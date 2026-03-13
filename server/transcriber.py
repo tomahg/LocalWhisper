@@ -84,7 +84,27 @@ class StreamingTranscriber:
         return None
 
     def finalize(self) -> dict | None:
-        """Run a final inference pass on whatever remains in the buffer."""
+        """Return the complete session transcript.
+
+        If partials have accumulated text, return that directly — the last
+        overlap window was already captured by the most recent partial, so
+        re-running inference on it would only cause hallucinations or
+        duplicated words.
+
+        For short utterances where no partial fired yet, run a single
+        inference on the full buffer.
+        """
+        if self._prompt:
+            # Normal case: partials already captured the session text.
+            # The last overlap window is already included — don't re-run inference.
+            self.audio_buffer = np.array([], dtype=np.float32)
+            self.segment_id += 1
+            text = self._prompt
+            self._prompt = ""
+            logger.debug("Final (from prompt) [%d]: %r", self.segment_id, text)
+            return {"type": "final", "text": text, "segment_id": self.segment_id}
+
+        # Short utterance: no partials fired yet — run a single inference.
         if len(self.audio_buffer) == 0:
             return None
         return self._run_inference(is_final=True)
@@ -126,13 +146,18 @@ class StreamingTranscriber:
             logger.debug("Final result [%d]: %r", self.segment_id, text)
             return {"type": "final", "text": text, "segment_id": self.segment_id}
         else:
-            # Accumulate prompt from confirmed partials for the next window
+            # Accumulate into the running session transcript.
             if text:
                 self._prompt = (self._prompt + " " + text).strip()
             overlap_samples = int(self.overlap_sec * SAMPLE_RATE)
             self.audio_buffer = self.audio_buffer[-overlap_samples:]
-            logger.debug("Partial result [%d]: %r", self.segment_id, text)
-            return {"type": "partial", "text": text, "segment_id": self.segment_id}
+            # Only send a partial if this window produced new text.
+            # If VAD filtered everything out (silence), return None so the
+            # client doesn't erase and re-inject the same text in a loop.
+            if not text:
+                return None
+            logger.debug("Partial result [%d]: %r", self.segment_id, self._prompt)
+            return {"type": "partial", "text": self._prompt, "segment_id": self.segment_id}
 
     # ------------------------------------------------------------------
     # Model switching
