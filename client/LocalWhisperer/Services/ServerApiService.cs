@@ -13,6 +13,8 @@ public record ModelInfo(string Id, string Name, bool Loaded);
 public class ServerApiService
 {
     private readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(10) };
+    // Model loading can take several minutes for large models
+    private readonly HttpClient _httpLong = new() { Timeout = TimeSpan.FromMinutes(10) };
 
     /// <summary>GET /models — returns available models with loaded flag.</summary>
     public async Task<List<ModelInfo>> GetModelsAsync(string serverUrl)
@@ -28,7 +30,7 @@ public class ServerApiService
     {
         var baseUrl = WsToHttp(serverUrl);
         var body = JsonSerializer.Serialize(new { model_id = modelId });
-        var response = await _http.PostAsync(
+        var response = await _httpLong.PostAsync(
             $"{baseUrl}/models/switch",
             new StringContent(body, Encoding.UTF8, "application/json"));
         response.EnsureSuccessStatusCode();
