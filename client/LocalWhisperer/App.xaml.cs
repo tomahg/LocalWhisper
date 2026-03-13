@@ -115,6 +115,11 @@ public partial class App : Application
         orchestrator.TranscriptionUpdated += (text, isFinal) =>
         {
             if (!isFinal) return;
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                _overlay.Hide();
+                return;
+            }
             var settings = Services.GetRequiredService<AppSettings>();
             if (settings.AutoCopyToClipboard)
             {

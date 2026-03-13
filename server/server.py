@@ -115,13 +115,19 @@ async def websocket_transcribe(websocket: WebSocket):
             if item == "audio_stop":
                 logger.info("audio_stop received — running final inference")
                 t0 = time.perf_counter()
-                result = await loop.run_in_executor(None, transcriber.finalize)
-                if result and result.get("text"):
-                    result["processing_time_ms"] = round((time.perf_counter() - t0) * 1000)
-                    try:
-                        await websocket.send_json(result)
-                    except Exception:
-                        break
+                try:
+                    result = await loop.run_in_executor(None, transcriber.finalize)
+                except Exception:
+                    logger.exception("finalize() raised an exception")
+                    result = None
+                # Always send a final message so the client exits "processing" state,
+                # even when VAD removes all audio and text is empty.
+                final = result or {"type": "final", "text": ""}
+                final["processing_time_ms"] = round((time.perf_counter() - t0) * 1000)
+                try:
+                    await websocket.send_json(final)
+                except Exception:
+                    break
                 transcriber.reset()
                 continue  # Stay alive for the next recording session
 
