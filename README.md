@@ -8,11 +8,12 @@ Default model: **NbAiLab/nb-whisper-medium** — optimised for Norwegian.
 
 ## How it works
 
-1. Press **F9** (hold for hold-to-talk, or tap to toggle)
-2. Speak — transcription appears in the focused input field in real time
-3. Release / press again to finish — final text is committed
+1. Press **F9** (hold for hold-to-talk, or tap to toggle) — an overlay appears in the bottom-right corner
+2. Speak — a live audio level indicator shows the microphone is active
+3. Release / press again to stop — the server transcribes the full recording in one pass
+4. The result appears in the overlay with a **Kopier** button; click to copy to the clipboard
 
-The client streams raw 16kHz PCM audio over WebSocket. The server runs inference with a sliding window and returns partial and final transcriptions as JSON. Partial results are shown in an overlay in real time; the final result is injected into the focused input field when recording stops.
+The client streams raw 16kHz PCM audio over WebSocket while recording. When stopped, the server runs a single inference pass on the complete buffer and returns the final transcription. This gives better quality than sliding-window approaches since Whisper processes the full utterance as a unit.
 
 ---
 
@@ -80,7 +81,7 @@ On first launch the app starts in the system tray (no window appears). The tray 
 | **Tilkobling** | Server URL, connect/disconnect |
 | **Hurtigtast** | Active hotkey (F9), hold-to-talk toggle |
 | **Modell** | Switch transcription model at runtime |
-| **Lyd** | Select microphone |
+| **Lyd** | Select microphone, auto-copy to clipboard toggle |
 | **Om** | About |
 
 Settings are persisted automatically between sessions.
