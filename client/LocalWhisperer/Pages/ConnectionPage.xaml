@@ -18,6 +18,11 @@
             <Button x:Name="DisconnectButton" Content="Koble fra"   Click="DisconnectButton_Click" IsEnabled="False"/>
         </StackPanel>
 
+        <CheckBox x:Name="AutoConnectCheckBox"
+                  Content="Koble til automatisk ved oppstart"
+                  Checked="AutoConnect_Changed"
+                  Unchecked="AutoConnect_Changed"/>
+
         <StackPanel Orientation="Horizontal" Spacing="8">
             <TextBlock Text="Status:" VerticalAlignment="Center"/>
             <TextBlock x:Name="StatusText" Text="Frakoblet" VerticalAlignment="Center"

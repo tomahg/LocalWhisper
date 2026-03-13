@@ -19,7 +19,8 @@ public sealed partial class ConnectionPage : Page
         _settings       = App.Services.GetRequiredService<AppSettings>();
         _settingsService = App.Services.GetRequiredService<SettingsService>();
 
-        ServerUrlBox.Text = _settings.ServerUrl;
+        ServerUrlBox.Text             = _settings.ServerUrl;
+        AutoConnectCheckBox.IsChecked = _settings.AutoConnect;
         UpdateStatus();
 
         _ws.ConnectionError    += _ => DispatcherQueue.TryEnqueue(UpdateStatus);
@@ -51,6 +52,12 @@ public sealed partial class ConnectionPage : Page
         {
             ConnectButton.IsEnabled = true;
         }
+    }
+
+    private void AutoConnect_Changed(object sender, RoutedEventArgs e)
+    {
+        _settings.AutoConnect = AutoConnectCheckBox.IsChecked == true;
+        _settingsService.Save(_settings);
     }
 
     private async void DisconnectButton_Click(object sender, RoutedEventArgs e)

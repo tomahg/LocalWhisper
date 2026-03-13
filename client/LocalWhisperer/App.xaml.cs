@@ -56,21 +56,18 @@ public partial class App : Application
         _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         _window = new MainWindow();
+        _window.Closed += OnWindowClosed;
         _window.Activate();
-        // App lives in the tray — hide the settings window immediately
-        _window.AppWindow.Hide();
 
-        _window.Activated += OnFirstActivation;
-        _window.Closed    += OnWindowClosed;
-    }
-
-    private void OnFirstActivation(object sender, WindowActivatedEventArgs e)
-    {
-        if (_trayInitialized) return;
-        _trayInitialized = true;
-
+        // Initialize directly — subscribing to Activated after Activate() misses the first event
         InitializeTrayIcon();
         RegisterHotkey();
+
+        _window.AppWindow.Hide();
+
+        var settings = Services.GetRequiredService<AppSettings>();
+        if (settings.AutoConnect)
+            _ = AutoConnectAsync(settings.ServerUrl);
     }
 
     // -------------------------------------------------------------------------
@@ -178,6 +175,13 @@ public partial class App : Application
     // -------------------------------------------------------------------------
     // Window management
     // -------------------------------------------------------------------------
+
+    private async Task AutoConnectAsync(string url)
+    {
+        var ws = Services.GetRequiredService<WebSocketService>();
+        try { await ws.ConnectAsync(url); }
+        catch { /* auto-reconnect will retry; tray icon updated via ConnectionError event */ }
+    }
 
     private void ShowWindow()
     {

@@ -17,7 +17,11 @@
         </NavigationView.MenuItems>
 
         <NavigationView.FooterMenuItems>
-            <NavigationViewItem Content="Om"          Tag="about"      Icon="Info"/>
+            <NavigationViewItem Content="Om"          Tag="about">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE946;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
         </NavigationView.FooterMenuItems>
 
         <Frame x:Name="ContentFrame" Margin="24,16,24,24"/>

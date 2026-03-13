@@ -5,6 +5,7 @@ public class AppSettings
     public string ServerUrl           { get; set; } = "ws://localhost:8765/ws/transcribe";
     public int    MicrophoneDeviceIndex { get; set; } = 0;
     public bool   HoldToTalk          { get; set; } = false;
+    public bool   AutoConnect         { get; set; } = true;
 
     /// <summary>Win32 virtual-key code for the global hotkey. Default: F9 (0x78).</summary>
     public int    HotkeyVirtualKey    { get; set; } = 0x78;
