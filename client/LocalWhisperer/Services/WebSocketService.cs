@@ -13,18 +13,26 @@ public class WebSocketService : IAsyncDisposable
 {
     private ClientWebSocket? _ws;
     private CancellationTokenSource? _cts;
+    private string? _serverUrl;
     // WebSocket sends must be serialized — concurrent sends throw InvalidOperationException
     private readonly SemaphoreSlim _sendLock = new(1, 1);
 
     public event Action<TranscriptionResult>? TranscriptionReceived;
     public event Action<Exception>? ConnectionError;
+    public event Action? ConnectionRestored;
 
     public bool IsConnected => _ws?.State == WebSocketState.Open;
+    public bool AutoReconnect { get; set; } = true;
 
     public async Task ConnectAsync(string url)
     {
+        _serverUrl = url;
         await DisconnectAsync();
+        await ConnectCoreAsync(url);
+    }
 
+    private async Task ConnectCoreAsync(string url)
+    {
         _cts = new CancellationTokenSource();
         _ws = new ClientWebSocket();
         // Respond to server pings to keep the connection alive during silence
@@ -114,6 +122,25 @@ public class WebSocketService : IAsyncDisposable
         catch (Exception ex)
         {
             ConnectionError?.Invoke(ex);
+            if (AutoReconnect && _serverUrl is not null)
+                _ = Task.Run(ReconnectLoopAsync);
+        }
+    }
+
+    private async Task ReconnectLoopAsync()
+    {
+        var delay = 2;
+        while (_serverUrl is not null)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(delay));
+            try
+            {
+                await ConnectCoreAsync(_serverUrl);
+                ConnectionRestored?.Invoke();
+                return;
+            }
+            catch { }
+            delay = Math.Min(delay * 2, 30);
         }
     }
 

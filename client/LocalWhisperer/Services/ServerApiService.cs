@@ -1,0 +1,56 @@
+using System.Net.Http;
+using System.Text;
+using System.Text.Json;
+
+namespace LocalWhisperer.Services;
+
+public record ModelInfo(string Id, string Name, bool Loaded);
+
+/// <summary>
+/// Thin HTTP client for the transcription server's REST API.
+/// Derives the base URL from the WebSocket URL stored in AppSettings.
+/// </summary>
+public class ServerApiService
+{
+    private readonly HttpClient _http = new() { Timeout = TimeSpan.FromSeconds(10) };
+
+    /// <summary>GET /models — returns available models with loaded flag.</summary>
+    public async Task<List<ModelInfo>> GetModelsAsync(string serverUrl)
+    {
+        var baseUrl = WsToHttp(serverUrl);
+        var json = await _http.GetStringAsync($"{baseUrl}/models");
+        return JsonSerializer.Deserialize<List<ModelInfo>>(json,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+    }
+
+    /// <summary>POST /models/switch — switches the active model.</summary>
+    public async Task SwitchModelAsync(string serverUrl, string modelId)
+    {
+        var baseUrl = WsToHttp(serverUrl);
+        var body = JsonSerializer.Serialize(new { model_id = modelId });
+        var response = await _http.PostAsync(
+            $"{baseUrl}/models/switch",
+            new StringContent(body, Encoding.UTF8, "application/json"));
+        response.EnsureSuccessStatusCode();
+    }
+
+    /// <summary>GET /health — returns true if server is reachable.</summary>
+    public async Task<bool> PingAsync(string serverUrl)
+    {
+        try
+        {
+            var baseUrl = WsToHttp(serverUrl);
+            var response = await _http.GetAsync($"{baseUrl}/health");
+            return response.IsSuccessStatusCode;
+        }
+        catch { return false; }
+    }
+
+    // ws://host:port/ws/transcribe → http://host:port
+    private static string WsToHttp(string wsUrl)
+    {
+        var uri = new Uri(wsUrl);
+        var scheme = uri.Scheme == "wss" ? "https" : "http";
+        return $"{scheme}://{uri.Host}:{uri.Port}";
+    }
+}

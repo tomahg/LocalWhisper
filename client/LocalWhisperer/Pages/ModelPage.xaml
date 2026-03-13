@@ -1,0 +1,19 @@
+<Page
+    x:Class="LocalWhisperer.Pages.ModelPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <StackPanel Spacing="16" MaxWidth="460" HorizontalAlignment="Left">
+        <TextBlock Text="Modell" Style="{StaticResource TitleTextBlockStyle}"/>
+
+        <StackPanel Spacing="4">
+            <TextBlock Text="Tilgjengelige modeller"/>
+            <ComboBox x:Name="ModelComboBox" Width="360" HorizontalAlignment="Left"
+                      PlaceholderText="Henter modeller..."/>
+        </StackPanel>
+
+        <Button x:Name="SwitchButton" Content="Bytt modell" Click="SwitchButton_Click" IsEnabled="False"/>
+
+        <InfoBar x:Name="StatusBar" IsOpen="False" IsClosable="True"/>
+    </StackPanel>
+</Page>

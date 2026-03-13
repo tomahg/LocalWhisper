@@ -11,7 +11,7 @@ System-wide tale-til-tekst for Windows som injiserer transkribert norsk tale i e
 ```
 ┌──────────────────────────┐   WebSocket (audio chunks)   ┌───────────────────────────┐
 │  Windows Client           │ ───────────────────────────► │  Transcription Server      │
-│  C# / WinUI 3 / .NET 9   │                              │  Python / FastAPI           │
+│  C# / WinUI 3 / .NET 10   │                              │  Python / FastAPI           │
 │                           │ ◄─────────────────────────── │                            │
 │  • Global hotkey          │   WebSocket (partial text)   │  • faster-whisper           │
 │  • NAudio mic capture     │                              │  • nb-whisper modeller      │
@@ -188,10 +188,10 @@ uvicorn server:app --host 0.0.0.0 --port 8765
 
 ---
 
-## Del 2: Windows Client (C# / WinUI 3 / .NET 9)
+## Del 2: Windows Client (C# / WinUI 3 / .NET 10)
 
 ### Teknologivalg
-- **.NET 9** — Siste LTS-nær versjon
+- **.NET 10** — Siste LTS-nær versjon
 - **WinUI 3 (Windows App SDK 1.6+)** — Microsofts anbefalte UI-rammeverk
 - **NAudio** — Audio capture
 - **H.NotifyIcon.WinUI** — System tray-ikon for WinUI 3
@@ -539,7 +539,7 @@ Klient                              Server
 5. Verifiser at nb-whisper-modellen gir korrekt norsk transkripsjon
 
 ### Fase 2: C# Client — Audio + WebSocket
-1. Opprett WinUI 3-prosjekt (.NET 9, Windows App SDK 1.6)
+1. Opprett WinUI 3-prosjekt (.NET 10, Windows App SDK 1.6)
 2. Implementer `AudioCaptureService` med NAudio
 3. Implementer `WebSocketService`
 4. Test: Ta opp lyd, send til server, logg transkripsjoner i konsollen
@@ -571,10 +571,10 @@ Klient                              Server
 
 ## Viktige hensyn
 
-### WinUI 3 + .NET 9 spesifikt
+### WinUI 3 + .NET 10 spesifikt
 - Bruk **packaged app** (MSIX) for enklere distribusjon og system tray-støtte
 - Sett `<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>` i csproj for å unngå runtime-avhengigheter
-- Target `net9.0-windows10.0.22621.0` eller nyere
+- Target `net10.0-windows10.0.22621.0` eller nyere
 - WinUI 3 har ikke innebygd WndProc — for global hotkey, bruk enten `SetWindowsHookEx` (anbefalt) eller opprett en skjult Win32-vindu
 
 ### Nettverksoppdagelse

@@ -2,7 +2,7 @@
 
 ## Hva er dette?
 
-En Windows system tray-app (WinUI 3 / .NET 9) som gir tale-til-tekst i alle inputfelt i alle applikasjoner. Transkripsjonen kjøres av en Python-server (faster-whisper) som kan stå på en annen maskin på lokalnettet. Audio streames i sanntid over WebSocket.
+En Windows system tray-app (WinUI 3 / .NET 10) som gir tale-til-tekst i alle inputfelt i alle applikasjoner. Transkripsjonen kjøres av en Python-server (faster-whisper) som kan stå på en annen maskin på lokalnettet. Audio streames i sanntid over WebSocket.
 
 ## Prosjektstruktur
 
@@ -10,7 +10,7 @@ En Windows system tray-app (WinUI 3 / .NET 9) som gir tale-til-tekst i alle inpu
 LocalWhisperer/
 ├── CLAUDE.md                   # ← Du leser denne
 ├── PLAN.md                     # Detaljert arkitektur og implementeringsplan
-├── client/                     # C# / WinUI 3 / .NET 9 Windows-klient
+├── client/                     # C# / WinUI 3 / .NET 10 Windows-klient
 │   ├── LocalWhisperer.sln
 │   └── LocalWhisperer/
 │       ├── LocalWhisperer.csproj
@@ -32,7 +32,7 @@ LocalWhisperer/
 ## Teknologivalg
 
 ### Klient
-- **.NET 9** med `net9.0-windows10.0.22621.0`
+- **.NET 10** med `net10.0-windows10.0.22621.0`
 - **WinUI 3** (Windows App SDK 1.6+) — Microsofts anbefalte desktop-rammeverk
 - **NAudio 2.x** — Mikrofon-capture (16kHz, 16-bit, mono PCM)
 - **H.NotifyIcon.WinUI** — System tray

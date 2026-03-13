@@ -1,0 +1,28 @@
+<Page
+    x:Class="LocalWhisperer.Pages.AboutPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <StackPanel Spacing="16" MaxWidth="460" HorizontalAlignment="Left">
+        <TextBlock Text="Om LocalWhisperer" Style="{StaticResource TitleTextBlockStyle}"/>
+
+        <StackPanel Spacing="4">
+            <TextBlock Text="LocalWhisperer" Style="{StaticResource SubtitleTextBlockStyle}"/>
+            <TextBlock Text="Norsk tale-til-tekst for Windows"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+            <TextBlock Text="Teknologi" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+            <TextBlock Text="• faster-whisper / NbAiLab nb-whisper"/>
+            <TextBlock Text="• WinUI 3 / .NET 10"/>
+            <TextBlock Text="• NAudio"/>
+        </StackPanel>
+
+        <StackPanel Spacing="4">
+            <TextBlock Text="Merk" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+            <TextBlock TextWrapping="Wrap"
+                       Text="SendInput fungerer ikke i applikasjoner som kjører med høyere privileginivå enn LocalWhisperer (f.eks. som administrator). Start LocalWhisperer som administrator om dette er et problem."/>
+        </StackPanel>
+    </StackPanel>
+</Page>

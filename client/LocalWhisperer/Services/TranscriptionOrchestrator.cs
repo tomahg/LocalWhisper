@@ -14,7 +14,7 @@ public class TranscriptionOrchestrator
     private readonly TextInjectionService _textInjection;
     private readonly AppSettings _settings;
 
-    private string _lastPartial = "";
+    private int _sessionInjectedLength = 0;  // total chars injected in this session
     private bool _injectText = false;
 
     public bool IsRecording { get; private set; }
@@ -49,7 +49,7 @@ public class TranscriptionOrchestrator
     {
         if (IsRecording) return;
         _injectText = injectText;
-        _lastPartial = "";
+        _sessionInjectedLength = 0;
         IsRecording = true;
         _audio.StartCapture(_settings.MicrophoneDeviceIndex);
     }
@@ -74,9 +74,11 @@ public class TranscriptionOrchestrator
 
         if (!_injectText) return;
 
-        // Erase the previous partial, then write the new text.
-        _textInjection.SendBackspaces(_lastPartial.Length);
+        // Replace the cumulative session text injected so far with the new text.
+        // Because the server now sends the full running transcript in every
+        // partial, we erase what we injected and re-inject the updated full text.
+        _textInjection.SendBackspaces(_sessionInjectedLength);
         _textInjection.InjectText(result.Text);
-        _lastPartial = result.IsFinal ? "" : result.Text;
+        _sessionInjectedLength = result.IsFinal ? 0 : result.Text.Length;
     }
 }

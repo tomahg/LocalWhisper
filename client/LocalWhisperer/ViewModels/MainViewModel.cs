@@ -1,9 +1,11 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LocalWhisperer.Models;
 using LocalWhisperer.Services;
 
 namespace LocalWhisperer.ViewModels;
+
+#pragma warning disable MVVMTK0045 // field-based ObservableProperty — AOT not required for desktop
 
 public partial class MainViewModel : ObservableObject
 {
@@ -11,26 +13,20 @@ public partial class MainViewModel : ObservableObject
     private readonly TranscriptionOrchestrator _orchestrator;
     private readonly AppSettings _settings;
 
-    [ObservableProperty]
-    private string _statusText = "Frakoblet";
-
-    [ObservableProperty]
-    private bool _isConnected;
-
-    [ObservableProperty]
-    private bool _isRecording;
-
-    [ObservableProperty]
-    private string _transcriptionLog = "";
+    [ObservableProperty] private string _statusText = "Frakoblet";
+    [ObservableProperty] private bool   _isConnected;
+    [ObservableProperty] private bool   _isRecording;
+    [ObservableProperty] private string _transcriptionLog = "";
 
     public MainViewModel(WebSocketService ws, TranscriptionOrchestrator orchestrator, AppSettings settings)
     {
-        _ws = ws;
+        _ws           = ws;
         _orchestrator = orchestrator;
-        _settings = settings;
+        _settings     = settings;
 
         _orchestrator.TranscriptionUpdated += OnTranscriptionUpdated;
-        _ws.ConnectionError += OnConnectionError;
+        _ws.ConnectionError    += OnConnectionError;
+        _ws.ConnectionRestored += () => { IsConnected = true; StatusText = "Tilkoblet"; };
     }
 
     [RelayCommand]
@@ -40,12 +36,12 @@ public partial class MainViewModel : ObservableObject
         {
             await _ws.ConnectAsync(_settings.ServerUrl);
             IsConnected = true;
-            StatusText = "Tilkoblet";
+            StatusText  = "Tilkoblet";
         }
         catch (Exception ex)
         {
             IsConnected = false;
-            StatusText = $"Feil: {ex.Message}";
+            StatusText  = $"Feil: {ex.Message}";
         }
     }
 
@@ -72,6 +68,6 @@ public partial class MainViewModel : ObservableObject
     private void OnConnectionError(Exception ex)
     {
         IsConnected = false;
-        StatusText = $"Tilkoblingsfeil: {ex.Message}";
+        StatusText  = $"Tilkoblingsfeil: {ex.Message}";
     }
 }
