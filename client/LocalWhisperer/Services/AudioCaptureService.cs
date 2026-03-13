@@ -70,7 +70,7 @@ public class AudioCaptureService : IDisposable
             sum += (double)sample * sample;
         }
         var rms = (float)(Math.Sqrt(sum / samples) / 32768.0);
-        AudioLevelChanged?.Invoke(Math.Min(1f, rms * 6f)); // amplify for display
+        AudioLevelChanged?.Invoke(Math.Min(1f, rms * 42f)); // amplify for display
     }
 
     public static IEnumerable<(int Index, string Name)> GetDevices()
