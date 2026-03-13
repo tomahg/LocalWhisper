@@ -94,7 +94,7 @@ Two modes (configurable in the Hurtigtast settings page):
 - **Toggle** (default) — press once to start, press again to stop
 - **Hold-to-talk** — hold key while speaking, release to stop
 
-> Note: `SendInput` does not inject text into applications running at a higher privilege level than the client. Start the client as Administrator if needed.
+> Tip: Enable **auto-copy to clipboard** in the Lyd settings page to skip the manual copy step — the result is copied automatically when recording stops.
 
 ---
 
@@ -191,15 +191,13 @@ python test_client.py --url ws://192.168.1.x:8765/ws/transcribe path/to/audio.wa
 
 Expected output:
 ```
-[partial] 'Hei, dette er en test'  (312ms)
-[final  ] 'Hei, dette er en test av talestyring.'  (287ms)
+[final  ] 'Hei, dette er en test av talestyring.'  (1243ms)
 ```
 
 ---
 
 ## Known limitations
 
-- `SendInput` does not work in applications running at a higher privilege level than the client.
+- Transcription runs after recording stops — longer recordings mean a longer wait for the result.
 - faster-whisper does not support Metal/MPS — macOS uses CPU with int8.
-- Whisper is not a true streaming model; real-time transcription is approximated with a sliding window.
 - The global keyboard hook (`WH_KEYBOARD_LL`) may be blocked in some enterprise environments.
