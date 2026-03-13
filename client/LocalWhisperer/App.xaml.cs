@@ -15,9 +15,10 @@ public partial class App : Application
 {
     public static ServiceProvider Services { get; private set; } = null!;
 
-    private MainWindow? _window;
-    private TaskbarIcon? _trayIcon;
-    private HotkeyService? _hotkey;
+    private MainWindow?     _window;
+    private OverlayWindow?  _overlay;
+    private TaskbarIcon?    _trayIcon;
+    private HotkeyService?  _hotkey;
     private DispatcherQueue? _dispatcherQueue;
     private bool _trayInitialized;
 
@@ -100,10 +101,28 @@ public partial class App : Application
         var ws           = Services.GetRequiredService<WebSocketService>();
         var orchestrator = Services.GetRequiredService<TranscriptionOrchestrator>();
 
+        _overlay = new OverlayWindow();
+        _overlay.Activate();   // must activate once so AppWindow is ready; Hide() immediately follows
+        _overlay.AppWindow.Hide();
+
         ws.ConnectionError    += _ => UpdateTrayIcon(recording: false, connected: false);
         ws.ConnectionRestored += () => UpdateTrayIcon(recording: false, connected: true);
-        orchestrator.TranscriptionUpdated += (_, isFinal) =>
+        orchestrator.TranscriptionUpdated += (text, isFinal) =>
+        {
             UpdateTrayIcon(recording: !isFinal, connected: true);
+            if (isFinal)
+                _overlay.Hide();
+            else
+                _overlay.ShowText(text);
+        };
+        orchestrator.MicrophoneDeviceLost += () =>
+        {
+            UpdateTrayIcon(recording: false, connected: ws.IsConnected);
+            _overlay.Hide();
+            _dispatcherQueue?.TryEnqueue(() =>
+                _trayIcon?.ShowNotification("LocalWhisperer",
+                    "Mikrofon frakoblet — opptak stoppet.", H.NotifyIcon.Core.NotificationIcon.Warning));
+        };
     }
 
     private void UpdateTrayIcon(bool recording, bool connected)
@@ -130,7 +149,7 @@ public partial class App : Application
         var orchestrator = Services.GetRequiredService<TranscriptionOrchestrator>();
         var ws           = Services.GetRequiredService<WebSocketService>();
 
-        _hotkey.Register(0x78); // F9
+        _hotkey.Register(settings.HotkeyVirtualKey);
 
         _hotkey.HotkeyDown += () => _dispatcherQueue?.TryEnqueue(() =>
         {

@@ -1,0 +1,24 @@
+<Window
+    x:Class="LocalWhisperer.OverlayWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Border x:Name="RootBorder"
+            Background="#CC1E1E2E"
+            CornerRadius="8"
+            Padding="14,8">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+            <!-- Recording indicator dot -->
+            <Ellipse x:Name="RecordingDot"
+                     Width="8" Height="8"
+                     Fill="#FF4444"
+                     VerticalAlignment="Center"/>
+            <TextBlock x:Name="TranscriptionText"
+                       FontSize="14"
+                       Foreground="White"
+                       MaxWidth="520"
+                       TextWrapping="Wrap"
+                       VerticalAlignment="Center"/>
+        </StackPanel>
+    </Border>
+</Window>

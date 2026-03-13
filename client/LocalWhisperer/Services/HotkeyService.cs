@@ -37,6 +37,12 @@ public class HotkeyService : IDisposable
             GetModuleHandle(module.ModuleName), 0);
     }
 
+    public void Update(int newVirtualKey)
+    {
+        _watchedVk = newVirtualKey;
+        _keyIsDown = false;
+    }
+
     public void Unregister()
     {
         if (_hookHandle == 0) return;

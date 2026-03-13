@@ -1,23 +1,36 @@
 <Page
     x:Class="LocalWhisperer.Pages.HotkeyPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    KeyDown="Page_KeyDown">
 
     <StackPanel Spacing="16" MaxWidth="460" HorizontalAlignment="Left">
         <TextBlock Text="Hurtigtast" Style="{StaticResource TitleTextBlockStyle}"/>
 
         <StackPanel Spacing="4">
             <TextBlock Text="Aktiv hurtigtast"/>
-            <TextBlock x:Name="HotkeyLabel"
-                       Style="{StaticResource SubtitleTextBlockStyle}"
-                       Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                        BorderThickness="1" CornerRadius="4" Padding="12,6">
+                    <TextBlock x:Name="HotkeyLabel"
+                               Style="{StaticResource SubtitleTextBlockStyle}"
+                               FontFamily="Consolas"
+                               Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                </Border>
+                <Button x:Name="ChangeButton" Content="Endre..." Click="ChangeButton_Click"/>
+            </StackPanel>
         </StackPanel>
+
+        <InfoBar x:Name="CapturingBar"
+                 IsOpen="False"
+                 Severity="Informational"
+                 IsClosable="False"
+                 Title="Venter på tast..."
+                 Message="Trykk ønsket tast. Esc avbryter."/>
 
         <ToggleSwitch x:Name="HoldToTalkToggle"
                       Header="Hold nede for å tale (slipp = stopp)"
                       Toggled="HoldToTalkToggle_Toggled"/>
-
-        <InfoBar IsOpen="True" Severity="Informational" IsClosable="False"
-                 Message="For å endre hurtigtast: rediger AppSettings og restart appen. Tastekonfigurasjon via UI kommer i en fremtidig versjon."/>
     </StackPanel>
 </Page>

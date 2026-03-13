@@ -19,6 +19,9 @@ public class TranscriptionOrchestrator
 
     public bool IsRecording { get; private set; }
 
+    /// <summary>Raised when the microphone device is lost mid-session.</summary>
+    public event Action? MicrophoneDeviceLost;
+
     /// <summary>
     /// Raised on the thread that receives WebSocket messages.
     /// UI must marshal to DispatcherQueue.
@@ -37,6 +40,7 @@ public class TranscriptionOrchestrator
         _settings = settings;
 
         _audio.AudioDataAvailable += OnAudioData;
+        _audio.DeviceLost         += OnDeviceLost;
         _ws.TranscriptionReceived += OnTranscription;
     }
 
@@ -60,6 +64,15 @@ public class TranscriptionOrchestrator
         IsRecording = false;
         _audio.StopCapture();
         await _ws.SendStopAsync();
+    }
+
+    private void OnDeviceLost(Exception _)
+    {
+        // Device disappeared mid-session — stop cleanly without sending audio_stop
+        // (server will reset on next connect anyway)
+        IsRecording = false;
+        _sessionInjectedLength = 0;
+        MicrophoneDeviceLost?.Invoke();
     }
 
     private async void OnAudioData(byte[] pcm)

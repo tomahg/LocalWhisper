@@ -16,6 +16,8 @@ public class AudioCaptureService : IDisposable
     private WaveInEvent? _waveIn;
 
     public event Action<byte[]>? AudioDataAvailable;
+    /// <summary>Raised when the capture device is lost mid-session.</summary>
+    public event Action<Exception>? DeviceLost;
 
     public void StartCapture(int deviceIndex = 0)
     {
@@ -28,17 +30,25 @@ public class AudioCaptureService : IDisposable
             DeviceNumber = deviceIndex,
         };
 
-        _waveIn.DataAvailable += OnDataAvailable;
+        _waveIn.DataAvailable    += OnDataAvailable;
+        _waveIn.RecordingStopped += OnRecordingStopped;
         _waveIn.StartRecording();
     }
 
     public void StopCapture()
     {
         if (_waveIn is null) return;
+        _waveIn.DataAvailable    -= OnDataAvailable;
+        _waveIn.RecordingStopped -= OnRecordingStopped;
         _waveIn.StopRecording();
-        _waveIn.DataAvailable -= OnDataAvailable;
         _waveIn.Dispose();
         _waveIn = null;
+    }
+
+    private void OnRecordingStopped(object? sender, StoppedEventArgs e)
+    {
+        if (e.Exception is not null)
+            DeviceLost?.Invoke(e.Exception);
     }
 
     private void OnDataAvailable(object? sender, WaveInEventArgs e)
