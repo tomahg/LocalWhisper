@@ -1,0 +1,41 @@
+server:
+  host: "0.0.0.0"
+  port: 8765
+
+transcription:
+  default_model: "NbAiLab/nb-whisper-medium"
+  language: "no"
+  beam_size: 5
+
+  # --- Device / compute configuration ---
+  # device:       "auto" | "cuda" | "cpu"
+  #   "auto"  = use CUDA if available, otherwise CPU
+  #   "cuda"  = force GPU (will fail if no CUDA-capable GPU is present)
+  #   "cpu"   = force CPU
+  device: "cpu"
+
+  # compute_type: "int8" | "float16" | "int8_float16" | "float32"
+  #   CPU recommendations:
+  #     "int8"    — fastest on CPU, minimal quality loss (RECOMMENDED for CPU)
+  #     "float32" — full precision, slowest
+  #   GPU recommendations:
+  #     "float16"      — best quality, requires VRAM
+  #     "int8_float16" — good balance of speed and quality on GPU
+  #     "int8"         — smallest VRAM footprint
+  compute_type: "int8"
+
+streaming:
+  chunk_duration_sec: 2.0   # Seconds of audio to accumulate before inference
+  overlap_sec: 0.5          # Audio overlap kept between windows for context
+  vad_enabled: true         # Voice Activity Detection (reduces hallucinations)
+  vad_threshold: 0.5
+
+models:
+  - id: "NbAiLab/nb-whisper-small"
+    name: "NB Whisper Small (Norsk, rask)"
+  - id: "NbAiLab/nb-whisper-medium"
+    name: "NB Whisper Medium (Norsk, anbefalt)"
+  - id: "NbAiLab/nb-whisper-large"
+    name: "NB Whisper Large (Norsk, best kvalitet)"
+  - id: "openai/whisper-large-v3"
+    name: "Whisper Large v3 (Flerspråklig)"

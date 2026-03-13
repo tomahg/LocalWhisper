@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd C:\\\\Dev\\\\NorskTale\\\\server && pip install websockets)",
+      "Bash(pip install:*)"
+    ]
+  }
+}

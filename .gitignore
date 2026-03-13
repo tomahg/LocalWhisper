@@ -1,0 +1,17 @@
+# Secrets — never commit these
+server/secrets.yaml
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+
+# Build output
+client/bin/
+client/obj/
+*.user
+
+# VS / Rider
+.vs/
+.idea/
