@@ -20,7 +20,6 @@ public partial class App : Application
     private TaskbarIcon?    _trayIcon;
     private HotkeyService?  _hotkey;
     private DispatcherQueue? _dispatcherQueue;
-    private bool _trayInitialized;
 
     private static readonly Uri UriIdle       = new("ms-appx:///Assets/tray-idle.ico");
     private static readonly Uri UriListening  = new("ms-appx:///Assets/tray-listening.ico");

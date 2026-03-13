@@ -49,7 +49,7 @@ public partial class MainViewModel : ObservableObject
     private void StartRecording()
     {
         IsRecording = true;
-        _orchestrator.StartRecording(injectText: false);
+        _orchestrator.StartRecording();
     }
 
     [RelayCommand]
