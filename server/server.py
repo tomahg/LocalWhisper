@@ -1,4 +1,4 @@
-import asyncio
+﻿import asyncio
 import json
 import logging
 import time
@@ -33,7 +33,7 @@ async def lifespan(app: FastAPI):
     logger.info("Server shutting down.")
 
 
-app = FastAPI(title="NorskTale Transcription Server", lifespan=lifespan)
+app = FastAPI(title="LocalWhisperer Transcription Server", lifespan=lifespan)
 
 # ---------------------------------------------------------------------------
 # REST endpoints

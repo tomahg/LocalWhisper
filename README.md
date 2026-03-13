@@ -1,4 +1,4 @@
-# NorskTale
+﻿# LocalWhisperer
 
 Windows speech-to-text for any input field in any application. A system tray app (WinUI 3 / .NET 9) streams microphone audio over WebSocket to a transcription server running [faster-whisper](https://github.com/SYSTRAN/faster-whisper). The server can run locally or on another machine on the LAN.
 
@@ -9,7 +9,7 @@ Default model: **NbAiLab/nb-whisper-medium** — optimised for Norwegian.
 ## Project structure
 
 ```
-NorskTale/
+LocalWhisperer/
 ├── client/          # C# / WinUI 3 / .NET 9 Windows client (work in progress)
 └── server/          # Python transcription server
     ├── server.py

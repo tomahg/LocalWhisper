@@ -1,4 +1,4 @@
-"""
+﻿"""
 Simple test client — streams a WAV file to the server as PCM chunks.
 
 Usage:
@@ -104,7 +104,7 @@ async def stream(url: str, pcm: bytes) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="NorskTale test client")
+    parser = argparse.ArgumentParser(description="LocalWhisperer test client")
     parser.add_argument("wav_file", nargs="?", help="WAV file to stream (optional)")
     parser.add_argument(
         "--url",

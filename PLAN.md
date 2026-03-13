@@ -1,4 +1,4 @@
-# NorskTale — Norsk Tale-til-Tekst for Windows
+﻿# LocalWhisperer — Norsk Tale-til-Tekst for Windows
 
 ## Prosjektoversikt
 
@@ -200,10 +200,10 @@ uvicorn server:app --host 0.0.0.0 --port 8765
 ### Prosjektstruktur
 
 ```
-NorskTale/
-├── NorskTale.sln
-├── NorskTale/
-│   ├── NorskTale.csproj
+LocalWhisperer/
+├── LocalWhisperer.sln
+├── LocalWhisperer/
+│   ├── LocalWhisperer.csproj
 │   ├── App.xaml / App.xaml.cs
 │   ├── MainWindow.xaml / MainWindow.xaml.cs      # Innstillinger-vindu
 │   ├── Package.appxmanifest
@@ -234,7 +234,7 @@ NorskTale/
 │       ├── tray-listening.ico
 │       └── tray-processing.ico
 │
-└── NorskTale.Tests/
+└── LocalWhisperer.Tests/
     └── ...
 ```
 

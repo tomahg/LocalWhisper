@@ -7,9 +7,9 @@ __pycache__/
 .venv/
 *.egg-info/
 
-# Build output
-client/bin/
-client/obj/
+# .NET build output
+**/bin/
+**/obj/
 *.user
 
 # VS / Rider
