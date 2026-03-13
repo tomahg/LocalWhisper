@@ -6,6 +6,7 @@
 
     <NavigationView x:Name="NavView"
                     IsSettingsVisible="False"
+                    IsBackButtonVisible="Collapsed"
                     PaneDisplayMode="LeftCompact"
                     SelectionChanged="NavView_SelectionChanged">
 

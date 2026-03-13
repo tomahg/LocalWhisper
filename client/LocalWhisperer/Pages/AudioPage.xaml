@@ -11,5 +11,10 @@
             <ComboBox x:Name="MicComboBox" Width="360" HorizontalAlignment="Left"
                       SelectionChanged="MicComboBox_SelectionChanged"/>
         </StackPanel>
+
+        <CheckBox x:Name="AutoCopyCheckBox"
+                  Content="Kopier transkripsjon til utklippstavle automatisk"
+                  Checked="AutoCopy_Changed"
+                  Unchecked="AutoCopy_Changed"/>
     </StackPanel>
 </Page>

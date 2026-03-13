@@ -110,14 +110,22 @@ public partial class App : Application
             if (isRecording)
                 _overlay.ShowListening();
             else
-                _overlay.Hide();
+                _overlay.ShowProcessing();
         };
+        orchestrator.AudioLevelChanged += level => _overlay.UpdateAudioLevel(level);
         orchestrator.TranscriptionUpdated += (text, isFinal) =>
         {
-            if (isFinal)
+            if (!isFinal) return;
+            var settings = Services.GetRequiredService<AppSettings>();
+            if (settings.AutoCopyToClipboard)
+            {
+                _overlay.CopyToClipboard(text);
                 _overlay.Hide();
+            }
             else
-                _overlay.ShowText(text);
+            {
+                _overlay.ShowResult(text);
+            }
         };
         orchestrator.MicrophoneDeviceLost += () =>
         {
@@ -161,12 +169,12 @@ public partial class App : Application
 
             if (settings.HoldToTalk)
             {
-                if (!orchestrator.IsRecording) orchestrator.StartRecording(injectText: true);
+                if (!orchestrator.IsRecording) orchestrator.StartRecording();
             }
             else
             {
                 if (!orchestrator.IsRecording)
-                    orchestrator.StartRecording(injectText: true);
+                    orchestrator.StartRecording();
                 else
                     _ = orchestrator.StopRecordingAsync();
             }

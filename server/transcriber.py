@@ -8,7 +8,7 @@ from faster_whisper import WhisperModel
 # Ensure huggingface_hub shows download progress bars in the terminal
 os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "0")
 
-from config import AppConfig, TranscriptionConfig, StreamingConfig, load_huggingface_token
+from config import AppConfig, TranscriptionConfig, load_huggingface_token
 
 logger = logging.getLogger(__name__)
 
@@ -33,14 +33,11 @@ def _resolve_device(device: str) -> str:
 class StreamingTranscriber:
     def __init__(self, config: AppConfig) -> None:
         tc: TranscriptionConfig = config.transcription
-        sc: StreamingConfig = config.streaming
 
         self.language = tc.language
         self.beam_size = tc.beam_size
-        self.chunk_duration = sc.chunk_duration_sec
-        self.overlap_sec = sc.overlap_sec
-        self.vad_enabled = sc.vad_enabled
-        self.vad_threshold = sc.vad_threshold
+        self.vad_enabled = config.streaming.vad_enabled
+        self.vad_threshold = config.streaming.vad_threshold
 
         self._device = _resolve_device(tc.device)
         self._compute_type = tc.compute_type
@@ -48,7 +45,6 @@ class StreamingTranscriber:
 
         self.audio_buffer = np.array([], dtype=np.float32)
         self.segment_id = 0
-        self._prompt = ""  # Accumulated text used as initial_prompt for next window
 
         logger.info(
             "Loading model '%s' on %s with compute_type=%s ...",
@@ -73,58 +69,27 @@ class StreamingTranscriber:
     # Audio ingestion
     # ------------------------------------------------------------------
 
-    def add_audio(self, pcm_bytes: bytes) -> dict | None:
-        """Add a raw int16 PCM chunk. Returns a partial result if enough audio
-        has accumulated, otherwise None."""
+    def add_audio(self, pcm_bytes: bytes) -> None:
+        """Accumulate raw int16 PCM chunks. Inference runs only on finalize()."""
         chunk = np.frombuffer(pcm_bytes, dtype=np.int16).astype(np.float32) / 32768.0
         self.audio_buffer = np.concatenate([self.audio_buffer, chunk])
 
-        if len(self.audio_buffer) / SAMPLE_RATE >= self.chunk_duration:
-            return self._run_inference(is_final=False)
-        return None
-
     def finalize(self) -> dict | None:
-        """Return the complete session transcript.
-
-        If partials have accumulated text, return that directly — the last
-        overlap window was already captured by the most recent partial, so
-        re-running inference on it would only cause hallucinations or
-        duplicated words.
-
-        For short utterances where no partial fired yet, run a single
-        inference on the full buffer.
-        """
-        if self._prompt:
-            # Normal case: partials already captured the session text.
-            # The last overlap window is already included — don't re-run inference.
-            self.audio_buffer = np.array([], dtype=np.float32)
-            self.segment_id += 1
-            text = self._prompt
-            self._prompt = ""
-            logger.debug("Final (from prompt) [%d]: %r", self.segment_id, text)
-            return {"type": "final", "text": text, "segment_id": self.segment_id}
-
-        # Short utterance: no partials fired yet — run a single inference.
+        """Transcribe the complete session buffer in a single inference pass."""
         if len(self.audio_buffer) == 0:
             return None
-        return self._run_inference(is_final=True)
+        return self._run_inference()
 
     def reset(self) -> None:
         self.audio_buffer = np.array([], dtype=np.float32)
         self.segment_id = 0
-        self._prompt = ""
 
     # ------------------------------------------------------------------
     # Inference
     # ------------------------------------------------------------------
 
-    def _run_inference(self, is_final: bool) -> dict:
+    def _run_inference(self) -> dict:
         vad_params = {"threshold": self.vad_threshold} if self.vad_enabled else {}
-
-        # Pass previous text as initial_prompt so Whisper has context for the
-        # current window — greatly reduces boundary errors and hallucinations.
-        # Keep the prompt to the last ~224 tokens (Whisper's context limit).
-        prompt = self._prompt[-200:] if self._prompt else None
 
         segments, _ = self.model.transcribe(
             self.audio_buffer,
@@ -132,34 +97,16 @@ class StreamingTranscriber:
             beam_size=self.beam_size,
             vad_filter=self.vad_enabled,
             vad_parameters=vad_params or None,
-            initial_prompt=prompt,
             no_speech_threshold=0.6,
             repetition_penalty=1.3,
         )
         # IMPORTANT: consume generator before touching audio_buffer
         text = " ".join(s.text for s in segments).strip()
         self.segment_id += 1
+        self.audio_buffer = np.array([], dtype=np.float32)
 
-        if is_final:
-            self._prompt = ""
-            self.audio_buffer = np.array([], dtype=np.float32)
-            logger.debug("Final result [%d]: %r", self.segment_id, text)
-            return {"type": "final", "text": text, "segment_id": self.segment_id}
-        else:
-            # Accumulate into the running session transcript.
-            if text:
-                self._prompt = (self._prompt + " " + text).strip()
-                overlap_samples = int(self.overlap_sec * SAMPLE_RATE)
-                self.audio_buffer = self.audio_buffer[-overlap_samples:]
-            else:
-                # VAD removed all audio — no speech to use as context.
-                # Clearing the buffer breaks the silence feedback loop where
-                # silence overlap fills the buffer → inference → VAD removes all
-                # → keeps silence overlap → fills buffer again → repeat forever.
-                self.audio_buffer = np.array([], dtype=np.float32)
-                return None
-            logger.debug("Partial result [%d]: %r", self.segment_id, self._prompt)
-            return {"type": "partial", "text": self._prompt, "segment_id": self.segment_id}
+        logger.debug("Final result [%d]: %r", self.segment_id, text)
+        return {"type": "final", "text": text, "segment_id": self.segment_id}
 
     # ------------------------------------------------------------------
     # Model switching

@@ -1,28 +1,25 @@
-﻿using LocalWhisperer.Models;
+using LocalWhisperer.Models;
 
 namespace LocalWhisperer.Services;
 
 /// <summary>
-/// Wires AudioCaptureService → WebSocketService → TextInjectionService.
-/// Partials are shown in the overlay only; text is injected into the focused
-/// input field only on final results to avoid clipboard race conditions.
+/// Wires AudioCaptureService → WebSocketService.
+/// Audio is streamed to the server while recording; a single final
+/// transcription result is returned when recording stops.
 /// </summary>
 public class TranscriptionOrchestrator
 {
     private readonly AudioCaptureService _audio;
     private readonly WebSocketService _ws;
-    private readonly TextInjectionService _textInjection;
     private readonly AppSettings _settings;
-
-    private bool _injectText = false;
 
     public bool IsRecording { get; private set; }
 
+    /// <summary>Raised immediately when recording starts (true) or stops (false).</summary>
+    public event Action<bool>? RecordingStateChanged;
+
     /// <summary>Raised when the microphone device is lost mid-session.</summary>
     public event Action? MicrophoneDeviceLost;
-
-    /// <summary>Raised immediately when recording starts or stops.</summary>
-    public event Action<bool>? RecordingStateChanged;
 
     /// <summary>
     /// Raised on the thread that receives WebSocket messages.
@@ -30,31 +27,27 @@ public class TranscriptionOrchestrator
     /// </summary>
     public event Action<string, bool>? TranscriptionUpdated;
 
+    /// <summary>Raised with RMS level 0.0–1.0 for each audio buffer (UI thread not guaranteed).</summary>
+    public event Action<float>? AudioLevelChanged;
+
     public TranscriptionOrchestrator(
         AudioCaptureService audio,
         WebSocketService ws,
-        TextInjectionService textInjection,
         AppSettings settings)
     {
         _audio = audio;
         _ws = ws;
-        _textInjection = textInjection;
         _settings = settings;
 
         _audio.AudioDataAvailable += OnAudioData;
+        _audio.AudioLevelChanged  += level => AudioLevelChanged?.Invoke(level);
         _audio.DeviceLost         += OnDeviceLost;
         _ws.TranscriptionReceived += OnTranscription;
     }
 
-    /// <summary>Start recording and streaming to the server.</summary>
-    /// <param name="injectText">
-    /// When true, transcriptions are injected into the focused input field.
-    /// Pass false for test/logging-only mode.
-    /// </param>
-    public void StartRecording(bool injectText = false)
+    public void StartRecording()
     {
         if (IsRecording) return;
-        _injectText = injectText;
         IsRecording = true;
         RecordingStateChanged?.Invoke(true);
         _audio.StartCapture(_settings.MicrophoneDeviceIndex);
@@ -72,8 +65,6 @@ public class TranscriptionOrchestrator
 
     private void OnDeviceLost(Exception _)
     {
-        // Device disappeared mid-session — stop cleanly without sending audio_stop
-        // (server will reset on next connect anyway)
         IsRecording = false;
         RecordingStateChanged?.Invoke(false);
         MicrophoneDeviceLost?.Invoke();
@@ -81,7 +72,7 @@ public class TranscriptionOrchestrator
 
     private async void OnAudioData(byte[] pcm)
     {
-        if (!IsRecording) return; // Guard against NAudio race condition delivering frames after StopCapture()
+        if (!IsRecording) return;
         try { await _ws.SendAudioAsync(pcm); }
         catch { /* connection error handled via WebSocketService.ConnectionError */ }
     }
@@ -89,13 +80,5 @@ public class TranscriptionOrchestrator
     private void OnTranscription(TranscriptionResult result)
     {
         TranscriptionUpdated?.Invoke(result.Text, result.IsFinal);
-
-        if (!_injectText) return;
-
-        // Only inject on final — partial injection via clipboard causes race
-        // conditions between restore timers when text > 50 chars.
-        // Partials are shown in the overlay only.
-        if (result.IsFinal)
-            _textInjection.InjectText(result.Text);
     }
 }

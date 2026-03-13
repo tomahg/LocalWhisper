@@ -18,6 +18,8 @@ public class AudioCaptureService : IDisposable
     public event Action<byte[]>? AudioDataAvailable;
     /// <summary>Raised when the capture device is lost mid-session.</summary>
     public event Action<Exception>? DeviceLost;
+    /// <summary>Raised with RMS level 0.0–1.0 for each audio buffer.</summary>
+    public event Action<float>? AudioLevelChanged;
 
     public void StartCapture(int deviceIndex = 0)
     {
@@ -58,6 +60,17 @@ public class AudioCaptureService : IDisposable
         var buffer = new byte[e.BytesRecorded];
         Array.Copy(e.Buffer, buffer, e.BytesRecorded);
         AudioDataAvailable?.Invoke(buffer);
+
+        // Calculate RMS amplitude for the level indicator
+        double sum = 0;
+        int samples = e.BytesRecorded / 2;
+        for (int i = 0; i < e.BytesRecorded - 1; i += 2)
+        {
+            short sample = (short)(e.Buffer[i] | (e.Buffer[i + 1] << 8));
+            sum += (double)sample * sample;
+        }
+        var rms = (float)(Math.Sqrt(sum / samples) / 32768.0);
+        AudioLevelChanged?.Invoke(Math.Min(1f, rms * 6f)); // amplify for display
     }
 
     public static IEnumerable<(int Index, string Name)> GetDevices()
