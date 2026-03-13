@@ -104,9 +104,16 @@ public partial class App : Application
 
         ws.ConnectionError    += _ => UpdateTrayIcon(recording: false, connected: false);
         ws.ConnectionRestored += () => UpdateTrayIcon(recording: false, connected: true);
+        orchestrator.RecordingStateChanged += isRecording =>
+        {
+            UpdateTrayIcon(recording: isRecording, connected: true);
+            if (isRecording)
+                _overlay.ShowListening();
+            else
+                _overlay.Hide();
+        };
         orchestrator.TranscriptionUpdated += (text, isFinal) =>
         {
-            UpdateTrayIcon(recording: !isFinal, connected: true);
             if (isFinal)
                 _overlay.Hide();
             else

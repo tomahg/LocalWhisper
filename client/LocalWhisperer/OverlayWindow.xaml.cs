@@ -76,11 +76,23 @@ public sealed partial class OverlayWindow : Window
             width, height));
     }
 
+    public void ShowListening()
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            TranscriptionText.Text = "Lytter...";
+            RecordingDot.Opacity = 1.0;
+            PositionBottomRight();
+            _appWindow.Show();
+        });
+    }
+
     public void ShowText(string text)
     {
         DispatcherQueue.TryEnqueue(() =>
         {
             TranscriptionText.Text = text;
+            RecordingDot.Opacity = 1.0;
             PositionBottomRight(); // re-anchor in case resolution changed
             _appWindow.Show();
         });

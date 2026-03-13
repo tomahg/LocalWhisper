@@ -4,8 +4,8 @@ namespace LocalWhisperer.Services;
 
 /// <summary>
 /// Wires AudioCaptureService → WebSocketService → TextInjectionService.
-/// Manages partial-text replacement: when a new partial arrives, the previous
-/// partial is erased with backspaces before the new text is injected.
+/// Partials are shown in the overlay only; text is injected into the focused
+/// input field only on final results to avoid clipboard race conditions.
 /// </summary>
 public class TranscriptionOrchestrator
 {
@@ -14,13 +14,15 @@ public class TranscriptionOrchestrator
     private readonly TextInjectionService _textInjection;
     private readonly AppSettings _settings;
 
-    private int _sessionInjectedLength = 0;  // total chars injected in this session
     private bool _injectText = false;
 
     public bool IsRecording { get; private set; }
 
     /// <summary>Raised when the microphone device is lost mid-session.</summary>
     public event Action? MicrophoneDeviceLost;
+
+    /// <summary>Raised immediately when recording starts or stops.</summary>
+    public event Action<bool>? RecordingStateChanged;
 
     /// <summary>
     /// Raised on the thread that receives WebSocket messages.
@@ -53,8 +55,8 @@ public class TranscriptionOrchestrator
     {
         if (IsRecording) return;
         _injectText = injectText;
-        _sessionInjectedLength = 0;
         IsRecording = true;
+        RecordingStateChanged?.Invoke(true);
         _audio.StartCapture(_settings.MicrophoneDeviceIndex);
     }
 
@@ -62,8 +64,10 @@ public class TranscriptionOrchestrator
     {
         if (!IsRecording) return;
         IsRecording = false;
+        RecordingStateChanged?.Invoke(false);
         _audio.StopCapture();
-        await _ws.SendStopAsync();
+        try { await _ws.SendStopAsync(); }
+        catch { /* connection error handled via WebSocketService.ConnectionError */ }
     }
 
     private void OnDeviceLost(Exception _)
@@ -71,7 +75,7 @@ public class TranscriptionOrchestrator
         // Device disappeared mid-session — stop cleanly without sending audio_stop
         // (server will reset on next connect anyway)
         IsRecording = false;
-        _sessionInjectedLength = 0;
+        RecordingStateChanged?.Invoke(false);
         MicrophoneDeviceLost?.Invoke();
     }
 
@@ -88,11 +92,10 @@ public class TranscriptionOrchestrator
 
         if (!_injectText) return;
 
-        // Replace the cumulative session text injected so far with the new text.
-        // Because the server now sends the full running transcript in every
-        // partial, we erase what we injected and re-inject the updated full text.
-        _textInjection.SendBackspaces(_sessionInjectedLength);
-        _textInjection.InjectText(result.Text);
-        _sessionInjectedLength = result.IsFinal ? 0 : result.Text.Length;
+        // Only inject on final — partial injection via clipboard causes race
+        // conditions between restore timers when text > 50 chars.
+        // Partials are shown in the overlay only.
+        if (result.IsFinal)
+            _textInjection.InjectText(result.Text);
     }
 }

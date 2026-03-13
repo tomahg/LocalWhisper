@@ -12,7 +12,7 @@ Default model: **NbAiLab/nb-whisper-medium** — optimised for Norwegian.
 2. Speak — transcription appears in the focused input field in real time
 3. Release / press again to finish — final text is committed
 
-The client streams raw 16kHz PCM audio over WebSocket. The server runs inference with a sliding window and returns partial and final transcriptions as JSON. Partial results are injected immediately and replaced as the text improves; the final result confirms the session.
+The client streams raw 16kHz PCM audio over WebSocket. The server runs inference with a sliding window and returns partial and final transcriptions as JSON. Partial results are shown in an overlay in real time; the final result is injected into the focused input field when recording stops.
 
 ---
 
