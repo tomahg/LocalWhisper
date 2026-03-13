@@ -17,6 +17,8 @@ public class TranscriptionOrchestrator
     private string _lastPartial = "";
     private bool _injectText = false;
 
+    public bool IsRecording { get; private set; }
+
     /// <summary>
     /// Raised on the thread that receives WebSocket messages.
     /// UI must marshal to DispatcherQueue.
@@ -45,14 +47,17 @@ public class TranscriptionOrchestrator
     /// </param>
     public void StartRecording(bool injectText = false)
     {
+        if (IsRecording) return;
         _injectText = injectText;
         _lastPartial = "";
+        IsRecording = true;
         _audio.StartCapture(_settings.MicrophoneDeviceIndex);
     }
 
-    /// <summary>Stop recording and wait for the final transcription result.</summary>
     public async Task StopRecordingAsync()
     {
+        if (!IsRecording) return;
+        IsRecording = false;
         _audio.StopCapture();
         await _ws.SendStopAsync();
     }

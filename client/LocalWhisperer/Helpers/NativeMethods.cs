@@ -79,6 +79,71 @@ internal static partial class NativeMethods
     }
 
     // -------------------------------------------------------------------------
+    // Win32 Clipboard — works from any thread (WinRT Clipboard requires STA)
+    // -------------------------------------------------------------------------
+
+    private const uint CF_UNICODETEXT = 13;
+    private const uint GMEM_MOVEABLE = 0x0002;
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool OpenClipboard(nint hWndNewOwner);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool CloseClipboard();
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool EmptyClipboard();
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern nint SetClipboardData(uint uFormat, nint hMem);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern nint GetClipboardData(uint uFormat);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern nint GlobalAlloc(uint uFlags, nuint dwBytes);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern nint GlobalLock(nint hMem);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern bool GlobalUnlock(nint hMem);
+
+    public static string? GetClipboardText()
+    {
+        if (!OpenClipboard(0)) return null;
+        try
+        {
+            var h = GetClipboardData(CF_UNICODETEXT);
+            if (h == 0) return null;
+            var ptr = GlobalLock(h);
+            if (ptr == 0) return null;
+            try { return Marshal.PtrToStringUni(ptr); }
+            finally { GlobalUnlock(h); }
+        }
+        finally { CloseClipboard(); }
+    }
+
+    public static void SetClipboardText(string text)
+    {
+        // Allocate moveable global memory for the Unicode string (including null terminator)
+        nuint bytes = (nuint)((text.Length + 1) * 2);
+        var hMem = GlobalAlloc(GMEM_MOVEABLE, bytes);
+        if (hMem == 0) return;
+
+        var ptr = GlobalLock(hMem);
+        if (ptr == 0) return;
+        try { Marshal.Copy(text.ToCharArray(), 0, ptr, text.Length); }
+        finally { GlobalUnlock(hMem); }
+
+        if (!OpenClipboard(0)) return;
+        EmptyClipboard();
+        SetClipboardData(CF_UNICODETEXT, hMem);
+        // After SetClipboardData the OS owns hMem — do NOT free it
+        CloseClipboard();
+    }
+
+    // -------------------------------------------------------------------------
     // Private helpers
     // -------------------------------------------------------------------------
 

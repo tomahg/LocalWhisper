@@ -44,6 +44,9 @@ public class HotkeyService : IDisposable
         _hookHandle = 0;
     }
 
+    // Suppress key-repeat: WH_KEYBOARD_LL fires for every repeat while held
+    private bool _keyIsDown;
+
     private nint HookCallback(int nCode, nint wParam, nint lParam)
     {
         if (nCode >= 0)
@@ -51,8 +54,16 @@ public class HotkeyService : IDisposable
             var vk = Marshal.ReadInt32(lParam);
             if (vk == _watchedVk)
             {
-                if (wParam == WM_KEYDOWN) HotkeyDown?.Invoke();
-                else if (wParam == WM_KEYUP) HotkeyUp?.Invoke();
+                if (wParam == WM_KEYDOWN && !_keyIsDown)
+                {
+                    _keyIsDown = true;
+                    HotkeyDown?.Invoke();
+                }
+                else if (wParam == WM_KEYUP)
+                {
+                    _keyIsDown = false;
+                    HotkeyUp?.Invoke();
+                }
             }
         }
         return CallNextHookEx(_hookHandle, nCode, wParam, lParam);

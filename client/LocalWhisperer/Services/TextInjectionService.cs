@@ -29,33 +29,16 @@ public class TextInjectionService
 
     private static void PasteViaClipboard(string text)
     {
-        // Save current clipboard, paste new text, restore original.
-        // Must run on STA thread — WinUI 3 UI thread qualifies.
-        var previous = TryGetClipboard();
-
-        SetClipboard(text);
+        var previous = NativeMethods.GetClipboardText();
+        NativeMethods.SetClipboardText(text);
         NativeMethods.SendCtrlV();
 
-        // Small delay so the target app has time to process the paste before
-        // we restore — otherwise the restore races the paste.
-        Task.Delay(150).ContinueWith(_ =>
+        // Restore the original clipboard after a short delay so the target app
+        // has time to process the paste before we overwrite it again.
+        Task.Delay(200).ContinueWith(_ =>
         {
             if (previous is not null)
-                SetClipboard(previous);
+                NativeMethods.SetClipboardText(previous);
         });
-    }
-
-    private static string? TryGetClipboard()
-    {
-        try { return Windows.ApplicationModel.DataTransfer.Clipboard.GetContent()
-                        .GetTextAsync().AsTask().GetAwaiter().GetResult(); }
-        catch { return null; }
-    }
-
-    private static void SetClipboard(string text)
-    {
-        var pkg = new Windows.ApplicationModel.DataTransfer.DataPackage();
-        pkg.SetText(text);
-        Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(pkg);
     }
 }
