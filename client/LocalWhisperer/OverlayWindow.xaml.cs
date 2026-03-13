@@ -23,6 +23,9 @@ public sealed partial class OverlayWindow : Window
     [DllImport("user32.dll")] private static extern int  SetWindowLong(nint hWnd, int nIndex, int dwNewLong);
     [DllImport("user32.dll")] private static extern bool SetWindowPos(nint hWnd, nint hWndInsertAfter,
         int x, int y, int cx, int cy, uint uFlags);
+    [DllImport("dwmapi.dll")] private static extern int  DwmExtendFrameIntoClientArea(nint hwnd, ref Margins pMarInset);
+
+    private struct Margins { public int Left, Right, Top, Bottom; }
 
     private static readonly nint HWND_TOPMOST = -1;
     private const uint SWP_NOSIZE = 0x0001;
@@ -60,6 +63,11 @@ public sealed partial class OverlayWindow : Window
         var ex = GetWindowLong(_hwnd, GWL_EXSTYLE);
         SetWindowLong(_hwnd, GWL_EXSTYLE,
             ex | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW | WS_EX_TRANSPARENT | WS_EX_LAYERED);
+
+        // Extend DWM frame across the entire client area — makes the window
+        // background truly transparent so rounded corners have no artifacts.
+        var margins = new Margins { Left = -1, Right = -1, Top = -1, Bottom = -1 };
+        DwmExtendFrameIntoClientArea(_hwnd, ref margins);
 
         PositionBottomRight();
     }
