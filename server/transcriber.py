@@ -149,12 +149,14 @@ class StreamingTranscriber:
             # Accumulate into the running session transcript.
             if text:
                 self._prompt = (self._prompt + " " + text).strip()
-            overlap_samples = int(self.overlap_sec * SAMPLE_RATE)
-            self.audio_buffer = self.audio_buffer[-overlap_samples:]
-            # Only send a partial if this window produced new text.
-            # If VAD filtered everything out (silence), return None so the
-            # client doesn't erase and re-inject the same text in a loop.
-            if not text:
+                overlap_samples = int(self.overlap_sec * SAMPLE_RATE)
+                self.audio_buffer = self.audio_buffer[-overlap_samples:]
+            else:
+                # VAD removed all audio — no speech to use as context.
+                # Clearing the buffer breaks the silence feedback loop where
+                # silence overlap fills the buffer → inference → VAD removes all
+                # → keeps silence overlap → fills buffer again → repeat forever.
+                self.audio_buffer = np.array([], dtype=np.float32)
                 return None
             logger.debug("Partial result [%d]: %r", self.segment_id, self._prompt)
             return {"type": "partial", "text": self._prompt, "segment_id": self.segment_id}

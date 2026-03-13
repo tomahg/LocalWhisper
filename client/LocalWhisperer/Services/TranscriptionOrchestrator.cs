@@ -77,6 +77,7 @@ public class TranscriptionOrchestrator
 
     private async void OnAudioData(byte[] pcm)
     {
+        if (!IsRecording) return; // Guard against NAudio race condition delivering frames after StopCapture()
         try { await _ws.SendAudioAsync(pcm); }
         catch { /* connection error handled via WebSocketService.ConnectionError */ }
     }
