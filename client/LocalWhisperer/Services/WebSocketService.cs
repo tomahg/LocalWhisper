@@ -13,6 +13,8 @@ public class WebSocketService : IAsyncDisposable
 {
     private ClientWebSocket? _ws;
     private CancellationTokenSource? _cts;
+    // WebSocket sends must be serialized — concurrent sends throw InvalidOperationException
+    private readonly SemaphoreSlim _sendLock = new(1, 1);
 
     public event Action<TranscriptionResult>? TranscriptionReceived;
     public event Action<Exception>? ConnectionError;
@@ -25,6 +27,8 @@ public class WebSocketService : IAsyncDisposable
 
         _cts = new CancellationTokenSource();
         _ws = new ClientWebSocket();
+        // Respond to server pings to keep the connection alive during silence
+        _ws.Options.KeepAliveInterval = TimeSpan.FromSeconds(15);
         await _ws.ConnectAsync(new Uri(url), _cts.Token);
 
         _ = Task.Run(ReceiveLoopAsync);
@@ -34,11 +38,16 @@ public class WebSocketService : IAsyncDisposable
     {
         if (_ws?.State != WebSocketState.Open) return;
 
-        await _ws.SendAsync(
-            new ArraySegment<byte>(pcmData),
-            WebSocketMessageType.Binary,
-            endOfMessage: true,
-            _cts!.Token);
+        await _sendLock.WaitAsync(_cts!.Token);
+        try
+        {
+            await _ws.SendAsync(
+                new ArraySegment<byte>(pcmData),
+                WebSocketMessageType.Binary,
+                endOfMessage: true,
+                _cts.Token);
+        }
+        finally { _sendLock.Release(); }
     }
 
     public async Task SendStopAsync()
@@ -46,11 +55,16 @@ public class WebSocketService : IAsyncDisposable
         if (_ws?.State != WebSocketState.Open) return;
 
         var msg = JsonSerializer.SerializeToUtf8Bytes(new { type = "audio_stop" });
-        await _ws.SendAsync(
-            new ArraySegment<byte>(msg),
-            WebSocketMessageType.Text,
-            endOfMessage: true,
-            _cts!.Token);
+        await _sendLock.WaitAsync(_cts!.Token);
+        try
+        {
+            await _ws.SendAsync(
+                new ArraySegment<byte>(msg),
+                WebSocketMessageType.Text,
+                endOfMessage: true,
+                _cts.Token);
+        }
+        finally { _sendLock.Release(); }
     }
 
     public async Task DisconnectAsync()
@@ -107,5 +121,6 @@ public class WebSocketService : IAsyncDisposable
     {
         await DisconnectAsync();
         _cts?.Dispose();
+        _sendLock.Dispose();
     }
 }

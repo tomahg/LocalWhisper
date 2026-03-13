@@ -25,8 +25,8 @@ transcription:
   compute_type: "int8"
 
 streaming:
-  chunk_duration_sec: 2.0   # Seconds of audio to accumulate before inference
-  overlap_sec: 0.5          # Audio overlap kept between windows for context
+  chunk_duration_sec: 3.0   # Seconds of audio to accumulate before inference
+  overlap_sec: 1.5          # Audio overlap kept between windows for context
   vad_enabled: true         # Voice Activity Detection (reduces hallucinations)
   vad_threshold: 0.5
 

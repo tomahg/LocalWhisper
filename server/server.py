@@ -96,25 +96,53 @@ async def websocket_transcribe(websocket: WebSocket):
     client = websocket.client
     logger.info("Client connected: %s", client)
 
-    # Each connection gets its own transcriber state
     transcriber.reset()
-
     loop = asyncio.get_event_loop()
+
+    # Queue decouples the receive loop from inference.
+    # Audio chunks (bytes) and control strings ("audio_stop", "close") are enqueued
+    # here and processed by the worker, so the receive loop is never blocked by
+    # slow CPU inference.
+    queue: asyncio.Queue[bytes | str] = asyncio.Queue()
+
+    async def inference_worker() -> None:
+        while True:
+            item = await queue.get()
+
+            if item == "close":
+                break
+
+            if item == "audio_stop":
+                logger.info("audio_stop received — running final inference")
+                t0 = time.perf_counter()
+                result = await loop.run_in_executor(None, transcriber.finalize)
+                if result and result.get("text"):
+                    result["processing_time_ms"] = round((time.perf_counter() - t0) * 1000)
+                    try:
+                        await websocket.send_json(result)
+                    except Exception:
+                        break
+                transcriber.reset()
+                continue  # Stay alive for the next recording session
+
+            # Binary audio chunk
+            t0 = time.perf_counter()
+            result = await loop.run_in_executor(None, transcriber.add_audio, item)
+            if result and result.get("text"):
+                result["processing_time_ms"] = round((time.perf_counter() - t0) * 1000)
+                try:
+                    await websocket.send_json(result)
+                except Exception:
+                    break
+
+    worker_task = asyncio.create_task(inference_worker())
 
     try:
         while True:
             message = await websocket.receive()
 
             if "bytes" in message:
-                t0 = time.perf_counter()
-                result = await loop.run_in_executor(
-                    None, transcriber.add_audio, message["bytes"]
-                )
-                if result:
-                    result["processing_time_ms"] = round(
-                        (time.perf_counter() - t0) * 1000
-                    )
-                    await websocket.send_json(result)
+                await queue.put(message["bytes"])
 
             elif "text" in message:
                 try:
@@ -124,19 +152,13 @@ async def websocket_transcribe(websocket: WebSocket):
                     continue
 
                 if data.get("type") == "audio_stop":
-                    logger.info("audio_stop received — running final inference")
-                    t0 = time.perf_counter()
-                    result = await loop.run_in_executor(None, transcriber.finalize)
-                    if result:
-                        result["processing_time_ms"] = round(
-                            (time.perf_counter() - t0) * 1000
-                        )
-                        await websocket.send_json(result)
-                    break
+                    await queue.put("audio_stop")
 
     except WebSocketDisconnect:
         logger.info("Client disconnected: %s", client)
     except Exception:
         logger.exception("Unexpected error in WebSocket handler")
     finally:
+        await queue.put("close")
+        worker_task.cancel()
         transcriber.reset()

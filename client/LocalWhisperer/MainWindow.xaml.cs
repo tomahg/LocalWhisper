@@ -29,6 +29,12 @@ public sealed partial class MainWindow : Window
         ServerUrlBox.Text = App.Services.GetRequiredService<AppSettings>().ServerUrl;
 
         _orchestrator.TranscriptionUpdated += OnTranscriptionUpdated;
+        _ws.ConnectionError += _ => DispatcherQueue.TryEnqueue(() =>
+        {
+            StatusText.Text = "Frakoblet";
+            RecordButton.IsEnabled = false;
+            StopButton.IsEnabled = false;
+        });
     }
 
     private async void ConnectButton_Click(object sender, RoutedEventArgs e)
@@ -67,12 +73,26 @@ public sealed partial class MainWindow : Window
         await _orchestrator.StopRecordingAsync();
     }
 
+    // Track whether the last line in the log is a partial (and can be replaced)
+    private bool _lastLineIsPartial;
+
     private void OnTranscriptionUpdated(string text, bool isFinal)
     {
         DispatcherQueue.TryEnqueue(() =>
         {
+            if (_lastLineIsPartial)
+            {
+                // Remove the previous partial line
+                var lastNewline = TranscriptionLog.Text.LastIndexOf('\n',
+                    TranscriptionLog.Text.Length - 2);
+                TranscriptionLog.Text = lastNewline >= 0
+                    ? TranscriptionLog.Text[..(lastNewline + 1)]
+                    : string.Empty;
+            }
+
             var prefix = isFinal ? "[final]  " : "[partial]";
             TranscriptionLog.Text += $"{prefix} {text}\n";
+            _lastLineIsPartial = !isFinal;
         });
     }
 }

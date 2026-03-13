@@ -48,6 +48,7 @@ class StreamingTranscriber:
 
         self.audio_buffer = np.array([], dtype=np.float32)
         self.segment_id = 0
+        self._prompt = ""  # Accumulated text used as initial_prompt for next window
 
         logger.info(
             "Loading model '%s' on %s with compute_type=%s ...",
@@ -91,6 +92,7 @@ class StreamingTranscriber:
     def reset(self) -> None:
         self.audio_buffer = np.array([], dtype=np.float32)
         self.segment_id = 0
+        self._prompt = ""
 
     # ------------------------------------------------------------------
     # Inference
@@ -99,22 +101,34 @@ class StreamingTranscriber:
     def _run_inference(self, is_final: bool) -> dict:
         vad_params = {"threshold": self.vad_threshold} if self.vad_enabled else {}
 
+        # Pass previous text as initial_prompt so Whisper has context for the
+        # current window — greatly reduces boundary errors and hallucinations.
+        # Keep the prompt to the last ~224 tokens (Whisper's context limit).
+        prompt = self._prompt[-200:] if self._prompt else None
+
         segments, _ = self.model.transcribe(
             self.audio_buffer,
             language=self.language,
             beam_size=self.beam_size,
             vad_filter=self.vad_enabled,
             vad_parameters=vad_params or None,
+            initial_prompt=prompt,
+            no_speech_threshold=0.6,
+            repetition_penalty=1.3,
         )
         # IMPORTANT: consume generator before touching audio_buffer
         text = " ".join(s.text for s in segments).strip()
         self.segment_id += 1
 
         if is_final:
+            self._prompt = ""
             self.audio_buffer = np.array([], dtype=np.float32)
             logger.debug("Final result [%d]: %r", self.segment_id, text)
             return {"type": "final", "text": text, "segment_id": self.segment_id}
         else:
+            # Accumulate prompt from confirmed partials for the next window
+            if text:
+                self._prompt = (self._prompt + " " + text).strip()
             overlap_samples = int(self.overlap_sec * SAMPLE_RATE)
             self.audio_buffer = self.audio_buffer[-overlap_samples:]
             logger.debug("Partial result [%d]: %r", self.segment_id, text)

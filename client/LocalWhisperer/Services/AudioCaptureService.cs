@@ -19,6 +19,8 @@ public class AudioCaptureService : IDisposable
 
     public void StartCapture(int deviceIndex = 0)
     {
+        StopCapture(); // Dispose any previous instance before creating a new one
+
         _waveIn = new WaveInEvent
         {
             WaveFormat = new WaveFormat(SampleRate, BitsPerSample, Channels),
@@ -32,7 +34,11 @@ public class AudioCaptureService : IDisposable
 
     public void StopCapture()
     {
-        _waveIn?.StopRecording();
+        if (_waveIn is null) return;
+        _waveIn.StopRecording();
+        _waveIn.DataAvailable -= OnDataAvailable;
+        _waveIn.Dispose();
+        _waveIn = null;
     }
 
     private void OnDataAvailable(object? sender, WaveInEventArgs e)
