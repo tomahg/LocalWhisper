@@ -55,7 +55,7 @@ public class ServerApiService
     {
         var baseUrl = WsToHttp(serverUrl);
         using var content = new MultipartFormDataContent();
-        var stream = File.OpenRead(filePath);
+        using var stream = File.OpenRead(filePath);
         var streamContent = new StreamContent(stream);
         content.Add(streamContent, "file", Path.GetFileName(filePath));
 

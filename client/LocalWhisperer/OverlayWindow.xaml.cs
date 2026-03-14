@@ -104,6 +104,7 @@ public sealed partial class OverlayWindow : Window
 
             _processingStart = DateTime.UtcNow;
             ProcessingTimer.Text = "";
+            StopProcessingTimer();
             _processingTimer ??= new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
             _processingTimer.Tick += ProcessingTimer_Tick;
             _processingTimer.Start();
@@ -150,12 +151,12 @@ public sealed partial class OverlayWindow : Window
             ProcessingPanel.Visibility = Visibility.Collapsed;
             ResultPanel.Visibility     = Visibility.Visible;
 
-            // Estimate height: ~20px per line, ~75 chars per line at width 560, plus padding+buttons
+            // Measure the actual content to size the window tightly
             const int width = 560;
-            const int minHeight = 100;
             const int maxHeight = 400;
-            int lines = Math.Max(1, (int)Math.Ceiling(text.Length / 75.0));
-            int height = Math.Clamp(30 + lines * 20 + 44, minHeight, maxHeight);
+            const int padding = 48; // border padding + button row + margins
+            ResultContent.Measure(new Windows.Foundation.Size(width - 28, double.PositiveInfinity));
+            int height = Math.Clamp((int)ResultContent.DesiredSize.Height + padding, 100, maxHeight);
 
             PositionBottomRight(width, height);
             _appWindow.Show();
