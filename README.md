@@ -29,7 +29,6 @@ LocalWhisperer/
 │       ├── Services/
 │       │   ├── AudioCaptureService.cs
 │       │   ├── WebSocketService.cs
-│       │   ├── TextInjectionService.cs
 │       │   ├── HotkeyService.cs
 │       │   ├── TranscriptionOrchestrator.cs
 │       │   ├── SettingsService.cs

@@ -42,7 +42,6 @@ public partial class App : Application
         services.AddSingleton(settings);
         services.AddSingleton<AudioCaptureService>();
         services.AddSingleton<WebSocketService>();
-        services.AddSingleton<TextInjectionService>();
         services.AddSingleton<HotkeyService>();
         services.AddSingleton<TranscriptionOrchestrator>();
         services.AddSingleton<ServerApiService>();
