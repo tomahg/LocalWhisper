@@ -165,14 +165,31 @@ public sealed partial class OverlayWindow : Window
     // File drop / picker handlers
     // -------------------------------------------------------------------------
 
-    private void IdlePanel_DragOver(object sender, Microsoft.UI.Xaml.DragEventArgs e)
+    private void ListeningPanel_DragOver(object sender, Microsoft.UI.Xaml.DragEventArgs e)
     {
         if (e.DataView.Contains(StandardDataFormats.StorageItems))
+        {
             e.AcceptedOperation = DataPackageOperation.Copy;
+            ListeningPanel.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(0xCC, 0x2A, 0x3A, 0x4E));
+            ListeningContent.Visibility = Visibility.Collapsed;
+            DropHint.Visibility = Visibility.Visible;
+        }
     }
 
-    private async void IdlePanel_Drop(object sender, Microsoft.UI.Xaml.DragEventArgs e)
+    private void ListeningPanel_DragLeave(object sender, Microsoft.UI.Xaml.DragEventArgs e)
     {
+        ListeningPanel.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+            Windows.UI.Color.FromArgb(0xCC, 0x1E, 0x1E, 0x2E));
+        ListeningContent.Visibility = Visibility.Visible;
+        DropHint.Visibility = Visibility.Collapsed;
+    }
+
+    private async void ListeningPanel_Drop(object sender, Microsoft.UI.Xaml.DragEventArgs e)
+    {
+        // Reset visuals immediately
+        ListeningPanel_DragLeave(sender, e);
+
         if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
         var items = await e.DataView.GetStorageItemsAsync();
         if (items.Count == 0) return;
