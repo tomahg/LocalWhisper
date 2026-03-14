@@ -8,6 +8,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 
 from config import load_config, AppConfig
+from corrector import apply, load_corrections
 from transcriber import StreamingTranscriber
 
 logging.basicConfig(
@@ -22,13 +23,15 @@ logger = logging.getLogger(__name__)
 
 config: AppConfig
 transcriber: StreamingTranscriber
+corrections: list
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global config, transcriber
+    global config, transcriber, corrections
     config = load_config()
     transcriber = StreamingTranscriber(config)
+    corrections = load_corrections()
     yield
     logger.info("Server shutting down.")
 
@@ -123,6 +126,8 @@ async def websocket_transcribe(websocket: WebSocket):
                 # Always send a final message so the client exits "processing" state,
                 # even when VAD removes all audio and text is empty.
                 final = result or {"type": "final", "text": ""}
+                if final.get("text"):
+                    final["text"] = apply(final["text"], corrections)
                 final["processing_time_ms"] = round((time.perf_counter() - t0) * 1000)
                 try:
                     await websocket.send_json(final)

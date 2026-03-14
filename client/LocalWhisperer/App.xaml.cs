@@ -21,8 +21,11 @@ public partial class App : Application
     private HotkeyService?  _hotkey;
     private DispatcherQueue? _dispatcherQueue;
 
-    private static readonly Uri UriIdle       = new("ms-appx:///Assets/tray-idle.ico");
-    private static readonly Uri UriListening  = new("ms-appx:///Assets/tray-listening.ico");
+    private static Uri AssetUri(string fileName) =>
+        new(Path.Combine(AppContext.BaseDirectory, "Assets", fileName));
+
+    private static readonly Uri UriIdle      = AssetUri("tray-idle.ico");
+    private static readonly Uri UriListening = AssetUri("tray-listening.ico");
 
     public App()
     {
@@ -75,6 +78,7 @@ public partial class App : Application
     private void InitializeTrayIcon()
     {
         _trayIcon = (TaskbarIcon)Resources["TrayIcon"];
+        _trayIcon.IconSource = new BitmapImage(UriIdle);
 
         var menu = new MenuFlyout();
 

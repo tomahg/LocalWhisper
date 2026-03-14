@@ -61,6 +61,15 @@ cd client
 dotnet build LocalWhisperer/LocalWhisperer.csproj -r win-x64
 ```
 
+### Publish (self-contained folder)
+
+```powershell
+cd client
+dotnet publish LocalWhisperer/LocalWhisperer.csproj -r win-x64 -c Release --self-contained -o publish
+```
+
+Copy the `publish\` folder to the target machine and run `LocalWhisperer.exe`. No installation required.
+
 ### Usage
 
 On first launch the app starts in the system tray (no window appears). The tray icon indicates state:

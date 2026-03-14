@@ -1,5 +1,6 @@
-# Secrets — never commit these
+# Secrets / local overrides — never commit these
 server/secrets.yaml
+server/corrections.yaml
 client/LocalWhisperer/appsettings.local.json
 
 # Python
@@ -12,6 +13,7 @@ __pycache__/
 **/bin/
 **/obj/
 *.user
+client/publish
 
 # VS / Rider
 .vs/

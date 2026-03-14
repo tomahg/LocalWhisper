@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using LocalWhisperer.Models;
-using Windows.Storage;
 
 namespace LocalWhisperer.Services;
 
@@ -51,6 +50,12 @@ public class SettingsService
         catch { }
     }
 
-    private static string GetPath() =>
-        Path.Combine(ApplicationData.Current.LocalFolder.Path, FileName);
+    private static string GetPath()
+    {
+        var dir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "LocalWhisperer");
+        Directory.CreateDirectory(dir);
+        return Path.Combine(dir, FileName);
+    }
 }

@@ -1,0 +1,11 @@
+# Ordfeil-korreksjoner — kopier til corrections.yaml og tilpass
+#
+# wrong:   det transkriberte ordet (søk er ikke case-sensitiv)
+# correct: det riktige ordet (skrives alltid slik du oppgir det her)
+#
+# Eksempler:
+corrections:
+  - wrong: "Thomas"
+    correct: "Tomas"
+  - wrong: "Nova Care"
+    correct: "Novacare"
