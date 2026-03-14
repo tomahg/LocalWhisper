@@ -3,7 +3,7 @@ server:
   port: 8765
 
 transcription:
-  default_model: "NbAiLab/nb-whisper-medium"
+  default_model: "NbAiLab/nb-whisper-large"
   language: "no"
   beam_size: 5
 
@@ -12,7 +12,7 @@ transcription:
   #   "auto"  = use CUDA if available, otherwise CPU
   #   "cuda"  = force GPU (will fail if no CUDA-capable GPU is present)
   #   "cpu"   = force CPU
-  device: "cpu"
+  device: "cuda"
 
   # compute_type: "int8" | "float16" | "int8_float16" | "float32"
   #   CPU recommendations:
@@ -22,7 +22,7 @@ transcription:
   #     "float16"      — best quality, requires VRAM
   #     "int8_float16" — good balance of speed and quality on GPU
   #     "int8"         — smallest VRAM footprint
-  compute_type: "int8"
+  compute_type: "float16"
 
 streaming:
   chunk_duration_sec: 3.0   # Seconds of audio to accumulate before inference
