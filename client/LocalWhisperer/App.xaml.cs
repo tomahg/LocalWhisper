@@ -59,6 +59,9 @@ public partial class App : Application
 
         _window = new MainWindow();
         _window.Closed += OnWindowClosed;
+
+        // Move offscreen before Activate() to avoid a visible flash
+        _window.AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(-9999, -9999, 0, 0));
         _window.Activate();
 
         // Initialize directly — subscribing to Activated after Activate() misses the first event
@@ -66,6 +69,7 @@ public partial class App : Application
         RegisterHotkey();
 
         _window.AppWindow.Hide();
+        _window.AppWindow.Resize(new Windows.Graphics.SizeInt32(560, 500));
 
         var settings = Services.GetRequiredService<AppSettings>();
         if (settings.AutoConnect)
@@ -97,10 +101,7 @@ public partial class App : Application
         _overlay.FileSelected += async (filePath) =>
         {
             if (orchestrator.IsRecording)
-            {
                 await orchestrator.StopRecordingAsync();
-                // Discard the mic transcription result for this aborted session
-            }
             _overlay.ShowProcessing();
             try
             {
@@ -117,6 +118,7 @@ public partial class App : Application
         orchestrator.RecordingStateChanged += isRecording =>
         {
             UpdateTrayIcon(recording: isRecording, connected: true);
+            if (orchestrator.IsTranscribingFile) return; // file transcription controls overlay
             if (isRecording)
                 _overlay.ShowListening();
             else
@@ -128,7 +130,8 @@ public partial class App : Application
             if (!isFinal) return;
             if (string.IsNullOrWhiteSpace(text))
             {
-                _overlay.Hide();
+                if (!orchestrator.IsTranscribingFile)
+                    _overlay.Hide();
                 return;
             }
             var settings = Services.GetRequiredService<AppSettings>();

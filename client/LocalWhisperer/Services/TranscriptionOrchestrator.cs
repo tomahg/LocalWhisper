@@ -83,12 +83,13 @@ public class TranscriptionOrchestrator
 
     private void OnTranscription(TranscriptionResult result)
     {
+        if (IsTranscribingFile) return; // suppress mic results during file transcription
         TranscriptionUpdated?.Invoke(result.Text, result.IsFinal);
     }
 
     public async Task TranscribeFileAsync(string filePath)
     {
-        if (IsRecording || IsTranscribingFile) return;
+        if (IsTranscribingFile) return;
         IsTranscribingFile = true;
         try
         {
