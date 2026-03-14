@@ -3,8 +3,8 @@ using H.NotifyIcon;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media.Imaging;
+using LocalWhisperer.Helpers;
 using LocalWhisperer.Models;
 using LocalWhisperer.Services;
 using LocalWhisperer.ViewModels;
@@ -20,6 +20,7 @@ public partial class App : Application
     private TaskbarIcon?    _trayIcon;
     private HotkeyService?  _hotkey;
     private DispatcherQueue? _dispatcherQueue;
+    private bool             _isExiting;
 
     private static Uri AssetUri(string fileName) =>
         new(Path.Combine(AppContext.BaseDirectory, "Assets", fileName));
@@ -79,21 +80,10 @@ public partial class App : Application
     {
         _trayIcon = (TaskbarIcon)Resources["TrayIcon"];
         _trayIcon.IconSource = new BitmapImage(UriIdle);
+        _trayIcon.ContextFlyout = null; // Don't use WinUI MenuFlyout — it doesn't fire events
 
-        var menu = new MenuFlyout();
-
-        var settingsItem = new MenuFlyoutItem { Text = "Innstillinger" };
-        settingsItem.Click += (_, _) => ShowWindow();
-
-        var exitItem = new MenuFlyoutItem { Text = "Avslutt" };
-        exitItem.Click += (_, _) => ExitApp();
-
-        menu.Items.Add(settingsItem);
-        menu.Items.Add(new MenuFlyoutSeparator());
-        menu.Items.Add(exitItem);
-
-        _trayIcon.ContextFlyout    = menu;
-        _trayIcon.LeftClickCommand = new RelayCommand(ShowWindow);
+        _trayIcon.LeftClickCommand  = new RelayCommand(ShowWindow);
+        _trayIcon.RightClickCommand = new RelayCommand(ShowTrayContextMenu);
         _trayIcon.ForceCreate(false);
 
         // Subscribe to state changes for icon + tooltip updates
@@ -142,6 +132,19 @@ public partial class App : Application
                 _trayIcon?.ShowNotification("LocalWhisperer",
                     "Mikrofon frakoblet — opptak stoppet.", H.NotifyIcon.Core.NotificationIcon.Warning));
         };
+    }
+
+    private void ShowTrayContextMenu()
+    {
+        var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
+        int choice = NativeMethods.ShowNativePopupMenu(hwnd,
+            ["Innstillinger", "-", "Avslutt"]);
+
+        switch (choice)
+        {
+            case 1: ShowWindow(); break;   // Innstillinger
+            case 3: ExitApp();    break;   // Avslutt (index 3 because separator is index 2)
+        }
     }
 
     private void UpdateTrayIcon(bool recording, bool connected)
@@ -217,6 +220,8 @@ public partial class App : Application
 
     private void OnWindowClosed(object sender, WindowEventArgs args)
     {
+        if (_isExiting) return; // Allow real close during exit
+
         // Intercept close — hide instead of destroying the window
         args.Handled = true;
         _window?.AppWindow.Hide();
@@ -224,11 +229,18 @@ public partial class App : Application
 
     private void ExitApp()
     {
-        _trayIcon?.Dispose();
-        _hotkey?.Dispose();
-        if (_window is not null)
-            _window.Closed -= OnWindowClosed;
-        _window?.Close();
-        Exit();
+        _isExiting = true;
+        try
+        {
+            _hotkey?.Dispose();
+            _window?.Close();
+            _overlay?.Close();
+        }
+        catch
+        {
+            // Swallow — we're terminating anyway
+        }
+
+        Environment.Exit(0);
     }
 }

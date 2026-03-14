@@ -144,6 +144,72 @@ internal static partial class NativeMethods
     }
 
     // -------------------------------------------------------------------------
+    // Native popup menu (for system tray — WinUI MenuFlyout doesn't work)
+    // -------------------------------------------------------------------------
+
+    private const uint MF_STRING    = 0x0000;
+    private const uint MF_SEPARATOR = 0x0800;
+    private const uint TPM_RETURNCMD   = 0x0100;
+    private const uint TPM_NONOTIFY    = 0x0080;
+    private const uint TPM_BOTTOMALIGN = 0x0020;
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct POINT { public int X; public int Y; }
+
+    [LibraryImport("user32.dll")]
+    private static partial nint CreatePopupMenu();
+
+    [LibraryImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool DestroyMenu(nint hMenu);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool AppendMenu(nint hMenu, uint uFlags, nuint uIDNewItem, string lpNewItem);
+
+    [LibraryImport("user32.dll")]
+    private static partial int TrackPopupMenuEx(nint hMenu, uint uFlags, int x, int y, nint hwnd, nint lptpm);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool GetCursorPos(out POINT lpPoint);
+
+    [LibraryImport("user32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool SetForegroundWindow(nint hWnd);
+
+    /// <summary>
+    /// Shows a native Win32 popup menu at the cursor position.
+    /// Returns the 1-based index of the selected item, or 0 if cancelled.
+    /// </summary>
+    public static int ShowNativePopupMenu(nint ownerHwnd, string[] items)
+    {
+        var hMenu = CreatePopupMenu();
+        if (hMenu == 0) return 0;
+
+        try
+        {
+            for (int i = 0; i < items.Length; i++)
+            {
+                if (items[i] == "-")
+                    AppendMenu(hMenu, MF_SEPARATOR, 0, string.Empty);
+                else
+                    AppendMenu(hMenu, MF_STRING, (nuint)(i + 1), items[i]);
+            }
+
+            GetCursorPos(out var pt);
+            SetForegroundWindow(ownerHwnd);
+
+            return TrackPopupMenuEx(hMenu, TPM_RETURNCMD | TPM_NONOTIFY | TPM_BOTTOMALIGN,
+                                    pt.X, pt.Y, ownerHwnd, 0);
+        }
+        finally
+        {
+            DestroyMenu(hMenu);
+        }
+    }
+
+    // -------------------------------------------------------------------------
     // Private helpers
     // -------------------------------------------------------------------------
 
