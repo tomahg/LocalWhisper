@@ -1,6 +1,12 @@
 import gc
+import glob
 import logging
 import os
+
+# Python 3.8+ no longer searches PATH for DLL dependencies of extension modules.
+# Explicitly register CUDA bin directories so ctranslate2 can find cublas etc.
+for _cuda_bin in glob.glob(r"C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v*\bin"):
+    os.add_dll_directory(_cuda_bin)
 
 import numpy as np
 from faster_whisper import WhisperModel
