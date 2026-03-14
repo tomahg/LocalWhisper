@@ -25,9 +25,10 @@ public class TranscriptionOrchestrator
 
     /// <summary>
     /// Raised on the thread that receives WebSocket messages.
+    /// Parameters: text, isFinal, isFileTranscription.
     /// UI must marshal to DispatcherQueue.
     /// </summary>
-    public event Action<string, bool>? TranscriptionUpdated;
+    public event Action<string, bool, bool>? TranscriptionUpdated;
 
     /// <summary>Raised with RMS level 0.0–1.0 for each audio buffer (UI thread not guaranteed).</summary>
     public event Action<float>? AudioLevelChanged;
@@ -84,7 +85,7 @@ public class TranscriptionOrchestrator
     private void OnTranscription(TranscriptionResult result)
     {
         if (IsTranscribingFile) return; // suppress mic results during file transcription
-        TranscriptionUpdated?.Invoke(result.Text, result.IsFinal);
+        TranscriptionUpdated?.Invoke(result.Text, result.IsFinal, false);
     }
 
     public async Task TranscribeFileAsync(string filePath)
@@ -94,11 +95,13 @@ public class TranscriptionOrchestrator
         try
         {
             var result = await _api.TranscribeFileAsync(_settings.ServerUrl, filePath);
-            TranscriptionUpdated?.Invoke(result.Text, true);
+            IsTranscribingFile = false;
+            TranscriptionUpdated?.Invoke(result.Text, true, true);
         }
-        finally
+        catch
         {
             IsTranscribingFile = false;
+            throw;
         }
     }
 }

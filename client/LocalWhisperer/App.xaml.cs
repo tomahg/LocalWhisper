@@ -125,17 +125,19 @@ public partial class App : Application
                 _overlay.ShowProcessing();
         };
         orchestrator.AudioLevelChanged += level => _overlay.UpdateAudioLevel(level);
-        orchestrator.TranscriptionUpdated += (text, isFinal) =>
+        orchestrator.TranscriptionUpdated += (text, isFinal, isFileTranscription) =>
         {
             if (!isFinal) return;
             if (string.IsNullOrWhiteSpace(text))
             {
-                if (!orchestrator.IsTranscribingFile)
+                if (isFileTranscription)
+                    _overlay.ShowResult("Ingen tale funnet", showCopy: false);
+                else
                     _overlay.Hide();
                 return;
             }
             var settings = Services.GetRequiredService<AppSettings>();
-            if (settings.AutoCopyToClipboard)
+            if (settings.AutoCopyToClipboard && !isFileTranscription)
             {
                 _overlay.CopyToClipboard(text);
                 _overlay.Hide();
@@ -235,6 +237,21 @@ public partial class App : Application
         _dispatcherQueue?.TryEnqueue(() =>
         {
             _window ??= new MainWindow();
+
+            // The window is initially placed off-screen to avoid a flash at startup.
+            // Move it to the center of the work area before showing.
+            var pos = _window.AppWindow.Position;
+            if (pos.X <= -9000 || pos.Y <= -9000)
+            {
+                var workArea = Microsoft.UI.Windowing.DisplayArea
+                    .GetFromWindowId(_window.AppWindow.Id, Microsoft.UI.Windowing.DisplayAreaFallback.Primary)
+                    .WorkArea;
+                var size = _window.AppWindow.Size;
+                _window.AppWindow.Move(new Windows.Graphics.PointInt32(
+                    workArea.X + (workArea.Width  - size.Width)  / 2,
+                    workArea.Y + (workArea.Height - size.Height) / 2));
+            }
+
             _window.AppWindow.Show();
             _window.Activate();
         });

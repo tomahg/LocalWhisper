@@ -59,7 +59,7 @@ public partial class MainViewModel : ObservableObject
         await _orchestrator.StopRecordingAsync();
     }
 
-    private void OnTranscriptionUpdated(string text, bool isFinal)
+    private void OnTranscriptionUpdated(string text, bool isFinal, bool isFileTranscription)
     {
         var prefix = isFinal ? "[final]  " : "[partial]";
         TranscriptionLog += $"{prefix} {text}\n";

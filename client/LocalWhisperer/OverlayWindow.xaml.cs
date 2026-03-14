@@ -107,12 +107,13 @@ public sealed partial class OverlayWindow : Window
         });
     }
 
-    public void ShowResult(string text)
+    public void ShowResult(string text, bool showCopy = true)
     {
         DispatcherQueue.TryEnqueue(() =>
         {
             _lastResult = text;
             ResultText.Text = text;
+            CopyButton.Visibility = showCopy ? Visibility.Visible : Visibility.Collapsed;
             SetClickThrough(false); // buttons must be clickable
             SetNoActivate(true);
 
@@ -189,6 +190,38 @@ public sealed partial class OverlayWindow : Window
     {
         // Reset visuals immediately
         ListeningPanel_DragLeave(sender, e);
+
+        if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
+        var items = await e.DataView.GetStorageItemsAsync();
+        if (items.Count == 0) return;
+
+        if (items[0] is StorageFile file && AllowedExtensions.Contains(Path.GetExtension(file.Path).ToLowerInvariant()))
+            FileSelected?.Invoke(file.Path);
+    }
+
+    private void ResultPanel_DragOver(object sender, Microsoft.UI.Xaml.DragEventArgs e)
+    {
+        if (e.DataView.Contains(StandardDataFormats.StorageItems))
+        {
+            e.AcceptedOperation = DataPackageOperation.Copy;
+            ResultPanel.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                Windows.UI.Color.FromArgb(0xCC, 0x2A, 0x3A, 0x4E));
+            ResultContent.Visibility = Visibility.Collapsed;
+            ResultDropHint.Visibility = Visibility.Visible;
+        }
+    }
+
+    private void ResultPanel_DragLeave(object sender, Microsoft.UI.Xaml.DragEventArgs e)
+    {
+        ResultPanel.Background = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+            Windows.UI.Color.FromArgb(0xCC, 0x1E, 0x1E, 0x2E));
+        ResultContent.Visibility = Visibility.Visible;
+        ResultDropHint.Visibility = Visibility.Collapsed;
+    }
+
+    private async void ResultPanel_Drop(object sender, Microsoft.UI.Xaml.DragEventArgs e)
+    {
+        ResultPanel_DragLeave(sender, e);
 
         if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
         var items = await e.DataView.GetStorageItemsAsync();
