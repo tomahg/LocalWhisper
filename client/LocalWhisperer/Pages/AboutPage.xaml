@@ -19,10 +19,5 @@
             <TextBlock Text="• NAudio"/>
         </StackPanel>
 
-        <StackPanel Spacing="4">
-            <TextBlock Text="Merk" Style="{StaticResource BodyStrongTextBlockStyle}"/>
-            <TextBlock TextWrapping="Wrap"
-                       Text="SendInput fungerer ikke i applikasjoner som kjører med høyere privileginivå enn LocalWhisperer (f.eks. som administrator). Start LocalWhisperer som administrator om dette er et problem."/>
-        </StackPanel>
     </StackPanel>
 </Page>
