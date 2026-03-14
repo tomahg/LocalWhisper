@@ -122,7 +122,7 @@ class StreamingTranscriber:
         vad_params = {"threshold": self.vad_threshold} if self.vad_enabled else {}
 
         with self._inference_lock:
-            segments, _ = self.model.transcribe(
+            segments, info = self.model.transcribe(
                 file_path,
                 language=self.language,
                 beam_size=self.beam_size,
@@ -132,10 +132,12 @@ class StreamingTranscriber:
                 repetition_penalty=1.3,
             )
             text = " ".join(s.text for s in segments).strip()
+            duration_ms = round(info.duration * 1000)
         self.segment_id += 1
 
         logger.info("File transcription [%d]: %r", self.segment_id, text)
-        return {"type": "final", "text": text, "segment_id": self.segment_id}
+        return {"type": "final", "text": text, "segment_id": self.segment_id,
+                "audio_duration_ms": duration_ms}
 
     # ------------------------------------------------------------------
     # Model switching

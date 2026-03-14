@@ -39,6 +39,8 @@ public sealed partial class OverlayWindow : Window
     private readonly AppWindow _appWindow;
     private readonly nint _hwnd;
     private string _lastResult = string.Empty;
+    private DispatcherTimer? _processingTimer;
+    private DateTime _processingStart;
 
     /// <summary>Raised when the user drops or picks an audio file.</summary>
     public event Action<string>? FileSelected;
@@ -81,6 +83,7 @@ public sealed partial class OverlayWindow : Window
     {
         DispatcherQueue.TryEnqueue(() =>
         {
+            StopProcessingTimer();
             SetClickThrough(false);  // allow drag-drop onto listening panel
             SetNoActivate(true);
             ListeningPanel.Visibility  = Visibility.Visible;
@@ -99,6 +102,12 @@ public sealed partial class OverlayWindow : Window
             SetClickThrough(true);
             SetNoActivate(true);
 
+            _processingStart = DateTime.UtcNow;
+            ProcessingTimer.Text = "";
+            _processingTimer ??= new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+            _processingTimer.Tick += ProcessingTimer_Tick;
+            _processingTimer.Start();
+
             ListeningPanel.Visibility  = Visibility.Collapsed;
             ProcessingPanel.Visibility = Visibility.Visible;
             ResultPanel.Visibility     = Visibility.Collapsed;
@@ -107,20 +116,48 @@ public sealed partial class OverlayWindow : Window
         });
     }
 
-    public void ShowResult(string text, bool showCopy = true)
+    private void StopProcessingTimer()
+    {
+        if (_processingTimer is not null)
+        {
+            _processingTimer.Stop();
+            _processingTimer.Tick -= ProcessingTimer_Tick;
+        }
+    }
+
+    private void ProcessingTimer_Tick(object? sender, object e)
+    {
+        var elapsed = DateTime.UtcNow - _processingStart;
+        ProcessingTimer.Text = elapsed.TotalSeconds < 60
+            ? $"{(int)elapsed.TotalSeconds} sek"
+            : $"{(int)elapsed.TotalMinutes}:{elapsed.Seconds:D2}";
+    }
+
+    public void ShowResult(string text, bool showCopy = true,
+        int audioDurationMs = 0, int processingTimeMs = 0)
     {
         DispatcherQueue.TryEnqueue(() =>
         {
+            StopProcessingTimer();
             _lastResult = text;
             ResultText.Text = text;
             CopyButton.Visibility = showCopy ? Visibility.Visible : Visibility.Collapsed;
+            StatsText.Text = FormatStats(audioDurationMs, processingTimeMs);
             SetClickThrough(false); // buttons must be clickable
             SetNoActivate(true);
 
             ListeningPanel.Visibility  = Visibility.Collapsed;
             ProcessingPanel.Visibility = Visibility.Collapsed;
             ResultPanel.Visibility     = Visibility.Visible;
-            PositionBottomRight(width: 560, height: 120);
+
+            // Estimate height: ~20px per line, ~75 chars per line at width 560, plus padding+buttons
+            const int width = 560;
+            const int minHeight = 100;
+            const int maxHeight = 400;
+            int lines = Math.Max(1, (int)Math.Ceiling(text.Length / 75.0));
+            int height = Math.Clamp(30 + lines * 20 + 44, minHeight, maxHeight);
+
+            PositionBottomRight(width, height);
             _appWindow.Show();
         });
     }
@@ -134,6 +171,7 @@ public sealed partial class OverlayWindow : Window
     {
         DispatcherQueue.TryEnqueue(() =>
         {
+            StopProcessingTimer();
             _lastResult = string.Empty;
             _appWindow.Hide();
         });
@@ -249,6 +287,25 @@ public sealed partial class OverlayWindow : Window
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
+
+    private static string FormatStats(int audioDurationMs, int processingTimeMs)
+    {
+        if (audioDurationMs <= 0 && processingTimeMs <= 0) return "";
+
+        static string FormatDuration(int ms)
+        {
+            var ts = TimeSpan.FromMilliseconds(ms);
+            return ts.TotalMinutes >= 1
+                ? $"{(int)ts.TotalMinutes} min {ts.Seconds} sek"
+                : $"{(int)ts.TotalSeconds} sek";
+        }
+
+        if (audioDurationMs > 0 && processingTimeMs > 0)
+            return $"{FormatDuration(audioDurationMs)} behandlet på {FormatDuration(processingTimeMs)}";
+        if (processingTimeMs > 0)
+            return $"Behandlet på {FormatDuration(processingTimeMs)}";
+        return "";
+    }
 
     private void SetNoActivate(bool noActivate)
     {

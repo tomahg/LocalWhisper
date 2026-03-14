@@ -16,5 +16,8 @@ public class TranscriptionResult
     [JsonPropertyName("processing_time_ms")]
     public int ProcessingTimeMs { get; set; }
 
+    [JsonPropertyName("audio_duration_ms")]
+    public int AudioDurationMs { get; set; }
+
     public bool IsFinal => Type == "final";
 }

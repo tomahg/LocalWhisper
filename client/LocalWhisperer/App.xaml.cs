@@ -125,13 +125,15 @@ public partial class App : Application
                 _overlay.ShowProcessing();
         };
         orchestrator.AudioLevelChanged += level => _overlay.UpdateAudioLevel(level);
-        orchestrator.TranscriptionUpdated += (text, isFinal, isFileTranscription) =>
+        orchestrator.TranscriptionUpdated += (result, isFileTranscription) =>
         {
-            if (!isFinal) return;
+            if (!result.IsFinal) return;
+            var text = result.Text;
             if (string.IsNullOrWhiteSpace(text))
             {
                 if (isFileTranscription)
-                    _overlay.ShowResult("Ingen tale funnet", showCopy: false);
+                    _overlay.ShowResult("Ingen tale funnet", showCopy: false,
+                        audioDurationMs: result.AudioDurationMs, processingTimeMs: result.ProcessingTimeMs);
                 else
                     _overlay.Hide();
                 return;
@@ -144,7 +146,8 @@ public partial class App : Application
             }
             else
             {
-                _overlay.ShowResult(text);
+                _overlay.ShowResult(text,
+                    audioDurationMs: result.AudioDurationMs, processingTimeMs: result.ProcessingTimeMs);
             }
         };
         orchestrator.MicrophoneDeviceLost += () =>
