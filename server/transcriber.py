@@ -2,6 +2,7 @@ import gc
 import glob
 import logging
 import os
+import threading
 
 # Python 3.8+ no longer searches PATH for DLL dependencies of extension modules.
 # Explicitly register CUDA bin directories so ctranslate2 can find cublas etc.
@@ -51,6 +52,7 @@ class StreamingTranscriber:
 
         self.audio_buffer = np.array([], dtype=np.float32)
         self.segment_id = 0
+        self._inference_lock = threading.Lock()
 
         logger.info(
             "Loading model '%s' on %s with compute_type=%s ...",
@@ -97,21 +99,42 @@ class StreamingTranscriber:
     def _run_inference(self) -> dict:
         vad_params = {"threshold": self.vad_threshold} if self.vad_enabled else {}
 
-        segments, _ = self.model.transcribe(
-            self.audio_buffer,
-            language=self.language,
-            beam_size=self.beam_size,
-            vad_filter=self.vad_enabled,
-            vad_parameters=vad_params or None,
-            no_speech_threshold=0.6,
-            repetition_penalty=1.3,
-        )
-        # IMPORTANT: consume generator before touching audio_buffer
-        text = " ".join(s.text for s in segments).strip()
+        with self._inference_lock:
+            segments, _ = self.model.transcribe(
+                self.audio_buffer,
+                language=self.language,
+                beam_size=self.beam_size,
+                vad_filter=self.vad_enabled,
+                vad_parameters=vad_params or None,
+                no_speech_threshold=0.6,
+                repetition_penalty=1.3,
+            )
+            # IMPORTANT: consume generator before touching audio_buffer
+            text = " ".join(s.text for s in segments).strip()
         self.segment_id += 1
         self.audio_buffer = np.array([], dtype=np.float32)
 
         logger.debug("Final result [%d]: %r", self.segment_id, text)
+        return {"type": "final", "text": text, "segment_id": self.segment_id}
+
+    def transcribe_file(self, file_path: str) -> dict:
+        """Transcribe an audio file directly (independent of the streaming buffer)."""
+        vad_params = {"threshold": self.vad_threshold} if self.vad_enabled else {}
+
+        with self._inference_lock:
+            segments, _ = self.model.transcribe(
+                file_path,
+                language=self.language,
+                beam_size=self.beam_size,
+                vad_filter=self.vad_enabled,
+                vad_parameters=vad_params or None,
+                no_speech_threshold=0.6,
+                repetition_penalty=1.3,
+            )
+            text = " ".join(s.text for s in segments).strip()
+        self.segment_id += 1
+
+        logger.info("File transcription [%d]: %r", self.segment_id, text)
         return {"type": "final", "text": text, "segment_id": self.segment_id}
 
     # ------------------------------------------------------------------

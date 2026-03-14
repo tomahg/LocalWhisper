@@ -94,6 +94,24 @@ public partial class App : Application
         _overlay.Activate();   // must activate once so AppWindow is ready; Hide() immediately follows
         _overlay.AppWindow.Hide();
 
+        _overlay.FileSelected += async (filePath) =>
+        {
+            if (orchestrator.IsRecording)
+            {
+                await orchestrator.StopRecordingAsync();
+                // Discard the mic transcription result for this aborted session
+            }
+            _overlay.ShowProcessing();
+            try
+            {
+                await orchestrator.TranscribeFileAsync(filePath);
+            }
+            catch (Exception ex)
+            {
+                _overlay.ShowResult($"Feil: {ex.Message}");
+            }
+        };
+
         ws.ConnectionError    += _ => UpdateTrayIcon(recording: false, connected: false);
         ws.ConnectionRestored += () => UpdateTrayIcon(recording: false, connected: true);
         orchestrator.RecordingStateChanged += isRecording =>
@@ -138,12 +156,13 @@ public partial class App : Application
     {
         var hwnd = WinRT.Interop.WindowNative.GetWindowHandle(_window);
         int choice = NativeMethods.ShowNativePopupMenu(hwnd,
-            ["Innstillinger", "-", "Avslutt"]);
+            ["Innstillinger", "Last inn lydfil...", "-", "Avslutt"]);
 
         switch (choice)
         {
-            case 1: ShowWindow(); break;   // Innstillinger
-            case 3: ExitApp();    break;   // Avslutt (index 3 because separator is index 2)
+            case 1: ShowWindow();          break;   // Innstillinger
+            case 2: _overlay?.OpenFilePicker(); break;   // Last inn lydfil...
+            case 4: ExitApp();             break;   // Avslutt (index 4 because separator is index 3)
         }
     }
 

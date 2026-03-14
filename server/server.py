@@ -1,10 +1,12 @@
 ﻿import asyncio
 import json
 import logging
+import os
+import tempfile
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, File, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 
 from config import load_config, AppConfig
@@ -86,6 +88,43 @@ async def switch_model(body: dict):
 @app.get("/config")
 async def get_config():
     return config.model_dump()
+
+
+ALLOWED_EXTENSIONS = {".wav", ".mp3", ".m4a", ".ogg", ".flac", ".webm", ".wma", ".aac"}
+MAX_FILE_SIZE = 100 * 1024 * 1024  # 100 MB
+
+
+@app.post("/transcribe/file")
+async def transcribe_file(file: UploadFile = File(...)):
+    ext = os.path.splitext(file.filename or "")[1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        return JSONResponse(
+            status_code=400,
+            content={"error": f"Unsupported file type '{ext}'. Allowed: {sorted(ALLOWED_EXTENSIONS)}"},
+        )
+
+    tmp_path = None
+    try:
+        data = await file.read()
+        if len(data) > MAX_FILE_SIZE:
+            return JSONResponse(status_code=400, content={"error": "File too large (max 100 MB)"})
+
+        with tempfile.NamedTemporaryFile(delete=False, suffix=ext) as tmp:
+            tmp.write(data)
+            tmp_path = tmp.name
+
+        loop = asyncio.get_event_loop()
+        t0 = time.perf_counter()
+        result = await loop.run_in_executor(None, transcriber.transcribe_file, tmp_path)
+        elapsed_ms = round((time.perf_counter() - t0) * 1000)
+
+        if result.get("text"):
+            result["text"] = apply(result["text"], corrections)
+        result["processing_time_ms"] = elapsed_ms
+        return result
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            os.unlink(tmp_path)
 
 
 # ---------------------------------------------------------------------------

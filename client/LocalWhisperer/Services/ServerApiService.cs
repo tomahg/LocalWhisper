@@ -1,6 +1,7 @@
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using LocalWhisperer.Models;
 
 namespace LocalWhisperer.Services;
 
@@ -46,6 +47,25 @@ public class ServerApiService
             return response.IsSuccessStatusCode;
         }
         catch { return false; }
+    }
+
+    /// <summary>POST /transcribe/file — uploads an audio file for transcription.</summary>
+    public async Task<TranscriptionResult> TranscribeFileAsync(
+        string serverUrl, string filePath, CancellationToken ct = default)
+    {
+        var baseUrl = WsToHttp(serverUrl);
+        using var content = new MultipartFormDataContent();
+        var stream = File.OpenRead(filePath);
+        var streamContent = new StreamContent(stream);
+        content.Add(streamContent, "file", Path.GetFileName(filePath));
+
+        var response = await _httpLong.PostAsync($"{baseUrl}/transcribe/file", content, ct);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync(ct);
+        return JsonSerializer.Deserialize<TranscriptionResult>(json,
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+            ?? new TranscriptionResult();
     }
 
     // ws://host:port/ws/transcribe → http://host:port

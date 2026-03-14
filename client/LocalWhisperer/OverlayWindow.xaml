@@ -7,7 +7,8 @@
 
         <!-- Listening state -->
         <Border x:Name="ListeningPanel"
-                Background="#CC1E1E2E" CornerRadius="8" Padding="14,10">
+                Background="#CC1E1E2E" CornerRadius="8" Padding="14,10"
+                AllowDrop="True" DragOver="IdlePanel_DragOver" Drop="IdlePanel_Drop">
             <Grid VerticalAlignment="Center">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>

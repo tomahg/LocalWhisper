@@ -3,6 +3,8 @@ using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Storage;
+using Windows.Storage.Pickers;
 using WinRT.Interop;
 
 namespace LocalWhisperer;
@@ -31,9 +33,15 @@ public sealed partial class OverlayWindow : Window
     private const uint SWP_NOSIZE = 0x0001;
     private const uint SWP_NOMOVE = 0x0002;
 
+    private static readonly HashSet<string> AllowedExtensions =
+        [".wav", ".mp3", ".m4a", ".ogg", ".flac", ".webm", ".wma", ".aac"];
+
     private readonly AppWindow _appWindow;
     private readonly nint _hwnd;
     private string _lastResult = string.Empty;
+
+    /// <summary>Raised when the user drops or picks an audio file.</summary>
+    public event Action<string>? FileSelected;
 
     public OverlayWindow()
     {
@@ -73,7 +81,8 @@ public sealed partial class OverlayWindow : Window
     {
         DispatcherQueue.TryEnqueue(() =>
         {
-            SetClickThrough(true);
+            SetClickThrough(false);  // allow drag-drop onto listening panel
+            SetNoActivate(true);
             ListeningPanel.Visibility  = Visibility.Visible;
             ProcessingPanel.Visibility = Visibility.Collapsed;
             ResultPanel.Visibility     = Visibility.Collapsed;
@@ -88,6 +97,8 @@ public sealed partial class OverlayWindow : Window
         DispatcherQueue.TryEnqueue(() =>
         {
             SetClickThrough(true);
+            SetNoActivate(true);
+
             ListeningPanel.Visibility  = Visibility.Collapsed;
             ProcessingPanel.Visibility = Visibility.Visible;
             ResultPanel.Visibility     = Visibility.Collapsed;
@@ -103,6 +114,8 @@ public sealed partial class OverlayWindow : Window
             _lastResult = text;
             ResultText.Text = text;
             SetClickThrough(false); // buttons must be clickable
+            SetNoActivate(true);
+
             ListeningPanel.Visibility  = Visibility.Collapsed;
             ProcessingPanel.Visibility = Visibility.Collapsed;
             ResultPanel.Visibility     = Visibility.Visible;
@@ -149,8 +162,52 @@ public sealed partial class OverlayWindow : Window
     }
 
     // -------------------------------------------------------------------------
+    // File drop / picker handlers
+    // -------------------------------------------------------------------------
+
+    private void IdlePanel_DragOver(object sender, Microsoft.UI.Xaml.DragEventArgs e)
+    {
+        if (e.DataView.Contains(StandardDataFormats.StorageItems))
+            e.AcceptedOperation = DataPackageOperation.Copy;
+    }
+
+    private async void IdlePanel_Drop(object sender, Microsoft.UI.Xaml.DragEventArgs e)
+    {
+        if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
+        var items = await e.DataView.GetStorageItemsAsync();
+        if (items.Count == 0) return;
+
+        if (items[0] is StorageFile file && AllowedExtensions.Contains(Path.GetExtension(file.Path).ToLowerInvariant()))
+            FileSelected?.Invoke(file.Path);
+    }
+
+    public async void OpenFilePicker()
+    {
+        DispatcherQueue.TryEnqueue(async () =>
+        {
+            var picker = new FileOpenPicker();
+            InitializeWithWindow.Initialize(picker, _hwnd);
+            foreach (var ext in AllowedExtensions)
+                picker.FileTypeFilter.Add(ext);
+
+            var file = await picker.PickSingleFileAsync();
+            if (file is not null)
+                FileSelected?.Invoke(file.Path);
+        });
+    }
+
+    // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
+
+    private void SetNoActivate(bool noActivate)
+    {
+        var ex = GetWindowLong(_hwnd, GWL_EXSTYLE);
+        if (noActivate)
+            SetWindowLong(_hwnd, GWL_EXSTYLE, ex | WS_EX_NOACTIVATE);
+        else
+            SetWindowLong(_hwnd, GWL_EXSTYLE, ex & ~WS_EX_NOACTIVATE);
+    }
 
     private void SetClickThrough(bool clickThrough)
     {

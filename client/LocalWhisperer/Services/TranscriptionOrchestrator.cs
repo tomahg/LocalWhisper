@@ -11,9 +11,11 @@ public class TranscriptionOrchestrator
 {
     private readonly AudioCaptureService _audio;
     private readonly WebSocketService _ws;
+    private readonly ServerApiService _api;
     private readonly AppSettings _settings;
 
     public bool IsRecording { get; private set; }
+    public bool IsTranscribingFile { get; private set; }
 
     /// <summary>Raised immediately when recording starts (true) or stops (false).</summary>
     public event Action<bool>? RecordingStateChanged;
@@ -33,10 +35,12 @@ public class TranscriptionOrchestrator
     public TranscriptionOrchestrator(
         AudioCaptureService audio,
         WebSocketService ws,
+        ServerApiService api,
         AppSettings settings)
     {
         _audio = audio;
         _ws = ws;
+        _api = api;
         _settings = settings;
 
         _audio.AudioDataAvailable += OnAudioData;
@@ -80,5 +84,20 @@ public class TranscriptionOrchestrator
     private void OnTranscription(TranscriptionResult result)
     {
         TranscriptionUpdated?.Invoke(result.Text, result.IsFinal);
+    }
+
+    public async Task TranscribeFileAsync(string filePath)
+    {
+        if (IsRecording || IsTranscribingFile) return;
+        IsTranscribingFile = true;
+        try
+        {
+            var result = await _api.TranscribeFileAsync(_settings.ServerUrl, filePath);
+            TranscriptionUpdated?.Invoke(result.Text, true);
+        }
+        finally
+        {
+            IsTranscribingFile = false;
+        }
     }
 }
