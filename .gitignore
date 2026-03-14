@@ -1,5 +1,6 @@
 # Secrets — never commit these
 server/secrets.yaml
+client/LocalWhisperer/appsettings.local.json
 
 # Python
 __pycache__/

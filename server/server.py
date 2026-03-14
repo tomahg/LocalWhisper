@@ -131,15 +131,8 @@ async def websocket_transcribe(websocket: WebSocket):
                 transcriber.reset()
                 continue  # Stay alive for the next recording session
 
-            # Binary audio chunk
-            t0 = time.perf_counter()
-            result = await loop.run_in_executor(None, transcriber.add_audio, item)
-            if result and result.get("text"):
-                result["processing_time_ms"] = round((time.perf_counter() - t0) * 1000)
-                try:
-                    await websocket.send_json(result)
-                except Exception:
-                    break
+            # Binary audio chunk — just accumulate, no inference until audio_stop
+            await loop.run_in_executor(None, transcriber.add_audio, item)
 
     worker_task = asyncio.create_task(inference_worker())
 
