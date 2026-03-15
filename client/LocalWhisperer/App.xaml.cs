@@ -24,6 +24,21 @@ public partial class App : Application
     private bool             _isExiting;
     private string           _accumulatedText = "";
 
+    /// <summary>
+    /// Injects text into the active window, converting '\n' characters to real Return key presses.
+    /// </summary>
+    private static void InjectText(string text)
+    {
+        var parts = text.Split('\n');
+        for (int i = 0; i < parts.Length; i++)
+        {
+            if (parts[i].Length > 0)
+                NativeMethods.SendUnicodeString(parts[i]);
+            if (i < parts.Length - 1)
+                NativeMethods.SendReturn();
+        }
+    }
+
     private static Uri AssetUri(string fileName) =>
         new(Path.Combine(AppContext.BaseDirectory, "Assets", fileName));
 
@@ -142,13 +157,18 @@ public partial class App : Application
                 if (source == AutoSilence)
                 {
                     // Inject this segment immediately; overlay stays in "Lytter..." state
-                    if (!string.IsNullOrWhiteSpace(text))
-                        NativeMethods.SendUnicodeString(text + " ");
+                    if (!string.IsNullOrEmpty(text))
+                    {
+                        // Add trailing space so consecutive segments don't run together,
+                        // unless the segment already ends with whitespace (e.g. "\n")
+                        var toInject = char.IsWhiteSpace(text[^1]) ? text : text + " ";
+                        InjectText(toInject);
+                    }
                     return;
                 }
                 // Microphone (final stop) or File
-                if (!string.IsNullOrWhiteSpace(text))
-                    NativeMethods.SendUnicodeString(text);
+                if (!string.IsNullOrEmpty(text))
+                    InjectText(text);
                 _overlay.Hide();
                 return;
             }
