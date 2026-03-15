@@ -35,7 +35,8 @@
       "Bash(powershell -NoProfile -Command \"\n\\\\$dll = Get-ChildItem 'C:\\\\Users\\\\tomas.h.gulla\\\\.nuget\\\\packages\\\\h.notifyicon.winui' -Recurse -Filter '*.dll' | Where-Object { \\\\$_.Name -eq 'H.NotifyIcon.WinUI.dll' } | Select-Object -First 1\nWrite-Host \\\\$dll.FullName\n\\\\$a = [Reflection.Assembly]::LoadFile\\(\\\\$dll.FullName\\)\n\\\\$t = \\\\$a.GetType\\('H.NotifyIcon.TaskbarIcon'\\)\n\\\\$t.GetEvents\\(\\) | ForEach-Object { \\\\$_.Name }\n\")",
       "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\\\Dev\\\\NorskTale\\\\inspect-tray.ps1\" 2>&1)",
       "Bash(find \"C:\\\\Users\\\\tomas.h.gulla\\\\.nuget\\\\packages\\\\h.notifyicon.winui\\\\2.1.0\" -name \"*.cs\" 2>/dev/null | head -5; find \"C:\\\\Users\\\\tomas.h.gulla\\\\.nuget\\\\packages\\\\h.notifyicon\" -name \"TaskbarIcon*.cs\" 2>/dev/null | head -5)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(cd:*)"
     ]
   }
 }

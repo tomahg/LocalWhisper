@@ -2,7 +2,7 @@
     x:Class="LocalWhisperer.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    Title="LocalWhisperer — Innstillinger">
+    Title="Local Whisperer">
 
     <NavigationView x:Name="NavView"
                     IsSettingsVisible="False"

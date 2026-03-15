@@ -3,17 +3,39 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <StackPanel Spacing="16" MaxWidth="460" HorizontalAlignment="Left">
-        <TextBlock Text="Modell" Style="{StaticResource TitleTextBlockStyle}"/>
+    <ScrollViewer>
+        <StackPanel Spacing="4" MaxWidth="460" HorizontalAlignment="Left" Margin="0,0,0,24">
+            <TextBlock Text="Modell" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,12"/>
 
-        <StackPanel Spacing="4">
-            <TextBlock Text="Tilgjengelige modeller"/>
-            <ComboBox x:Name="ModelComboBox" Width="360" HorizontalAlignment="Left"
-                      PlaceholderText="Henter modeller..."/>
+            <!-- Model selection card -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8" Padding="16">
+                <StackPanel Spacing="12">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Grid.Column="0" Glyph="&#xE189;" FontSize="16"
+                                  VerticalAlignment="Center" Margin="0,0,14,0"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Whisper-modell" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                            <TextBlock Text="Velg modell for transkripsjonen"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                        </StackPanel>
+                    </Grid>
+                    <ComboBox x:Name="ModelComboBox" HorizontalAlignment="Stretch"
+                              PlaceholderText="Henter modeller..."/>
+                    <Button x:Name="SwitchButton" Content="Bytt modell"
+                            Style="{StaticResource AccentButtonStyle}"
+                            Click="SwitchButton_Click" IsEnabled="False"/>
+                </StackPanel>
+            </Border>
+
+            <InfoBar x:Name="StatusBar" IsOpen="False" IsClosable="True"
+                     Margin="0,8,0,0"/>
         </StackPanel>
-
-        <Button x:Name="SwitchButton" Content="Bytt modell" Click="SwitchButton_Click" IsEnabled="False"/>
-
-        <InfoBar x:Name="StatusBar" IsOpen="False" IsClosable="True"/>
-    </StackPanel>
+    </ScrollViewer>
 </Page>

@@ -4,33 +4,73 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     KeyDown="Page_KeyDown">
 
-    <StackPanel Spacing="16" MaxWidth="460" HorizontalAlignment="Left">
-        <TextBlock Text="Hurtigtast" Style="{StaticResource TitleTextBlockStyle}"/>
+    <ScrollViewer>
+        <StackPanel Spacing="4" MaxWidth="460" HorizontalAlignment="Left" Margin="0,0,0,24">
+            <TextBlock Text="Hurtigtast" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,12"/>
 
-        <StackPanel Spacing="4">
-            <TextBlock Text="Aktiv hurtigtast"/>
-            <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
-                        BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                        BorderThickness="1" CornerRadius="4" Padding="12,6">
-                    <TextBlock x:Name="HotkeyLabel"
-                               Style="{StaticResource SubtitleTextBlockStyle}"
-                               FontFamily="Consolas"
-                               Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
-                </Border>
-                <Button x:Name="ChangeButton" Content="Endre..." Click="ChangeButton_Click"/>
-            </StackPanel>
+            <!-- Grouped card: Hotkey + Hold-to-talk -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8">
+
+                <StackPanel>
+                    <!-- Hotkey row -->
+                    <Grid Padding="16,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Grid.Column="0" Glyph="&#xE765;" FontSize="16"
+                                  VerticalAlignment="Center" Margin="0,0,14,0"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Aktiv hurtigtast" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                            <TextBlock Text="Tast for å starte/stoppe opptak"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Border Background="{ThemeResource AccentFillColorDefaultBrush}"
+                                    CornerRadius="4" Padding="10,4">
+                                <TextBlock x:Name="HotkeyLabel"
+                                           FontFamily="Consolas" FontSize="14"
+                                           Foreground="White"/>
+                            </Border>
+                            <Button x:Name="ChangeButton" Content="Endre..." Click="ChangeButton_Click"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Divider -->
+                    <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
+
+                    <!-- Hold-to-talk row -->
+                    <Grid Padding="16,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Grid.Column="0" Glyph="&#xE720;" FontSize="16"
+                                  VerticalAlignment="Center" Margin="0,0,14,0"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Hold nede for å tale"/>
+                            <TextBlock Text="Slipp tasten for å stoppe opptak"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                        </StackPanel>
+                        <ToggleSwitch x:Name="HoldToTalkToggle" Grid.Column="2"
+                                      OnContent="" OffContent="" MinWidth="0" Margin="16,0,0,0"
+                                      Toggled="HoldToTalkToggle_Toggled"
+                                      VerticalAlignment="Center"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <InfoBar x:Name="CapturingBar"
+                     IsOpen="False" Severity="Informational" IsClosable="False"
+                     Title="Venter på tast..."
+                     Message="Trykk ønsket tast. Esc avbryter."
+                     Margin="0,8,0,0"/>
         </StackPanel>
-
-        <InfoBar x:Name="CapturingBar"
-                 IsOpen="False"
-                 Severity="Informational"
-                 IsClosable="False"
-                 Title="Venter på tast..."
-                 Message="Trykk ønsket tast. Esc avbryter."/>
-
-        <ToggleSwitch x:Name="HoldToTalkToggle"
-                      Header="Hold nede for å tale (slipp = stopp)"
-                      Toggled="HoldToTalkToggle_Toggled"/>
-    </StackPanel>
+    </ScrollViewer>
 </Page>

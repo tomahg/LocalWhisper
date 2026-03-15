@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
 using LocalWhisperer.Models;
 using LocalWhisperer.Services;
 
@@ -12,6 +13,11 @@ public sealed partial class ConnectionPage : Page
     private readonly AppSettings _settings;
     private readonly SettingsService _settingsService;
 
+    private static readonly SolidColorBrush BrushConnected =
+        new(Windows.UI.Color.FromArgb(255, 0x4C, 0xAF, 0x50));
+    private static readonly SolidColorBrush BrushDisconnected =
+        new(Windows.UI.Color.FromArgb(255, 0x88, 0x88, 0x88));
+
     public ConnectionPage()
     {
         InitializeComponent();
@@ -19,8 +25,8 @@ public sealed partial class ConnectionPage : Page
         _settings       = App.Services.GetRequiredService<AppSettings>();
         _settingsService = App.Services.GetRequiredService<SettingsService>();
 
-        ServerUrlBox.Text             = _settings.ServerUrl;
-        AutoConnectCheckBox.IsChecked = _settings.AutoConnect;
+        ServerUrlBox.Text          = _settings.ServerUrl;
+        AutoConnectToggle.IsOn     = _settings.AutoConnect;
         UpdateStatus();
 
         _ws.ConnectionError    += _ => DispatcherQueue.TryEnqueue(UpdateStatus);
@@ -56,7 +62,7 @@ public sealed partial class ConnectionPage : Page
 
     private void AutoConnect_Changed(object sender, RoutedEventArgs e)
     {
-        _settings.AutoConnect = AutoConnectCheckBox.IsChecked == true;
+        _settings.AutoConnect = AutoConnectToggle.IsOn;
         _settingsService.Save(_settings);
     }
 
@@ -71,7 +77,8 @@ public sealed partial class ConnectionPage : Page
     private void UpdateStatus()
     {
         var connected = _ws.IsConnected;
-        StatusText.Text         = connected ? "Tilkoblet" : "Frakoblet";
+        StatusText.Text            = connected ? "Tilkoblet" : "Frakoblet";
+        StatusDot.Fill             = connected ? BrushConnected : BrushDisconnected;
         ConnectButton.IsEnabled    = !connected;
         DisconnectButton.IsEnabled =  connected;
     }

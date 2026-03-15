@@ -182,8 +182,8 @@ public partial class App : Application
 
             _trayIcon.IconSource  = new BitmapImage(recording ? UriListening : UriIdle);
             _trayIcon.ToolTipText = connected
-                ? (recording ? "LocalWhisperer — Tar opp..." : "LocalWhisperer — Tilkoblet")
-                : "LocalWhisperer — Frakoblet";
+                ? (recording ? "LocalWhisperer — Tar opp..." : "Local Whisperer — Tilkoblet")
+                : "Local Whisperer — Frakoblet";
         });
     }
 

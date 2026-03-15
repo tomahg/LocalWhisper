@@ -3,18 +3,61 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <StackPanel Spacing="16" MaxWidth="460" HorizontalAlignment="Left">
-        <TextBlock Text="Lyd" Style="{StaticResource TitleTextBlockStyle}"/>
+    <ScrollViewer>
+        <StackPanel Spacing="4" MaxWidth="460" HorizontalAlignment="Left" Margin="0,0,0,24">
+            <TextBlock Text="Lyd" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,12"/>
 
-        <StackPanel Spacing="4">
-            <TextBlock Text="Mikrofon"/>
-            <ComboBox x:Name="MicComboBox" Width="360" HorizontalAlignment="Left"
-                      SelectionChanged="MicComboBox_SelectionChanged"/>
+            <!-- Grouped card: Microphone + Auto-copy -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8">
+
+                <StackPanel>
+                    <!-- Microphone row -->
+                    <StackPanel Padding="16" Spacing="12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Grid.Column="0" Glyph="&#xE720;" FontSize="16"
+                                      VerticalAlignment="Center" Margin="0,0,14,0"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="Mikrofon" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                                <TextBlock Text="Enhet for lydopptak"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                            </StackPanel>
+                        </Grid>
+                        <ComboBox x:Name="MicComboBox" HorizontalAlignment="Stretch"
+                                  SelectionChanged="MicComboBox_SelectionChanged"/>
+                    </StackPanel>
+
+                    <!-- Divider -->
+                    <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
+
+                    <!-- Auto-copy row -->
+                    <Grid Padding="16,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Grid.Column="0" Glyph="&#xE8C8;" FontSize="16"
+                                  VerticalAlignment="Center" Margin="0,0,14,0"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Kopier automatisk"/>
+                            <TextBlock Text="Kopier transkripsjon til utklippstavle"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                        </StackPanel>
+                        <ToggleSwitch x:Name="AutoCopyToggle" Grid.Column="2"
+                                      OnContent="" OffContent="" MinWidth="0" Margin="16,0,0,0"
+                                      Toggled="AutoCopy_Changed"
+                                      VerticalAlignment="Center"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
         </StackPanel>
-
-        <CheckBox x:Name="AutoCopyCheckBox"
-                  Content="Kopier transkripsjon til utklippstavle automatisk"
-                  Checked="AutoCopy_Changed"
-                  Unchecked="AutoCopy_Changed"/>
-    </StackPanel>
+    </ScrollViewer>
 </Page>

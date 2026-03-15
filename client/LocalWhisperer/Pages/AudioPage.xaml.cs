@@ -24,7 +24,7 @@ public sealed partial class AudioPage : Page
         MicComboBox.SelectedIndex = _settings.MicrophoneDeviceIndex < MicComboBox.Items.Count
             ? _settings.MicrophoneDeviceIndex
             : 0;
-        AutoCopyCheckBox.IsChecked = _settings.AutoCopyToClipboard;
+        AutoCopyToggle.IsOn = _settings.AutoCopyToClipboard;
         _loading = false;
     }
 
@@ -38,7 +38,7 @@ public sealed partial class AudioPage : Page
     private void AutoCopy_Changed(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         if (_loading) return;
-        _settings.AutoCopyToClipboard = AutoCopyCheckBox.IsChecked == true;
+        _settings.AutoCopyToClipboard = AutoCopyToggle.IsOn;
         _settingsService.Save(_settings);
     }
 }

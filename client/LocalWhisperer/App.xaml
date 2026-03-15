@@ -10,7 +10,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <tb:TaskbarIcon x:Key="TrayIcon"
-                            ToolTipText="LocalWhisperer — Frakoblet"/>
+                            ToolTipText="Local Whisperer — Frakoblet"/>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
