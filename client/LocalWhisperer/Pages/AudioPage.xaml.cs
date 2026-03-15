@@ -64,7 +64,9 @@ public sealed partial class AudioPage : Page
     private void SilenceThreshold_Changed(NumberBox sender, NumberBoxValueChangedEventArgs args)
     {
         if (_loading || double.IsNaN(args.NewValue)) return;
-        _settings.SilenceThresholdSeconds = args.NewValue;
+        var rounded = Math.Round(args.NewValue, 1);
+        sender.Value = rounded;
+        _settings.SilenceThresholdSeconds = rounded;
         _settingsService.Save(_settings);
     }
 

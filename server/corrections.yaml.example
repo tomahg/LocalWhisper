@@ -1,8 +1,8 @@
 # Ordfeil-korreksjoner — kopier til corrections.yaml og tilpass
 #
-# wrong:        det transkriberte ordet (søk er ikke case-sensitiv)
-# correct:      det riktige ordet (skrives alltid slik du oppgir det her)
-# full_segment: matcher bare et helt segment, ikke deler av et segment
+# wrong:         det transkriberte ordet (søk er ikke case-sensitiv)
+# correct:       det riktige ordet (skrives alltid slik du oppgir det her)
+# full_sentence: matcher bare et helt segment, eller hele setninger
 #
 # Eksempler:
 corrections:
@@ -12,7 +12,7 @@ corrections:
     correct: "Novacare"
   - wrong: "Enter"
     correct: "\n"
-    full_segment: true
+    full_sentence: true
   - wrong: "Enter, enter"
     correct: "\n\n"
-    full_segment: true
+    full_sentence: true
