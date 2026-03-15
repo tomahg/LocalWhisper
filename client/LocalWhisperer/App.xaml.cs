@@ -134,7 +134,26 @@ public partial class App : Application
         {
             if (!result.IsFinal) return;
             var text = result.Text;
+            var settings = Services.GetRequiredService<AppSettings>();
 
+            if (settings.InjectTextDirectly)
+            {
+                // --- Inject mode ---
+                if (source == AutoSilence)
+                {
+                    // Inject this segment immediately; overlay stays in "Lytter..." state
+                    if (!string.IsNullOrWhiteSpace(text))
+                        NativeMethods.SendUnicodeString(text + " ");
+                    return;
+                }
+                // Microphone (final stop) or File
+                if (!string.IsNullOrWhiteSpace(text))
+                    NativeMethods.SendUnicodeString(text);
+                _overlay.Hide();
+                return;
+            }
+
+            // --- Overlay mode ---
             if (source == AutoSilence)
             {
                 // Intermediate result from silence detection — accumulate and keep listening
@@ -167,7 +186,6 @@ public partial class App : Application
                     return;
                 }
 
-                var settings = Services.GetRequiredService<AppSettings>();
                 if (settings.AutoCopyToClipboard)
                 {
                     _overlay.CopyToClipboard(text);

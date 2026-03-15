@@ -37,7 +37,7 @@
                     <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
 
                     <!-- Auto-copy row -->
-                    <Grid Padding="16,14">
+                    <Grid x:Name="AutoCopyRow" Padding="16,14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
@@ -97,6 +97,30 @@
                                    SpinButtonPlacementMode="Inline"
                                    ValueChanged="SilenceThreshold_Changed"
                                    MinWidth="120"/>
+                    </Grid>
+
+                    <!-- Divider -->
+                    <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
+
+                    <!-- Inject text directly row -->
+                    <Grid x:Name="InjectRow" Padding="16,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Grid.Column="0" Glyph="&#xE8AD;" FontSize="16"
+                                  VerticalAlignment="Center" Margin="0,0,14,0"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Skriv tekst direkte inn"/>
+                            <TextBlock Text="Sender tekst til aktivt tekstfelt uten utklippstavle"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                        </StackPanel>
+                        <ToggleSwitch x:Name="InjectToggle" Grid.Column="2"
+                                      OnContent="" OffContent="" MinWidth="0" Margin="16,0,0,0"
+                                      Toggled="Inject_Changed"
+                                      VerticalAlignment="Center"/>
                     </Grid>
                 </StackPanel>
             </Border>

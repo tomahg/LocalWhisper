@@ -10,6 +10,8 @@ public class AppSettings
     public bool   AutoSendOnSilence      { get; set; } = false;
     public double SilenceThresholdSeconds { get; set; } = 2.0;
 
+    public bool   InjectTextDirectly { get; set; } = false;
+
     /// <summary>Win32 virtual-key code for the global hotkey. Default: F9 (0x78).</summary>
     public int    HotkeyVirtualKey    { get; set; } = 0x78;
     /// <summary>Human-readable name shown in the settings UI.</summary>

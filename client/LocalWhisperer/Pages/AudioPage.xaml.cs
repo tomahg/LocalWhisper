@@ -30,6 +30,10 @@ public sealed partial class AudioPage : Page
         SilenceThresholdRow.Visibility = _settings.AutoSendOnSilence
             ? Microsoft.UI.Xaml.Visibility.Visible
             : Microsoft.UI.Xaml.Visibility.Collapsed;
+        InjectToggle.IsOn = _settings.InjectTextDirectly;
+        AutoCopyRow.Visibility = _settings.InjectTextDirectly
+            ? Microsoft.UI.Xaml.Visibility.Collapsed
+            : Microsoft.UI.Xaml.Visibility.Visible;
         _loading = false;
     }
 
@@ -61,6 +65,16 @@ public sealed partial class AudioPage : Page
     {
         if (_loading || double.IsNaN(args.NewValue)) return;
         _settings.SilenceThresholdSeconds = args.NewValue;
+        _settingsService.Save(_settings);
+    }
+
+    private void Inject_Changed(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        if (_loading) return;
+        _settings.InjectTextDirectly = InjectToggle.IsOn;
+        AutoCopyRow.Visibility = InjectToggle.IsOn
+            ? Microsoft.UI.Xaml.Visibility.Collapsed
+            : Microsoft.UI.Xaml.Visibility.Visible;
         _settingsService.Save(_settings);
     }
 }
