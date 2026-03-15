@@ -8,6 +8,7 @@ using LocalWhisperer.Helpers;
 using LocalWhisperer.Models;
 using LocalWhisperer.Services;
 using LocalWhisperer.ViewModels;
+using static LocalWhisperer.Models.TranscriptionSource;
 
 namespace LocalWhisperer;
 
@@ -21,6 +22,7 @@ public partial class App : Application
     private HotkeyService?  _hotkey;
     private DispatcherQueue? _dispatcherQueue;
     private bool             _isExiting;
+    private string           _accumulatedText = "";
 
     private static Uri AssetUri(string fileName) =>
         new(Path.Combine(AppContext.BaseDirectory, "Assets", fileName));
@@ -120,35 +122,74 @@ public partial class App : Application
             UpdateTrayIcon(recording: isRecording, connected: true);
             if (orchestrator.IsTranscribingFile) return; // file transcription controls overlay
             if (isRecording)
+            {
+                _accumulatedText = "";
                 _overlay.ShowListening();
+            }
             else
                 _overlay.ShowProcessing();
         };
         orchestrator.AudioLevelChanged += level => _overlay.UpdateAudioLevel(level);
-        orchestrator.TranscriptionUpdated += (result, isFileTranscription) =>
+        orchestrator.TranscriptionUpdated += (result, source) =>
         {
             if (!result.IsFinal) return;
             var text = result.Text;
-            if (string.IsNullOrWhiteSpace(text))
+
+            if (source == AutoSilence)
             {
-                if (isFileTranscription)
-                    _overlay.ShowResult("Ingen tale funnet", showCopy: false,
-                        audioDurationMs: result.AudioDurationMs, processingTimeMs: result.ProcessingTimeMs);
-                else
-                    _overlay.Hide();
+                // Intermediate result from silence detection — accumulate and keep listening
+                if (string.IsNullOrWhiteSpace(text)) return;
+                if (_accumulatedText.Length > 0)
+                    _accumulatedText += "\n";
+                _accumulatedText += text;
+                _overlay.ShowListeningWithText(_accumulatedText);
                 return;
             }
-            var settings = Services.GetRequiredService<AppSettings>();
-            if (settings.AutoCopyToClipboard && !isFileTranscription)
+
+            if (source == Microphone)
             {
-                _overlay.CopyToClipboard(text);
-                _overlay.Hide();
+                // Final stop from user hotkey
+                if (_accumulatedText.Length > 0)
+                {
+                    // Append final segment to accumulated text
+                    if (!string.IsNullOrWhiteSpace(text))
+                    {
+                        _accumulatedText += "\n";
+                        _accumulatedText += text;
+                    }
+                    text = _accumulatedText;
+                    _accumulatedText = "";
+                }
+
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    _overlay.Hide();
+                    return;
+                }
+
+                var settings = Services.GetRequiredService<AppSettings>();
+                if (settings.AutoCopyToClipboard)
+                {
+                    _overlay.CopyToClipboard(text);
+                    _overlay.Hide();
+                }
+                else
+                {
+                    _overlay.ShowResult(text,
+                        audioDurationMs: result.AudioDurationMs, processingTimeMs: result.ProcessingTimeMs);
+                }
+                return;
             }
-            else
+
+            // File transcription
+            if (string.IsNullOrWhiteSpace(text))
             {
-                _overlay.ShowResult(text,
+                _overlay.ShowResult("Ingen tale funnet", showCopy: false,
                     audioDurationMs: result.AudioDurationMs, processingTimeMs: result.ProcessingTimeMs);
+                return;
             }
+            _overlay.ShowResult(text,
+                audioDurationMs: result.AudioDurationMs, processingTimeMs: result.ProcessingTimeMs);
         };
         orchestrator.MicrophoneDeviceLost += () =>
         {

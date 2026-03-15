@@ -86,11 +86,40 @@ public sealed partial class OverlayWindow : Window
             StopProcessingTimer();
             SetClickThrough(false);  // allow drag-drop onto listening panel
             SetNoActivate(true);
-            ListeningPanel.Visibility  = Visibility.Visible;
-            ProcessingPanel.Visibility = Visibility.Collapsed;
-            ResultPanel.Visibility     = Visibility.Collapsed;
-            AudioLevelBar.Value        = 0;
+            ListeningPanel.Visibility      = Visibility.Visible;
+            ListeningTextPanel.Visibility  = Visibility.Collapsed;
+            ProcessingPanel.Visibility     = Visibility.Collapsed;
+            ResultPanel.Visibility         = Visibility.Collapsed;
+            AudioLevelBar.Value            = 0;
             PositionBottomRight(width: 360, height: 44);
+            _appWindow.Show();
+        });
+    }
+
+    public void ShowListeningWithText(string text)
+    {
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            StopProcessingTimer();
+            SetClickThrough(false); // Kopier button must be clickable
+            SetNoActivate(true);
+
+            AccumulatedText.Text = text;
+            ListeningPanel.Visibility      = Visibility.Collapsed;
+            ListeningTextPanel.Visibility  = Visibility.Visible;
+            ProcessingPanel.Visibility     = Visibility.Collapsed;
+            ResultPanel.Visibility         = Visibility.Collapsed;
+
+            // Measure content to size window
+            const int width = 500;
+            const int maxHeight = 400;
+            const int headerHeight = 44; // listening indicator row
+            const int padding = 28;      // border padding + margins
+            var contentGrid = (Microsoft.UI.Xaml.Controls.Grid)ListeningTextPanel.Child;
+            contentGrid.Measure(new Windows.Foundation.Size(width - 28, double.PositiveInfinity));
+            int height = Math.Clamp((int)contentGrid.DesiredSize.Height + padding, headerHeight + 20, maxHeight);
+
+            PositionBottomRight(width, height);
             _appWindow.Show();
         });
     }
@@ -109,9 +138,10 @@ public sealed partial class OverlayWindow : Window
             _processingTimer.Tick += ProcessingTimer_Tick;
             _processingTimer.Start();
 
-            ListeningPanel.Visibility  = Visibility.Collapsed;
-            ProcessingPanel.Visibility = Visibility.Visible;
-            ResultPanel.Visibility     = Visibility.Collapsed;
+            ListeningPanel.Visibility      = Visibility.Collapsed;
+            ListeningTextPanel.Visibility  = Visibility.Collapsed;
+            ProcessingPanel.Visibility     = Visibility.Visible;
+            ResultPanel.Visibility         = Visibility.Collapsed;
             PositionBottomRight(width: 260, height: 44);
             _appWindow.Show();
         });
@@ -147,9 +177,10 @@ public sealed partial class OverlayWindow : Window
             SetClickThrough(false); // buttons must be clickable
             SetNoActivate(true);
 
-            ListeningPanel.Visibility  = Visibility.Collapsed;
-            ProcessingPanel.Visibility = Visibility.Collapsed;
-            ResultPanel.Visibility     = Visibility.Visible;
+            ListeningPanel.Visibility      = Visibility.Collapsed;
+            ListeningTextPanel.Visibility  = Visibility.Collapsed;
+            ProcessingPanel.Visibility     = Visibility.Collapsed;
+            ResultPanel.Visibility         = Visibility.Visible;
 
             // Measure the actual content to size the window tightly
             const int width = 560;
@@ -165,7 +196,11 @@ public sealed partial class OverlayWindow : Window
 
     public void UpdateAudioLevel(float level)
     {
-        DispatcherQueue.TryEnqueue(() => AudioLevelBar.Value = level);
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            AudioLevelBar.Value = level;
+            AudioLevelBarText.Value = level;
+        });
     }
 
     public void Hide()
@@ -186,6 +221,11 @@ public sealed partial class OverlayWindow : Window
     {
         CopyToClipboard(_lastResult);
         _appWindow.Hide();
+    }
+
+    private void AccumulatedCopyButton_Click(object sender, RoutedEventArgs e)
+    {
+        CopyToClipboard(AccumulatedText.Text);
     }
 
     private void CloseButton_Click(object sender, RoutedEventArgs e)

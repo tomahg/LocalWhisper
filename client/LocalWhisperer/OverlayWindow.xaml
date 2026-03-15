@@ -38,6 +38,46 @@
             </Grid>
         </Border>
 
+        <!-- Listening with accumulated text state -->
+        <Border x:Name="ListeningTextPanel"
+                Background="#CC1E1E2E" CornerRadius="8" Padding="14,10"
+                Visibility="Collapsed">
+            <Grid MaxWidth="500">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <!-- Top row: listening indicator -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Ellipse Grid.Column="0" Width="8" Height="8" Fill="#FF4444"
+                             VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Grid.Column="1" Text="Lytter..." Foreground="White"
+                               FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <ProgressBar x:Name="AudioLevelBarText" Grid.Column="2"
+                                 Height="6" Minimum="0" Maximum="1" Value="0"
+                                 VerticalAlignment="Center"/>
+                </Grid>
+                <!-- Accumulated text -->
+                <ScrollViewer Grid.Row="1" MaxHeight="300" VerticalScrollBarVisibility="Auto"
+                              Margin="0,8,0,0">
+                    <TextBlock x:Name="AccumulatedText"
+                               Foreground="White" FontSize="14" TextWrapping="Wrap"/>
+                </ScrollViewer>
+                <!-- Copy button row -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8"
+                            HorizontalAlignment="Right" Margin="0,8,0,0">
+                    <Button x:Name="AccumulatedCopyButton" Content="Kopier"
+                            Click="AccumulatedCopyButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
         <!-- Processing state -->
         <Border x:Name="ProcessingPanel"
                 Background="#CC1E1E2E" CornerRadius="8" Padding="14,10"

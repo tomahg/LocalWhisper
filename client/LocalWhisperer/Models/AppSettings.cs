@@ -7,6 +7,8 @@ public class AppSettings
     public bool   HoldToTalk          { get; set; } = false;
     public bool   AutoConnect         { get; set; } = true;
     public bool   AutoCopyToClipboard { get; set; } = false;
+    public bool   AutoSendOnSilence      { get; set; } = false;
+    public double SilenceThresholdSeconds { get; set; } = 2.0;
 
     /// <summary>Win32 virtual-key code for the global hotkey. Default: F9 (0x78).</summary>
     public int    HotkeyVirtualKey    { get; set; } = 0x78;

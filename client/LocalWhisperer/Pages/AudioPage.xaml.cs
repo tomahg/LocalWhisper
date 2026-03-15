@@ -25,6 +25,11 @@ public sealed partial class AudioPage : Page
             ? _settings.MicrophoneDeviceIndex
             : 0;
         AutoCopyToggle.IsOn = _settings.AutoCopyToClipboard;
+        AutoSilenceToggle.IsOn = _settings.AutoSendOnSilence;
+        SilenceThresholdBox.Value = _settings.SilenceThresholdSeconds;
+        SilenceThresholdRow.Visibility = _settings.AutoSendOnSilence
+            ? Microsoft.UI.Xaml.Visibility.Visible
+            : Microsoft.UI.Xaml.Visibility.Collapsed;
         _loading = false;
     }
 
@@ -39,6 +44,23 @@ public sealed partial class AudioPage : Page
     {
         if (_loading) return;
         _settings.AutoCopyToClipboard = AutoCopyToggle.IsOn;
+        _settingsService.Save(_settings);
+    }
+
+    private void AutoSilence_Changed(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    {
+        if (_loading) return;
+        _settings.AutoSendOnSilence = AutoSilenceToggle.IsOn;
+        SilenceThresholdRow.Visibility = AutoSilenceToggle.IsOn
+            ? Microsoft.UI.Xaml.Visibility.Visible
+            : Microsoft.UI.Xaml.Visibility.Collapsed;
+        _settingsService.Save(_settings);
+    }
+
+    private void SilenceThreshold_Changed(NumberBox sender, NumberBoxValueChangedEventArgs args)
+    {
+        if (_loading || double.IsNaN(args.NewValue)) return;
+        _settings.SilenceThresholdSeconds = args.NewValue;
         _settingsService.Save(_settings);
     }
 }

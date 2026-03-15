@@ -56,6 +56,48 @@
                                       Toggled="AutoCopy_Changed"
                                       VerticalAlignment="Center"/>
                     </Grid>
+
+                    <!-- Divider -->
+                    <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
+
+                    <!-- Auto-send on silence row -->
+                    <Grid Padding="16,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Grid.Column="0" Glyph="&#xE71E;" FontSize="16"
+                                  VerticalAlignment="Center" Margin="0,0,14,0"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Auto-send ved stillhet"/>
+                            <TextBlock Text="Send transkripsjon automatisk ved pause i tale"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                        </StackPanel>
+                        <ToggleSwitch x:Name="AutoSilenceToggle" Grid.Column="2"
+                                      OnContent="" OffContent="" MinWidth="0" Margin="16,0,0,0"
+                                      Toggled="AutoSilence_Changed"
+                                      VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- Silence threshold row (visible when toggle is on) -->
+                    <Grid x:Name="SilenceThresholdRow" Padding="16,0,16,14" Visibility="Collapsed">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="1" Text="Ventetid (sekunder)"
+                                   VerticalAlignment="Center"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"
+                                   Margin="30,0,0,0"/>
+                        <NumberBox x:Name="SilenceThresholdBox" Grid.Column="2"
+                                   Minimum="0.5" Maximum="10" SmallChange="0.5" LargeChange="1"
+                                   SpinButtonPlacementMode="Inline"
+                                   ValueChanged="SilenceThreshold_Changed"
+                                   MinWidth="120"/>
+                    </Grid>
                 </StackPanel>
             </Border>
         </StackPanel>

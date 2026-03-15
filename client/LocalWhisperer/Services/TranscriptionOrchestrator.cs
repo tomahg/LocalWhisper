@@ -14,6 +14,10 @@ public class TranscriptionOrchestrator
     private readonly ServerApiService _api;
     private readonly AppSettings _settings;
 
+    private System.Timers.Timer? _silenceTimer;
+    private int _pendingSilenceStops;
+    private const float SilenceLevelThreshold = 0.02f;
+
     public bool IsRecording { get; private set; }
     public bool IsTranscribingFile { get; private set; }
 
@@ -25,10 +29,10 @@ public class TranscriptionOrchestrator
 
     /// <summary>
     /// Raised on the thread that receives WebSocket messages.
-    /// Parameters: result, isFileTranscription.
+    /// Parameters: result, source.
     /// UI must marshal to DispatcherQueue.
     /// </summary>
-    public event Action<TranscriptionResult, bool>? TranscriptionUpdated;
+    public event Action<TranscriptionResult, TranscriptionSource>? TranscriptionUpdated;
 
     /// <summary>Raised with RMS level 0.0–1.0 for each audio buffer (UI thread not guaranteed).</summary>
     public event Action<float>? AudioLevelChanged;
@@ -45,7 +49,7 @@ public class TranscriptionOrchestrator
         _settings = settings;
 
         _audio.AudioDataAvailable += OnAudioData;
-        _audio.AudioLevelChanged  += level => AudioLevelChanged?.Invoke(level);
+        _audio.AudioLevelChanged  += OnAudioLevel;
         _audio.DeviceLost         += OnDeviceLost;
         _ws.TranscriptionReceived += OnTranscription;
     }
@@ -54,6 +58,8 @@ public class TranscriptionOrchestrator
     {
         if (IsRecording) return;
         IsRecording = true;
+        _pendingSilenceStops = 0;
+        ResetSilenceTimer();
         RecordingStateChanged?.Invoke(true);
         _audio.StartCapture(_settings.MicrophoneDeviceIndex);
     }
@@ -62,6 +68,7 @@ public class TranscriptionOrchestrator
     {
         if (!IsRecording) return;
         IsRecording = false;
+        ResetSilenceTimer();
         RecordingStateChanged?.Invoke(false);
         _audio.StopCapture();
         try { await _ws.SendStopAsync(); }
@@ -71,8 +78,53 @@ public class TranscriptionOrchestrator
     private void OnDeviceLost(Exception _)
     {
         IsRecording = false;
+        ResetSilenceTimer();
         RecordingStateChanged?.Invoke(false);
         MicrophoneDeviceLost?.Invoke();
+    }
+
+    private void OnAudioLevel(float level)
+    {
+        AudioLevelChanged?.Invoke(level);
+
+        if (!IsRecording || !_settings.AutoSendOnSilence) return;
+
+        if (level < SilenceLevelThreshold)
+        {
+            // Below threshold — start one-shot timer if not running
+            if (_silenceTimer is null)
+            {
+                _silenceTimer = new System.Timers.Timer(_settings.SilenceThresholdSeconds * 1000);
+                _silenceTimer.AutoReset = false;
+                _silenceTimer.Elapsed += OnSilenceTimerElapsed;
+                _silenceTimer.Start();
+            }
+        }
+        else
+        {
+            // Above threshold — reset timer
+            ResetSilenceTimer();
+        }
+    }
+
+    private async void OnSilenceTimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
+    {
+        if (!IsRecording) return;
+        Interlocked.Increment(ref _pendingSilenceStops);
+        ResetSilenceTimer();
+        try { await _ws.SendStopAsync(); }
+        catch { /* connection error handled via WebSocketService.ConnectionError */ }
+    }
+
+    private void ResetSilenceTimer()
+    {
+        if (_silenceTimer is not null)
+        {
+            _silenceTimer.Stop();
+            _silenceTimer.Elapsed -= OnSilenceTimerElapsed;
+            _silenceTimer.Dispose();
+            _silenceTimer = null;
+        }
     }
 
     private async void OnAudioData(byte[] pcm)
@@ -85,7 +137,16 @@ public class TranscriptionOrchestrator
     private void OnTranscription(TranscriptionResult result)
     {
         if (IsTranscribingFile) return; // suppress mic results during file transcription
-        TranscriptionUpdated?.Invoke(result, false);
+
+        if (Interlocked.CompareExchange(ref _pendingSilenceStops, 0, 0) > 0)
+        {
+            Interlocked.Decrement(ref _pendingSilenceStops);
+            TranscriptionUpdated?.Invoke(result, TranscriptionSource.AutoSilence);
+        }
+        else
+        {
+            TranscriptionUpdated?.Invoke(result, TranscriptionSource.Microphone);
+        }
     }
 
     public async Task TranscribeFileAsync(string filePath)
@@ -96,7 +157,7 @@ public class TranscriptionOrchestrator
         {
             var result = await _api.TranscribeFileAsync(_settings.ServerUrl, filePath);
             IsTranscribingFile = false;
-            TranscriptionUpdated?.Invoke(result, true);
+            TranscriptionUpdated?.Invoke(result, TranscriptionSource.File);
         }
         catch
         {
