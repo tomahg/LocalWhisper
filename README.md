@@ -10,10 +10,11 @@ Default model: **NbAiLab/nb-whisper-medium** — optimised for Norwegian.
 
 1. Press **F9** (hold for hold-to-talk, or tap to toggle) — an overlay appears in the bottom-right corner
 2. Speak — a live audio level indicator shows the microphone is active
-3. Release / press again to stop — the server transcribes the full recording in one pass
-4. The result appears in the overlay with a **Kopier** button; click to copy to the clipboard
+3. Release / press again to stop — the server transcribes and the result appears with a **Kopier** button
 
-The client streams raw 16kHz PCM audio over WebSocket while recording. When stopped, the server runs a single inference pass on the complete buffer and returns the final transcription. This gives better quality than sliding-window approaches since Whisper processes the full utterance as a unit.
+**Optional: auto-send on silence** — enable in Lyd settings for continuous dictation. The server transcribes each pause automatically and text accumulates in the overlay while the microphone stays open. Press the hotkey to finish.
+
+The client streams raw 16kHz PCM audio over WebSocket while recording. When stopped (or when a silence pause is detected), the server runs an inference pass on the buffered audio and returns the transcription.
 
 ---
 
@@ -89,7 +90,7 @@ On first launch the app starts in the system tray (no window appears). The tray 
 | **Tilkobling** | Server URL, connect/disconnect |
 | **Hurtigtast** | Active hotkey (F9), hold-to-talk toggle |
 | **Modell** | Switch transcription model at runtime |
-| **Lyd** | Select microphone, auto-copy to clipboard toggle |
+| **Lyd** | Select microphone, auto-copy to clipboard, auto-send on silence |
 | **Om** | About |
 
 Settings are persisted automatically between sessions.
@@ -103,6 +104,8 @@ Two modes (configurable in the Hurtigtast settings page):
 - **Hold-to-talk** — hold key while speaking, release to stop
 
 > Tip: Enable **auto-copy to clipboard** in the Lyd settings page to skip the manual copy step — the result is copied automatically when recording stops.
+
+> Tip: Enable **auto-send ved stillhet** in the Lyd settings page for continuous dictation — transcribed text accumulates in the overlay as you speak and pause naturally.
 
 ---
 
@@ -206,6 +209,6 @@ Expected output:
 
 ## Known limitations
 
-- Transcription runs after recording stops — longer recordings mean a longer wait for the result.
+- Transcription runs after recording stops (or per silence pause with auto-send) — longer recordings between pauses mean a longer wait for each result.
 - faster-whisper does not support Metal/MPS — macOS uses CPU with int8.
 - The global keyboard hook (`WH_KEYBOARD_LL`) may be blocked in some enterprise environments.
