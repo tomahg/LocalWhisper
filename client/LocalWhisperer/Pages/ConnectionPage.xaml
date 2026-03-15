@@ -27,7 +27,7 @@
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                            <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="#888"/>
+                            <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="#888" Margin="18,0,0,0"/>
                             <TextBlock x:Name="StatusText" Text="Frakoblet" FontSize="12"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                                        VerticalAlignment="Center"/>

@@ -29,11 +29,11 @@
                             <TextBlock Text="Tast for å starte/stoppe opptak"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
                         </StackPanel>
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="12,0,0,0">
                             <Border Background="{ThemeResource AccentFillColorDefaultBrush}"
-                                    CornerRadius="4" Padding="10,4">
+                                    CornerRadius="5" Padding="12,5">
                                 <TextBlock x:Name="HotkeyLabel"
-                                           FontFamily="Consolas" FontSize="14"
+                                           FontFamily="Consolas" FontSize="16"
                                            Foreground="White"/>
                             </Border>
                             <Button x:Name="ChangeButton" Content="Endre..." Click="ChangeButton_Click"/>
@@ -54,7 +54,7 @@
                                   VerticalAlignment="Center" Margin="0,0,14,0"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="Hold nede for å tale"/>
+                            <TextBlock Text="Hold nede for opptak"/>
                             <TextBlock Text="Slipp tasten for å stoppe opptak"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
                         </StackPanel>
