@@ -57,9 +57,11 @@ def _normalize_for_matching(text: str) -> str:
     return text.lower()
 
 
-# Splits on sentence-ending punctuation followed by whitespace, keeping the delimiter.
+# Splits on sentence-ending punctuation followed by whitespace OR end of string.
 # Produces alternating [sentence, delimiter, sentence, delimiter, ..., sentence].
-_SENTENCE_SPLIT_RE = re.compile(r"([.!?]+\s+)")
+# Using (?:\s+|$) ensures trailing punctuation (e.g. the "." in "Enter.") is always
+# captured as a delimiter rather than left attached to the sentence content.
+_SENTENCE_SPLIT_RE = re.compile(r"([.!?]+(?:\s+|$))")
 
 
 def apply_full_sentence(text: str, corrections: list[tuple[str, str]]) -> str:
