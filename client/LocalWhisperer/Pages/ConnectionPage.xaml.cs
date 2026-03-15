@@ -31,6 +31,9 @@ public sealed partial class ConnectionPage : Page
 
         _ws.ConnectionError    += _ => DispatcherQueue.TryEnqueue(UpdateStatus);
         _ws.ConnectionRestored +=  () => DispatcherQueue.TryEnqueue(UpdateStatus);
+
+        // Re-check status each time the page becomes visible (e.g. after auto-connect)
+        Loaded += (_, _) => UpdateStatus();
     }
 
     private async void ConnectButton_Click(object sender, RoutedEventArgs e)

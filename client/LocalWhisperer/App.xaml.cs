@@ -231,8 +231,12 @@ public partial class App : Application
     private async Task AutoConnectAsync(string url)
     {
         var ws = Services.GetRequiredService<WebSocketService>();
-        try { await ws.ConnectAsync(url); }
-        catch { /* auto-reconnect will retry; tray icon updated via ConnectionError event */ }
+        try
+        {
+            await ws.ConnectAsync(url);
+            UpdateTrayIcon(recording: false, connected: true);
+        }
+        catch { /* tray icon updated via ConnectionError event */ }
     }
 
     private void ShowWindow()
