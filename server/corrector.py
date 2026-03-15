@@ -14,8 +14,8 @@ def load_corrections() -> tuple[list[tuple[re.Pattern, str]], list[tuple[str, st
 
     Returns a tuple of two lists:
     - regex_corrections: (pattern, replacement) pairs applied via regex substitution
-    - full_segment_corrections: (wrong, correct) pairs applied only when the entire
-      transcription text matches 'wrong' (case-insensitive, after stripping whitespace)
+    - full_sentence_corrections: (wrong, correct) pairs matched against either the
+      entire text or the last sentence of the text (case-insensitive, punctuation-ignored)
     """
     if not _CORRECTIONS_FILE.exists():
         return [], []
@@ -23,22 +23,22 @@ def load_corrections() -> tuple[list[tuple[re.Pattern, str]], list[tuple[str, st
         with open(_CORRECTIONS_FILE, encoding="utf-8") as f:
             data = yaml.safe_load(f)
         regex_corrections: list[tuple[re.Pattern, str]] = []
-        full_segment_corrections: list[tuple[str, str]] = []
+        full_sentence_corrections: list[tuple[str, str]] = []
         for item in data.get("corrections", []):
             wrong   = str(item.get("wrong",   "")).strip()
             correct = str(item.get("correct", ""))   # do NOT strip — value may be "\n" etc.
             if not wrong or correct == "":
                 continue
-            if item.get("full_segment"):
-                full_segment_corrections.append((wrong, correct))
+            if item.get("full_sentence"):
+                full_sentence_corrections.append((wrong, correct))
             else:
                 pattern = re.compile(r"(?<!\w)" + re.escape(wrong) + r"(?!\w)", re.IGNORECASE)
                 regex_corrections.append((pattern, correct))
         logger.info(
-            "Loaded %d correction(s), %d full-segment correction(s) from corrections.yaml",
-            len(regex_corrections), len(full_segment_corrections),
+            "Loaded %d correction(s), %d full-sentence correction(s) from corrections.yaml",
+            len(regex_corrections), len(full_sentence_corrections),
         )
-        return regex_corrections, full_segment_corrections
+        return regex_corrections, full_sentence_corrections
     except Exception:
         logger.exception("Failed to load corrections.yaml")
         return [], []
@@ -51,21 +51,58 @@ def apply(text: str, corrections: list[tuple[re.Pattern, str]]) -> str:
 
 
 def _normalize_for_matching(text: str) -> str:
-    """Strip punctuation and normalize whitespace for full-segment matching."""
+    """Strip punctuation and normalize whitespace for full-sentence matching."""
     text = re.sub(r"[,\.!?]+", "", text)
     text = re.sub(r"\s+", " ", text).strip()
     return text.lower()
 
 
-def apply_full_segment(text: str, corrections: list[tuple[str, str]]) -> str:
-    """Replace text wholesale if it matches a full-segment correction.
+# Splits on sentence-ending punctuation followed by whitespace, keeping the delimiter.
+# Produces alternating [sentence, delimiter, sentence, delimiter, ..., sentence].
+_SENTENCE_SPLIT_RE = re.compile(r"([.!?]+\s+)")
 
-    Matching is case-insensitive and ignores punctuation (,.!?), so
-    'Enter.' and 'Enter!' both match wrong='Enter', and 'Enter, enter.'
-    matches wrong='Enter Enter'.
+
+def apply_full_sentence(text: str, corrections: list[tuple[str, str]]) -> str:
+    """Apply full-sentence corrections to any sentence within the text.
+
+    Splits the text on sentence boundaries and checks each sentence independently.
+    Matching is case-insensitive and ignores punctuation (,.!?).
+
+    Examples with wrong='Enter', correct='\\n':
+      "Enter."                                          → "\\n"
+      "Dette fungerte jo fint. Enter."                  → "Dette fungerte jo fint.\\n"
+      "Dette er første avsnitt. Enter. Andre avsnitt."  → "Dette er første avsnitt.\\nAndre avsnitt."
     """
-    normalized = _normalize_for_matching(text)
-    for wrong, correct in corrections:
-        if normalized == _normalize_for_matching(wrong):
-            return correct
-    return text
+    parts = _SENTENCE_SPLIT_RE.split(text.strip())
+    # parts alternates: sentence, delimiter, sentence, delimiter, ..., sentence
+
+    result: list[str] = []
+    changed = False
+    i = 0
+    while i < len(parts):
+        sentence  = parts[i]
+        delimiter = parts[i + 1] if i + 1 < len(parts) else ""
+        normalized = _normalize_for_matching(sentence)
+
+        matched_correct = None
+        for wrong, correct in corrections:
+            if normalized == _normalize_for_matching(wrong):
+                matched_correct = correct
+                break
+
+        if matched_correct is not None:
+            # Strip trailing space from the preceding delimiter so we don't get
+            # "first sentence. \n" with a stray space before the correction.
+            if result and result[-1].endswith(" "):
+                result[-1] = result[-1].rstrip()
+            result.append(matched_correct)
+            # Drop the delimiter that trails the matched sentence
+            changed = True
+        else:
+            result.append(sentence)
+            if delimiter:
+                result.append(delimiter)
+
+        i += 2
+
+    return "".join(result) if changed else text

@@ -10,7 +10,7 @@ from fastapi import FastAPI, File, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 
 from config import load_config, AppConfig
-from corrector import apply, apply_full_segment, load_corrections
+from corrector import apply, apply_full_sentence, load_corrections
 from transcriber import StreamingTranscriber
 
 logging.basicConfig(
@@ -26,15 +26,15 @@ logger = logging.getLogger(__name__)
 config: AppConfig
 transcriber: StreamingTranscriber
 corrections: list
-full_segment_corrections: list
+full_sentence_corrections: list
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global config, transcriber, corrections, full_segment_corrections
+    global config, transcriber, corrections, full_sentence_corrections
     config = load_config()
     transcriber = StreamingTranscriber(config)
-    corrections, full_segment_corrections = load_corrections()
+    corrections, full_sentence_corrections = load_corrections()
     yield
     logger.info("Server shutting down.")
 
@@ -121,7 +121,7 @@ async def transcribe_file(file: UploadFile = File(...)):
 
         if result.get("text"):
             result["text"] = apply(result["text"], corrections)
-            result["text"] = apply_full_segment(result["text"], full_segment_corrections)
+            result["text"] = apply_full_sentence(result["text"], full_sentence_corrections)
         result["processing_time_ms"] = elapsed_ms
         return result
     finally:
@@ -169,7 +169,7 @@ async def websocket_transcribe(websocket: WebSocket):
                 final = result or {"type": "final", "text": ""}
                 if final.get("text"):
                     final["text"] = apply(final["text"], corrections)
-                    final["text"] = apply_full_segment(final["text"], full_segment_corrections)
+                    final["text"] = apply_full_sentence(final["text"], full_sentence_corrections)
                 final["processing_time_ms"] = round((time.perf_counter() - t0) * 1000)
                 try:
                     await websocket.send_json(final)
