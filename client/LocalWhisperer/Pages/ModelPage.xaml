@@ -28,9 +28,14 @@
                     </Grid>
                     <ComboBox x:Name="ModelComboBox" HorizontalAlignment="Stretch"
                               PlaceholderText="Henter modeller..."/>
-                    <Button x:Name="SwitchButton" Content="Bytt modell"
-                            Style="{StaticResource AccentButtonStyle}"
-                            Click="SwitchButton_Click" IsEnabled="False"/>
+                    <Button x:Name="SwitchButton" Style="{StaticResource AccentButtonStyle}"
+                            Click="SwitchButton_Click" IsEnabled="False">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <ProgressRing x:Name="SwitchSpinner" IsActive="False"
+                                          Width="16" Height="16" Visibility="Collapsed"/>
+                            <TextBlock x:Name="SwitchButtonText" Text="Bytt modell"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </Border>
 

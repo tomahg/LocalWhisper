@@ -55,8 +55,11 @@ public sealed partial class ModelPage : Page
     {
         if (ModelComboBox.SelectedItem is not ModelInfo model) return;
 
-        SwitchButton.IsEnabled = false;
-        StatusBar.IsOpen = false;
+        SwitchButton.IsEnabled         = false;
+        SwitchSpinner.IsActive         = true;
+        SwitchSpinner.Visibility       = Visibility.Visible;
+        SwitchButtonText.Text          = "Bytter...";
+        StatusBar.IsOpen               = false;
 
         try
         {
@@ -73,7 +76,10 @@ public sealed partial class ModelPage : Page
         }
         finally
         {
-            SwitchButton.IsEnabled = true;
+            SwitchSpinner.IsActive   = false;
+            SwitchSpinner.Visibility = Visibility.Collapsed;
+            SwitchButtonText.Text    = "Bytt modell";
+            SwitchButton.IsEnabled   = true;
         }
     }
 }
