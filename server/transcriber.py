@@ -151,7 +151,21 @@ class StreamingTranscriber:
         if model_id == self._current_model_id:
             return
         logger.info("Switching model: %s → %s", self._current_model_id, model_id)
-        del self.model
+
+        # Load new model first — only swap if successful so we don't break the
+        # transcriber if the model ID is invalid or the download fails.
+        new_model = WhisperModel(
+            model_id,
+            device=self._device,
+            compute_type=self._compute_type,
+        )
+
+        old_model = self.model
+        self.model = new_model
+        self._current_model_id = model_id
+        self.reset()
+
+        del old_model
         try:
             import torch
             if torch.cuda.is_available():
@@ -159,12 +173,4 @@ class StreamingTranscriber:
         except ImportError:
             pass
         gc.collect()
-
-        self.model = WhisperModel(
-            model_id,
-            device=self._device,
-            compute_type=self._compute_type,
-        )
-        self._current_model_id = model_id
-        self.reset()
         logger.info("Model switched to '%s'", model_id)

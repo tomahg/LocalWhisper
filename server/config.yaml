@@ -37,5 +37,5 @@ models:
     name: "NB Whisper Medium (Norsk, anbefalt)"
   - id: "NbAiLab/nb-whisper-large"
     name: "NB Whisper Large (Norsk, best kvalitet)"
-  - id: "openai/whisper-large-v3"
+  - id: "Systran/faster-whisper-large-v3"
     name: "Whisper Large v3 (Flerspråklig)"
