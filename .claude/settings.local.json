@@ -36,7 +36,12 @@
       "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File \"C:\\\\Dev\\\\NorskTale\\\\inspect-tray.ps1\" 2>&1)",
       "Bash(find \"C:\\\\Users\\\\tomas.h.gulla\\\\.nuget\\\\packages\\\\h.notifyicon.winui\\\\2.1.0\" -name \"*.cs\" 2>/dev/null | head -5; find \"C:\\\\Users\\\\tomas.h.gulla\\\\.nuget\\\\packages\\\\h.notifyicon\" -name \"TaskbarIcon*.cs\" 2>/dev/null | head -5)",
       "Bash(ls:*)",
-      "Bash(cd:*)"
+      "Bash(cd:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebSearch",
+      "Bash(curl:*)"
     ]
   }
 }

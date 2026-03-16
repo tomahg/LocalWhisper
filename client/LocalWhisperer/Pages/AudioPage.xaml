@@ -13,8 +13,35 @@
                     BorderThickness="1" CornerRadius="8">
 
                 <StackPanel>
-                    <!-- Microphone row -->
+                    <!-- Audio source row -->
                     <StackPanel Padding="16" Spacing="12">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <FontIcon Grid.Column="0" Glyph="&#xE767;" FontSize="16"
+                                      VerticalAlignment="Center" Margin="0,0,14,0"
+                                      Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                <TextBlock Text="Lydkilde" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                                <TextBlock Text="Hva skal transkriberes"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                            </StackPanel>
+                        </Grid>
+                        <ComboBox x:Name="AudioSourceComboBox" HorizontalAlignment="Stretch"
+                                  SelectionChanged="AudioSource_SelectionChanged">
+                            <ComboBoxItem Content="Mikrofon"/>
+                            <ComboBoxItem Content="Datalyd (loopback)"/>
+                            <ComboBoxItem Content="Begge"/>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <!-- Divider -->
+                    <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
+
+                    <!-- Microphone row (hidden when source is SystemAudio) -->
+                    <StackPanel x:Name="MicSection" Padding="16" Spacing="12">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -33,8 +60,8 @@
                                   SelectionChanged="MicComboBox_SelectionChanged"/>
                     </StackPanel>
 
-                    <!-- Divider -->
-                    <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
+                    <!-- Divider (hidden together with mic section) -->
+                    <Border x:Name="MicDivider" Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
 
                     <!-- Auto-copy row -->
                     <Grid x:Name="AutoCopyRow" Padding="16,14">

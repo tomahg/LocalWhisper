@@ -1,9 +1,17 @@
 namespace LocalWhisperer.Models;
 
+public enum AudioSourceMode
+{
+    Microphone,
+    SystemAudio,
+    Both
+}
+
 public class AppSettings
 {
     public string ServerUrl           { get; set; } = "ws://localhost:8765/ws/transcribe";
     public int    MicrophoneDeviceIndex { get; set; } = 0;
+    public AudioSourceMode AudioSource { get; set; } = AudioSourceMode.Microphone;
     public bool   HoldToTalk          { get; set; } = false;
     public bool   AutoConnect         { get; set; } = true;
     public bool   AutoCopyToClipboard { get; set; } = false;

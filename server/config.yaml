@@ -28,7 +28,7 @@ streaming:
   chunk_duration_sec: 3.0   # Seconds of audio to accumulate before inference
   overlap_sec: 1.5          # Audio overlap kept between windows for context
   vad_enabled: true         # Voice Activity Detection (reduces hallucinations)
-  vad_threshold: 0.5
+  vad_threshold: 0.4        # Lower value → more audio passes through as "speech" (less filtering, fewer missed words, but more hallucinations on silence. (Range: 0.0–1.0)
 
 models:
   - id: "NbAiLab/nb-whisper-small"

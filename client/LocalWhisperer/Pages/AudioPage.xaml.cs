@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using LocalWhisperer.Models;
 using LocalWhisperer.Services;
@@ -18,6 +19,10 @@ public sealed partial class AudioPage : Page
         _settingsService = App.Services.GetRequiredService<SettingsService>();
 
         _loading = true;
+
+        AudioSourceComboBox.SelectedIndex = (int)_settings.AudioSource;
+        ApplyMicSectionVisibility(_settings.AudioSource);
+
         foreach (var (index, name) in AudioCaptureService.GetDevices())
             MicComboBox.Items.Add(new ComboBoxItem { Content = name, Tag = index });
 
@@ -35,6 +40,22 @@ public sealed partial class AudioPage : Page
             ? Microsoft.UI.Xaml.Visibility.Collapsed
             : Microsoft.UI.Xaml.Visibility.Visible;
         _loading = false;
+    }
+
+    private void AudioSource_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading) return;
+        var mode = (AudioSourceMode)AudioSourceComboBox.SelectedIndex;
+        _settings.AudioSource = mode;
+        _settingsService.Save(_settings);
+        ApplyMicSectionVisibility(mode);
+    }
+
+    private void ApplyMicSectionVisibility(AudioSourceMode mode)
+    {
+        var vis = mode != AudioSourceMode.SystemAudio ? Visibility.Visible : Visibility.Collapsed;
+        MicSection.Visibility  = vis;
+        MicDivider.Visibility  = vis;
     }
 
     private void MicComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)

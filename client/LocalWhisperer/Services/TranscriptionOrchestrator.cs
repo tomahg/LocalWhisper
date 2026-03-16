@@ -61,7 +61,7 @@ public class TranscriptionOrchestrator
         _pendingSilenceStops = 0;
         ResetSilenceTimer();
         RecordingStateChanged?.Invoke(true);
-        _audio.StartCapture(_settings.MicrophoneDeviceIndex);
+        _audio.StartCapture(_settings.MicrophoneDeviceIndex, _settings.AudioSource);
     }
 
     public async Task StopRecordingAsync()
