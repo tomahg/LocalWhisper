@@ -90,7 +90,7 @@ public sealed partial class OverlayWindow : Window
             ListeningTextPanel.Visibility  = Visibility.Collapsed;
             ProcessingPanel.Visibility     = Visibility.Collapsed;
             ResultPanel.Visibility         = Visibility.Collapsed;
-            AudioLevelBar.Value            = 0;
+            AudioLevelBarClip.Rect         = new Windows.Foundation.Rect(0, 0, 0, 6);
             PositionBottomRight(width: 360, height: 44);
             _appWindow.Show();
         });
@@ -198,8 +198,8 @@ public sealed partial class OverlayWindow : Window
     {
         DispatcherQueue.TryEnqueue(() =>
         {
-            AudioLevelBar.Value = level;
-            AudioLevelBarText.Value = level;
+            AudioLevelBarClip.Rect     = new Windows.Foundation.Rect(0, 0, AudioLevelBarContainer.ActualWidth * level, 6);
+            AudioLevelBarTextClip.Rect = new Windows.Foundation.Rect(0, 0, AudioLevelBarTextContainer.ActualWidth * level, 6);
         });
     }
 

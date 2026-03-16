@@ -22,9 +22,21 @@
                              VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBlock Grid.Column="1" Text="Lytter..." Foreground="White"
                                FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <ProgressBar x:Name="AudioLevelBar" Grid.Column="2"
-                                 Height="6" Minimum="0" Maximum="1" Value="0"
-                                 VerticalAlignment="Center"/>
+                    <Grid x:Name="AudioLevelBarContainer" Grid.Column="2" Height="6" VerticalAlignment="Center">
+                        <Rectangle Fill="#22FFFFFF" RadiusX="3" RadiusY="3"/>
+                        <Rectangle RadiusX="3" RadiusY="3">
+                            <Rectangle.Clip>
+                                <RectangleGeometry x:Name="AudioLevelBarClip" Rect="0,0,0,6"/>
+                            </Rectangle.Clip>
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#55EE44" Offset="0.0"/>
+                                    <GradientStop Color="#FFBB00" Offset="0.6"/>
+                                    <GradientStop Color="#FF3333" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Grid>
                 </Grid>
                 <!-- Drop hint (shown during drag-over) -->
                 <StackPanel x:Name="DropHint" Orientation="Horizontal" Spacing="8"
@@ -59,9 +71,21 @@
                              VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <TextBlock Grid.Column="1" Text="Lytter..." Foreground="White"
                                FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <ProgressBar x:Name="AudioLevelBarText" Grid.Column="2"
-                                 Height="6" Minimum="0" Maximum="1" Value="0"
-                                 VerticalAlignment="Center"/>
+                    <Grid x:Name="AudioLevelBarTextContainer" Grid.Column="2" Height="6" VerticalAlignment="Center">
+                        <Rectangle Fill="#22FFFFFF" RadiusX="3" RadiusY="3"/>
+                        <Rectangle RadiusX="3" RadiusY="3">
+                            <Rectangle.Clip>
+                                <RectangleGeometry x:Name="AudioLevelBarTextClip" Rect="0,0,0,6"/>
+                            </Rectangle.Clip>
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#55EE44" Offset="0.0"/>
+                                    <GradientStop Color="#FFBB00" Offset="0.6"/>
+                                    <GradientStop Color="#FF3333" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Grid>
                 </Grid>
                 <!-- Accumulated text -->
                 <ScrollViewer Grid.Row="1" MaxHeight="300" VerticalScrollBarVisibility="Auto"
