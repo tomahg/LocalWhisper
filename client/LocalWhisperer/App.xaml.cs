@@ -340,6 +340,7 @@ public partial class App : Application
 
             _window.AppWindow.Show();
             _window.Activate();
+            NativeMethods.SetForegroundWindow(WinRT.Interop.WindowNative.GetWindowHandle(_window));
         });
     }
 

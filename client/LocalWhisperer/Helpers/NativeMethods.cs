@@ -187,7 +187,7 @@ internal static partial class NativeMethods
 
     [LibraryImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
-    private static partial bool SetForegroundWindow(nint hWnd);
+    public static partial bool SetForegroundWindow(nint hWnd);
 
     /// <summary>
     /// Shows a native Win32 popup menu at the cursor position.
