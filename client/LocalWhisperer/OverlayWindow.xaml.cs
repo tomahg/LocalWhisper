@@ -104,7 +104,7 @@ public sealed partial class OverlayWindow : Window
             SetClickThrough(false); // Kopier button must be clickable
             SetNoActivate(true);
 
-            AccumulatedText.Text = text;
+            SetTextWithLineBreaks(AccumulatedText, text);
             ListeningPanel.Visibility      = Visibility.Collapsed;
             ListeningTextPanel.Visibility  = Visibility.Visible;
             ProcessingPanel.Visibility     = Visibility.Collapsed;
@@ -171,7 +171,7 @@ public sealed partial class OverlayWindow : Window
         {
             StopProcessingTimer();
             _lastResult = text;
-            ResultText.Text = text;
+            SetTextWithLineBreaks(ResultText, text);
             CopyButton.Visibility = showCopy ? Visibility.Visible : Visibility.Collapsed;
             StatsText.Text = FormatStats(audioDurationMs, processingTimeMs);
             SetClickThrough(false); // buttons must be clickable
@@ -328,6 +328,19 @@ public sealed partial class OverlayWindow : Window
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
+
+    private static void SetTextWithLineBreaks(Microsoft.UI.Xaml.Controls.TextBlock tb, string text)
+    {
+        tb.Inlines.Clear();
+        var lines = text.Split('\n');
+        for (int i = 0; i < lines.Length; i++)
+        {
+            if (i > 0)
+                tb.Inlines.Add(new Microsoft.UI.Xaml.Documents.LineBreak());
+            tb.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run { Text = lines[i] });
+        }
+    }
+
 
     private static string FormatStats(int audioDurationMs, int processingTimeMs)
     {

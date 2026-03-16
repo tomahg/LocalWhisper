@@ -187,6 +187,10 @@ async def websocket_transcribe(websocket: WebSocket):
         while True:
             message = await websocket.receive()
 
+            if message.get("type") == "websocket.disconnect":
+                logger.info("Client disconnected: %s", client)
+                break
+
             if "bytes" in message:
                 await queue.put(message["bytes"])
 
