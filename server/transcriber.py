@@ -152,18 +152,20 @@ class StreamingTranscriber:
             return
         logger.info("Switching model: %s → %s", self._current_model_id, model_id)
 
-        # Load new model first — only swap if successful so we don't break the
-        # transcriber if the model ID is invalid or the download fails.
+        # Load new model first without holding the lock — download can take minutes.
+        # Only swap if successful so we don't break the transcriber on failure.
         new_model = WhisperModel(
             model_id,
             device=self._device,
             compute_type=self._compute_type,
         )
 
-        old_model = self.model
-        self.model = new_model
-        self._current_model_id = model_id
-        self.reset()
+        # Acquire inference lock so we never swap the model mid-transcription.
+        with self._inference_lock:
+            old_model = self.model
+            self.model = new_model
+            self._current_model_id = model_id
+            self.reset()
 
         del old_model
         try:
