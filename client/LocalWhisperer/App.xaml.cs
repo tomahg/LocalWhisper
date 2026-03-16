@@ -86,7 +86,7 @@ public partial class App : Application
         RegisterHotkey();
 
         _window.AppWindow.Hide();
-        _window.AppWindow.Resize(new Windows.Graphics.SizeInt32(560, 500));
+        _window.AppWindow.Resize(new Windows.Graphics.SizeInt32(560, 620));
 
         var settings = Services.GetRequiredService<AppSettings>();
         if (settings.AutoConnect)
@@ -181,6 +181,10 @@ public partial class App : Application
                 if (_accumulatedText.Length > 0)
                     _accumulatedText += "\n";
                 _accumulatedText += text;
+                if (settings.AutoCopyToClipboard)
+                {
+                    _dispatcherQueue?.TryEnqueue(() => _overlay.CopyToClipboard(_accumulatedText));
+                }
                 _overlay.ShowListeningWithText(_accumulatedText);
                 return;
             }
@@ -208,12 +212,13 @@ public partial class App : Application
 
                 if (settings.AutoCopyToClipboard)
                 {
-                    _overlay.CopyToClipboard(text);
-                    _overlay.Hide();
+                    _dispatcherQueue?.TryEnqueue(() => _overlay.CopyToClipboard(text));
+                    _overlay.ShowResult(text, showCopy: true,
+                        audioDurationMs: result.AudioDurationMs, processingTimeMs: result.ProcessingTimeMs);
                 }
                 else
                 {
-                    _overlay.ShowResult(text,
+                    _overlay.ShowResult(text, showCopy: true,
                         audioDurationMs: result.AudioDurationMs, processingTimeMs: result.ProcessingTimeMs);
                 }
                 return;

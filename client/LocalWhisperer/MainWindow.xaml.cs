@@ -13,7 +13,7 @@ public sealed partial class MainWindow : Window
         var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(
             Microsoft.UI.Win32Interop.GetWindowIdFromWindow(
                 WinRT.Interop.WindowNative.GetWindowHandle(this)));
-        appWindow.Resize(new Windows.Graphics.SizeInt32(560, 500));
+        appWindow.Resize(new Windows.Graphics.SizeInt32(560, 640));
 
         // Select first item (Tilkobling)
         NavView.SelectedItem = NavView.MenuItems[0];
