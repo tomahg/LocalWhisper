@@ -141,7 +141,7 @@
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="Skriv tekst direkte inn"/>
-                            <TextBlock Text="Sender tekst til aktivt tekstfelt uten utklippstavle"
+                            <TextBlock Text="Sender tekst til aktivt tekstfelt"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
                         </StackPanel>
                         <ToggleSwitch x:Name="InjectToggle" Grid.Column="2"

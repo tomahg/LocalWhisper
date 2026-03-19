@@ -24,7 +24,7 @@
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="Avslutning per segment" Style="{StaticResource BodyStrongTextBlockStyle}"/>
-                            <TextBlock Text="Hva som legges til etter hvert transkriberte segment"
+                            <TextBlock Text="Hva som legges til"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
                         </StackPanel>
                         <ComboBox x:Name="SilenceSuffixComboBox" Grid.Column="2"
