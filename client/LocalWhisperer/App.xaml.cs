@@ -172,6 +172,9 @@ public partial class App : Application
             var text = result.Text;
             var settings = Services.GetRequiredService<AppSettings>();
 
+            if (settings.Corrections.Count > 0)
+                text = CorrectorService.Apply(text, settings.Corrections);
+
             if (settings.InjectTextDirectly)
             {
                 // --- Inject mode ---

@@ -14,6 +14,7 @@ public sealed partial class MainWindow : Window
             Microsoft.UI.Win32Interop.GetWindowIdFromWindow(
                 WinRT.Interop.WindowNative.GetWindowHandle(this)));
         appWindow.Resize(new Windows.Graphics.SizeInt32(560, 640));
+        appWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", "tray-idle.ico"));
 
         // Select first item (Tilkobling)
         NavView.SelectedItem = NavView.MenuItems[0];
@@ -31,6 +32,7 @@ public sealed partial class MainWindow : Window
             "model"      => typeof(ModelPage),
             "audio"      => typeof(AudioPage),
             "display"    => typeof(DisplayPage),
+            "corrections"=> typeof(CorrectionsPage),
             "general"    => typeof(GeneralPage),
             "about"      => typeof(AboutPage),
             _            => typeof(ConnectionPage),

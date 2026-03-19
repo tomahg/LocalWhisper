@@ -40,6 +40,7 @@ public class AppSettings
     public SilenceSuffixMode SilenceSuffix  { get; set; } = SilenceSuffixMode.Space;
     public OverlayPosition   OverlayPosition  { get; set; } = OverlayPosition.Right;
     public InjectionMethod   InjectionMethod  { get; set; } = InjectionMethod.Type;
+    public List<CorrectionEntry> Corrections  { get; set; } = [];
 
     public bool   InjectTextDirectly { get; set; } = false;
 

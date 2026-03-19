@@ -20,6 +20,11 @@
                     <FontIcon Glyph="&#xE7F4;"/>
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
+            <NavigationViewItem Content="Korreksjoner" Tag="corrections">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE8D3;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
             <NavigationViewItem Content="Generelt"    Tag="general">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xE713;"/>
