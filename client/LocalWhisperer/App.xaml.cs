@@ -39,6 +39,27 @@ public partial class App : Application
         }
     }
 
+    /// <summary>
+    /// Pastes text via clipboard + Ctrl+V, then restores the previous clipboard content.
+    /// Runs on a background thread to avoid blocking the UI during the restore delay.
+    /// </summary>
+    private static void InjectTextViaClipboard(string text)
+    {
+        _ = Task.Run(() =>
+        {
+            NativeMethods.SetClipboardText(text);
+            NativeMethods.SendCtrlV();
+        });
+    }
+
+    private static void Inject(string text, AppSettings settings)
+    {
+        if (settings.InjectionMethod == InjectionMethod.Paste)
+            InjectTextViaClipboard(text);
+        else
+            InjectText(text);
+    }
+
     private static Uri AssetUri(string fileName) =>
         new(Path.Combine(AppContext.BaseDirectory, "Assets", fileName));
 
@@ -166,7 +187,7 @@ public partial class App : Application
                             _                                      => " "
                         };
                         var toInject = char.IsWhiteSpace(text[^1]) ? text : text + suffix;
-                        InjectText(toInject);
+                        Inject(toInject, settings);
                     }
                     return;
                 }
@@ -182,14 +203,14 @@ public partial class App : Application
                             _                                      => " "
                         };
                         var toInject = char.IsWhiteSpace(text[^1]) ? text : text + suffix;
-                        InjectText(toInject);
+                        Inject(toInject, settings);
                     }
                     _overlay.Hide();
                     return;
                 }
                 // File
                 if (!string.IsNullOrEmpty(text))
-                    InjectText(text);
+                    Inject(text, settings);
                 _overlay.Hide();
                 return;
             }

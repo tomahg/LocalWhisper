@@ -63,30 +63,6 @@
                     <!-- Divider (hidden together with mic section) -->
                     <Border x:Name="MicDivider" Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
 
-                    <!-- Auto-copy row -->
-                    <Grid x:Name="AutoCopyRow" Padding="16,14">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <FontIcon Grid.Column="0" Glyph="&#xE8C8;" FontSize="16"
-                                  VerticalAlignment="Center" Margin="0,0,14,0"
-                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="Kopier automatisk"/>
-                            <TextBlock Text="Kopier transkripsjon til utklippstavle"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
-                        </StackPanel>
-                        <ToggleSwitch x:Name="AutoCopyToggle" Grid.Column="2"
-                                      OnContent="" OffContent="" MinWidth="0" Margin="16,0,0,0"
-                                      Toggled="AutoCopy_Changed"
-                                      VerticalAlignment="Center"/>
-                    </Grid>
-
-                    <!-- Divider -->
-                    <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
-
                     <!-- Auto-send on silence row -->
                     <Grid Padding="16,14">
                         <Grid.ColumnDefinitions>
@@ -147,6 +123,30 @@
                         <ToggleSwitch x:Name="InjectToggle" Grid.Column="2"
                                       OnContent="" OffContent="" MinWidth="0" Margin="16,0,0,0"
                                       Toggled="Inject_Changed"
+                                      VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- Divider -->
+                    <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
+
+                    <!-- Auto-copy row (hidden when inject is on) -->
+                    <Grid x:Name="AutoCopyRow" Padding="16,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Grid.Column="0" Glyph="&#xE8C8;" FontSize="16"
+                                  VerticalAlignment="Center" Margin="0,0,14,0"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Kopier automatisk"/>
+                            <TextBlock Text="Kopier transkripsjon til utklippstavle"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                        </StackPanel>
+                        <ToggleSwitch x:Name="AutoCopyToggle" Grid.Column="2"
+                                      OnContent="" OffContent="" MinWidth="0" Margin="16,0,0,0"
+                                      Toggled="AutoCopy_Changed"
                                       VerticalAlignment="Center"/>
                     </Grid>
 

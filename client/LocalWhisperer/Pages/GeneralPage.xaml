@@ -37,6 +37,50 @@
                     </Grid>
                 </StackPanel>
             </Border>
+
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8">
+
+                <StackPanel>
+                    <!-- Header row -->
+                    <Grid Padding="16,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Grid.Column="0" Glyph="&#xE8AD;" FontSize="16"
+                                  VerticalAlignment="Center" Margin="0,0,14,0"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Tekstinnliming" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                            <TextBlock Text="Hvordan tekst skrives inn i aktivt felt"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Divider -->
+                    <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
+
+                    <!-- Radio buttons -->
+                    <StackPanel Padding="16,12,16,16" Spacing="8">
+                        <RadioButton x:Name="MethodType"  GroupName="InjectionMethod" Checked="Method_Checked">
+                            <StackPanel>
+                                <TextBlock Text="Skriv direkte"/>
+                                <TextBlock Text="Tegn for tegn via SendInput"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                            </StackPanel>
+                        </RadioButton>
+                        <RadioButton x:Name="MethodPaste" GroupName="InjectionMethod" Checked="Method_Checked">
+                            <StackPanel>
+                                <TextBlock Text="Lim inn via utklippstavle"/>
+                                <TextBlock Text="Raskere, men bruker utklippstavlen"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                            </StackPanel>
+                        </RadioButton>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
         </StackPanel>
     </ScrollViewer>
 </Page>

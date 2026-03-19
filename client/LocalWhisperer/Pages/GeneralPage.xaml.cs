@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using LocalWhisperer.Models;
 using LocalWhisperer.Services;
@@ -19,6 +20,10 @@ public sealed partial class GeneralPage : Page
 
         _loading = true;
         SilenceSuffixComboBox.SelectedIndex = (int)_settings.SilenceSuffix;
+        if (_settings.InjectionMethod == InjectionMethod.Paste)
+            MethodPaste.IsChecked = true;
+        else
+            MethodType.IsChecked = true;
         _loading = false;
     }
 
@@ -26,6 +31,15 @@ public sealed partial class GeneralPage : Page
     {
         if (_loading) return;
         _settings.SilenceSuffix = (SilenceSuffixMode)SilenceSuffixComboBox.SelectedIndex;
+        _settingsService.Save(_settings);
+    }
+
+    private void Method_Checked(object sender, RoutedEventArgs e)
+    {
+        if (_loading) return;
+        _settings.InjectionMethod = sender == MethodPaste
+            ? InjectionMethod.Paste
+            : InjectionMethod.Type;
         _settingsService.Save(_settings);
     }
 }

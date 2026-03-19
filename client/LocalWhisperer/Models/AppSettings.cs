@@ -21,6 +21,12 @@ public enum OverlayPosition
     Left
 }
 
+public enum InjectionMethod
+{
+    Type,   // Character by character via SendInput
+    Paste   // Via clipboard + Ctrl+V, then restore original clipboard
+}
+
 public class AppSettings
 {
     public string ServerUrl           { get; set; } = "ws://localhost:8765/ws/transcribe";
@@ -32,7 +38,8 @@ public class AppSettings
     public bool   AutoSendOnSilence      { get; set; } = false;
     public double SilenceThresholdSeconds { get; set; } = 2.0;
     public SilenceSuffixMode SilenceSuffix  { get; set; } = SilenceSuffixMode.Space;
-    public OverlayPosition   OverlayPosition { get; set; } = OverlayPosition.Right;
+    public OverlayPosition   OverlayPosition  { get; set; } = OverlayPosition.Right;
+    public InjectionMethod   InjectionMethod  { get; set; } = InjectionMethod.Type;
 
     public bool   InjectTextDirectly { get; set; } = false;
 
