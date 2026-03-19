@@ -15,6 +15,11 @@
             <NavigationViewItem Content="Hurtigtast"  Tag="hotkey"     Icon="Keyboard"/>
             <NavigationViewItem Content="Modell"      Tag="model"      Icon="Audio"/>
             <NavigationViewItem Content="Lyd"         Tag="audio"      Icon="Microphone"/>
+            <NavigationViewItem Content="Visning"     Tag="display">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE7F4;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
         </NavigationView.MenuItems>
 
         <NavigationView.FooterMenuItems>

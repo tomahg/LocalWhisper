@@ -30,6 +30,7 @@ public sealed partial class MainWindow : Window
             "hotkey"     => typeof(HotkeyPage),
             "model"      => typeof(ModelPage),
             "audio"      => typeof(AudioPage),
+            "display"    => typeof(DisplayPage),
             "about"      => typeof(AboutPage),
             _            => typeof(ConnectionPage),
         };

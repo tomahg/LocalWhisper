@@ -14,6 +14,13 @@ public enum SilenceSuffixMode
     DoubleNewline
 }
 
+public enum OverlayPosition
+{
+    Right,
+    Center,
+    Left
+}
+
 public class AppSettings
 {
     public string ServerUrl           { get; set; } = "ws://localhost:8765/ws/transcribe";
@@ -24,7 +31,8 @@ public class AppSettings
     public bool   AutoCopyToClipboard { get; set; } = false;
     public bool   AutoSendOnSilence      { get; set; } = false;
     public double SilenceThresholdSeconds { get; set; } = 2.0;
-    public SilenceSuffixMode SilenceSuffix { get; set; } = SilenceSuffixMode.Space;
+    public SilenceSuffixMode SilenceSuffix  { get; set; } = SilenceSuffixMode.Space;
+    public OverlayPosition   OverlayPosition { get; set; } = OverlayPosition.Right;
 
     public bool   InjectTextDirectly { get; set; } = false;
 

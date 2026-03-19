@@ -1,4 +1,5 @@
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.UI;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -72,7 +73,7 @@ public sealed partial class OverlayWindow : Window
         int noRound = DWMWCP_DONOTROUND;
         DwmSetWindowAttribute(_hwnd, DWMWA_WINDOW_CORNER_PREFERENCE, ref noRound, sizeof(int));
 
-        PositionBottomRight(width: 360, height: 44);
+        PositionOverlay(width: 360, height: 44);
     }
 
     // -------------------------------------------------------------------------
@@ -91,7 +92,7 @@ public sealed partial class OverlayWindow : Window
             ProcessingPanel.Visibility     = Visibility.Collapsed;
             ResultPanel.Visibility         = Visibility.Collapsed;
             AudioLevelBarClip.Rect         = new Windows.Foundation.Rect(0, 0, 0, 6);
-            PositionBottomRight(width: 360, height: 44);
+            PositionOverlay(width: 360, height: 44);
             _appWindow.Show();
         });
     }
@@ -119,7 +120,7 @@ public sealed partial class OverlayWindow : Window
             contentGrid.Measure(new Windows.Foundation.Size(width - 28, double.PositiveInfinity));
             int height = Math.Clamp((int)contentGrid.DesiredSize.Height + padding, headerHeight + 20, maxHeight);
 
-            PositionBottomRight(width, height);
+            PositionOverlay(width, height);
             _appWindow.Show();
         });
     }
@@ -142,7 +143,7 @@ public sealed partial class OverlayWindow : Window
             ListeningTextPanel.Visibility  = Visibility.Collapsed;
             ProcessingPanel.Visibility     = Visibility.Visible;
             ResultPanel.Visibility         = Visibility.Collapsed;
-            PositionBottomRight(width: 260, height: 44);
+            PositionOverlay(width: 260, height: 44);
             _appWindow.Show();
         });
     }
@@ -189,7 +190,7 @@ public sealed partial class OverlayWindow : Window
             ResultContent.Measure(new Windows.Foundation.Size(width - 28, double.PositiveInfinity));
             int height = Math.Clamp((int)ResultContent.DesiredSize.Height + padding, 100, maxHeight);
 
-            PositionBottomRight(width, height);
+            PositionOverlay(width, height);
             _appWindow.Show();
         });
     }
@@ -379,12 +380,21 @@ public sealed partial class OverlayWindow : Window
             SetWindowLong(_hwnd, GWL_EXSTYLE, ex & ~WS_EX_TRANSPARENT);
     }
 
-    private void PositionBottomRight(int width, int height)
+    private void PositionOverlay(int width, int height)
     {
         var workArea = DisplayArea.GetFromWindowId(_appWindow.Id, DisplayAreaFallback.Primary).WorkArea;
         const int margin = 16;
+
+        var position = App.Services.GetRequiredService<Models.AppSettings>().OverlayPosition;
+        int x = position switch
+        {
+            Models.OverlayPosition.Left   => workArea.X + margin,
+            Models.OverlayPosition.Center => workArea.X + (workArea.Width - width) / 2,
+            _                             => workArea.X + workArea.Width - width - margin
+        };
+
         _appWindow.MoveAndResize(new Windows.Graphics.RectInt32(
-            workArea.X + workArea.Width  - width  - margin,
+            x,
             workArea.Y + workArea.Height - height - margin,
             width, height));
 
