@@ -159,14 +159,35 @@ public partial class App : Application
                     // Inject this segment immediately; overlay stays in "Lytter..." state
                     if (!string.IsNullOrEmpty(text))
                     {
-                        // Add trailing space so consecutive segments don't run together,
-                        // unless the segment already ends with whitespace (e.g. "\n")
-                        var toInject = char.IsWhiteSpace(text[^1]) ? text : text + " ";
+                        var suffix = settings.SilenceSuffix switch
+                        {
+                            Models.SilenceSuffixMode.Newline       => "\n",
+                            Models.SilenceSuffixMode.DoubleNewline => "\n\n",
+                            _                                      => " "
+                        };
+                        var toInject = char.IsWhiteSpace(text[^1]) ? text : text + suffix;
                         InjectText(toInject);
                     }
                     return;
                 }
-                // Microphone (final stop) or File
+                // Microphone (final stop)
+                if (source == Microphone)
+                {
+                    if (!string.IsNullOrEmpty(text))
+                    {
+                        var suffix = settings.SilenceSuffix switch
+                        {
+                            Models.SilenceSuffixMode.Newline       => "\n",
+                            Models.SilenceSuffixMode.DoubleNewline => "\n\n",
+                            _                                      => " "
+                        };
+                        var toInject = char.IsWhiteSpace(text[^1]) ? text : text + suffix;
+                        InjectText(toInject);
+                    }
+                    _overlay.Hide();
+                    return;
+                }
+                // File
                 if (!string.IsNullOrEmpty(text))
                     InjectText(text);
                 _overlay.Hide();
@@ -266,8 +287,8 @@ public partial class App : Application
 
             _trayIcon.IconSource  = new BitmapImage(recording ? UriListening : UriIdle);
             _trayIcon.ToolTipText = connected
-                ? (recording ? "LocalWhisperer — Tar opp..." : "Local Whisperer — Tilkoblet")
-                : "Local Whisperer — Frakoblet";
+                ? (recording ? "LocalWhisperer – Tar opp..." : "Local Whisperer – Tilkoblet")
+                : "Local Whisperer – Frakoblet";
         });
     }
 

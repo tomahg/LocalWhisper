@@ -90,7 +90,7 @@ On first launch the app starts in the system tray (no window appears). The tray 
 | **Tilkobling** | Server URL, connect/disconnect |
 | **Hurtigtast** | Active hotkey (F9), hold-to-talk toggle |
 | **Modell** | Switch transcription model at runtime |
-| **Lyd** | Select microphone, auto-copy to clipboard, auto-send on silence |
+| **Lyd** | Select microphone, auto-copy to clipboard, auto-send on silence (with configurable segment suffix) |
 | **Om** | About |
 
 Settings are persisted automatically between sessions.
@@ -105,7 +105,7 @@ Two modes (configurable in the Hurtigtast settings page):
 
 > Tip: Enable **auto-copy to clipboard** in the Lyd settings page to skip the manual copy step — the result is copied automatically when recording stops.
 
-> Tip: Enable **auto-send ved stillhet** in the Lyd settings page for continuous dictation — transcribed text accumulates in the overlay as you speak and pause naturally.
+> Tip: Enable **auto-send ved stillhet** in the Lyd settings page for continuous dictation — transcribed text accumulates in the overlay as you speak and pause naturally. Use the **Avslutning per segment** option to control how pauses are joined: space (continuous text), single newline, or double newline (paragraph break).
 
 ---
 

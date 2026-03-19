@@ -7,6 +7,13 @@ public enum AudioSourceMode
     Both
 }
 
+public enum SilenceSuffixMode
+{
+    Space,
+    Newline,
+    DoubleNewline
+}
+
 public class AppSettings
 {
     public string ServerUrl           { get; set; } = "ws://localhost:8765/ws/transcribe";
@@ -17,6 +24,7 @@ public class AppSettings
     public bool   AutoCopyToClipboard { get; set; } = false;
     public bool   AutoSendOnSilence      { get; set; } = false;
     public double SilenceThresholdSeconds { get; set; } = 2.0;
+    public SilenceSuffixMode SilenceSuffix { get; set; } = SilenceSuffixMode.Space;
 
     public bool   InjectTextDirectly { get; set; } = false;
 
