@@ -150,25 +150,6 @@
                                       VerticalAlignment="Center"/>
                     </Grid>
 
-                    <!-- Silence suffix row (visible when Inject is on) -->
-                    <Grid x:Name="SilenceSuffixRow" Padding="16,0,16,14" Visibility="Collapsed">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="1" Text="Avslutning per segment"
-                                   VerticalAlignment="Center"
-                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"
-                                   Margin="30,0,0,0"/>
-                        <ComboBox x:Name="SilenceSuffixComboBox" Grid.Column="2"
-                                  SelectionChanged="SilenceSuffix_Changed"
-                                  MinWidth="160">
-                            <ComboBoxItem Content="Mellomrom"/>
-                            <ComboBoxItem Content="Linjeskift"/>
-                            <ComboBoxItem Content="Dobbelt linjeskift"/>
-                        </ComboBox>
-                    </Grid>
                 </StackPanel>
             </Border>
         </StackPanel>

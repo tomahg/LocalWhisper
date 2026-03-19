@@ -195,12 +195,19 @@ public partial class App : Application
             }
 
             // --- Overlay mode ---
+            var sep = settings.SilenceSuffix switch
+            {
+                Models.SilenceSuffixMode.Newline       => "\n",
+                Models.SilenceSuffixMode.DoubleNewline => "\n\n",
+                _                                      => " "
+            };
+
             if (source == AutoSilence)
             {
                 // Intermediate result from silence detection — accumulate and keep listening
                 if (string.IsNullOrWhiteSpace(text)) return;
                 if (_accumulatedText.Length > 0)
-                    _accumulatedText += "\n";
+                    _accumulatedText += sep;
                 _accumulatedText += text;
                 if (settings.AutoCopyToClipboard)
                 {
@@ -218,7 +225,7 @@ public partial class App : Application
                     // Append final segment to accumulated text
                     if (!string.IsNullOrWhiteSpace(text))
                     {
-                        _accumulatedText += "\n";
+                        _accumulatedText += sep;
                         _accumulatedText += text;
                     }
                     text = _accumulatedText;

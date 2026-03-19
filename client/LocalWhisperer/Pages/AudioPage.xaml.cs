@@ -36,10 +36,6 @@ public sealed partial class AudioPage : Page
             ? Microsoft.UI.Xaml.Visibility.Visible
             : Microsoft.UI.Xaml.Visibility.Collapsed;
         InjectToggle.IsOn = _settings.InjectTextDirectly;
-        SilenceSuffixComboBox.SelectedIndex = (int)_settings.SilenceSuffix;
-        SilenceSuffixRow.Visibility = _settings.InjectTextDirectly
-            ? Microsoft.UI.Xaml.Visibility.Visible
-            : Microsoft.UI.Xaml.Visibility.Collapsed;
         AutoCopyRow.Visibility = _settings.InjectTextDirectly
             ? Microsoft.UI.Xaml.Visibility.Collapsed
             : Microsoft.UI.Xaml.Visibility.Visible;
@@ -95,21 +91,10 @@ public sealed partial class AudioPage : Page
         _settingsService.Save(_settings);
     }
 
-    private void SilenceSuffix_Changed(object sender, SelectionChangedEventArgs e)
-    {
-        if (_loading) return;
-        _settings.SilenceSuffix = (Models.SilenceSuffixMode)SilenceSuffixComboBox.SelectedIndex;
-        _settingsService.Save(_settings);
-    }
-
     private void Inject_Changed(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
         if (_loading) return;
         _settings.InjectTextDirectly = InjectToggle.IsOn;
-        var injectVis = InjectToggle.IsOn
-            ? Microsoft.UI.Xaml.Visibility.Visible
-            : Microsoft.UI.Xaml.Visibility.Collapsed;
-        SilenceSuffixRow.Visibility = injectVis;
         AutoCopyRow.Visibility = InjectToggle.IsOn
             ? Microsoft.UI.Xaml.Visibility.Collapsed
             : Microsoft.UI.Xaml.Visibility.Visible;
