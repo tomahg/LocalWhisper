@@ -25,9 +25,12 @@ public enum SegmentPrefixMode
 
 public enum OverlayPosition
 {
-    Right,
-    Center,
-    Left
+    BottomRight   = 0,
+    BottomCenter  = 1,
+    BottomLeft    = 2,
+    TopRight      = 3,
+    TopCenter     = 4,
+    TopLeft       = 5,
 }
 
 public enum InjectionMethod
@@ -62,7 +65,7 @@ public class AppSettings
     public SilenceSuffixMode SilenceSuffix     { get; set; } = SilenceSuffixMode.Space;
 
     // Display
-    public OverlayPosition OverlayPosition     { get; set; } = OverlayPosition.Right;
+    public OverlayPosition OverlayPosition     { get; set; } = OverlayPosition.BottomRight;
 
     // Silence level threshold for auto-send (compared against 36× amplified RMS level)
     public double SilenceLevelThreshold { get; set; } = 0.08;

@@ -15,6 +15,7 @@ namespace LocalWhisperer;
 public partial class App : Application
 {
     public static ServiceProvider Services { get; private set; } = null!;
+    public OverlayWindow? Overlay => _overlay;
 
     private MainWindow?     _window;
     private OverlayWindow?  _overlay;

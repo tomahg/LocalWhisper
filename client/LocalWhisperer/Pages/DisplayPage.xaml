@@ -33,9 +33,16 @@
 
                     <!-- Radio buttons -->
                     <StackPanel Padding="16,12,16,16" Spacing="8">
-                        <RadioButton x:Name="PositionRight"  Content="Høyre" GroupName="OverlayPosition" Checked="Position_Checked"/>
-                        <RadioButton x:Name="PositionCenter" Content="Midten" GroupName="OverlayPosition" Checked="Position_Checked"/>
-                        <RadioButton x:Name="PositionLeft"   Content="Venstre" GroupName="OverlayPosition" Checked="Position_Checked"/>
+                        <TextBlock Text="Øverst" FontSize="12"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        <RadioButton x:Name="PositionTopLeft"    Content="Venstre" GroupName="OverlayPosition" Checked="Position_Checked"/>
+                        <RadioButton x:Name="PositionTopCenter"  Content="Midten"  GroupName="OverlayPosition" Checked="Position_Checked"/>
+                        <RadioButton x:Name="PositionTopRight"   Content="Høyre"   GroupName="OverlayPosition" Checked="Position_Checked"/>
+                        <TextBlock Text="Nederst" FontSize="12" Margin="0,4,0,0"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        <RadioButton x:Name="PositionBottomLeft"   Content="Venstre" GroupName="OverlayPosition" Checked="Position_Checked"/>
+                        <RadioButton x:Name="PositionBottomCenter" Content="Midten"  GroupName="OverlayPosition" Checked="Position_Checked"/>
+                        <RadioButton x:Name="PositionBottomRight"  Content="Høyre"   GroupName="OverlayPosition" Checked="Position_Checked"/>
                     </StackPanel>
                 </StackPanel>
             </Border>

@@ -208,6 +208,16 @@ public sealed partial class OverlayWindow : Window
         });
     }
 
+    public void RepositionIfVisible()
+    {
+        if (!_appWindow.IsVisible) return;
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            var size = _appWindow.Size;
+            PositionOverlay(size.Width, size.Height);
+        });
+    }
+
     public void Hide()
     {
         DispatcherQueue.TryEnqueue(() =>
@@ -389,18 +399,22 @@ public sealed partial class OverlayWindow : Window
         var workArea = DisplayArea.GetFromWindowId(_appWindow.Id, DisplayAreaFallback.Primary).WorkArea;
         const int margin = 16;
 
-        var position = App.Services.GetRequiredService<Models.AppSettings>().OverlayPosition;
+        var position = _settings.OverlayPosition;
+        bool isTop = position is Models.OverlayPosition.TopLeft
+                              or Models.OverlayPosition.TopCenter
+                              or Models.OverlayPosition.TopRight;
+
         int x = position switch
         {
-            Models.OverlayPosition.Left   => workArea.X + margin,
-            Models.OverlayPosition.Center => workArea.X + (workArea.Width - width) / 2,
-            _                             => workArea.X + workArea.Width - width - margin
+            Models.OverlayPosition.BottomLeft  or Models.OverlayPosition.TopLeft   => workArea.X + margin,
+            Models.OverlayPosition.BottomCenter or Models.OverlayPosition.TopCenter => workArea.X + (workArea.Width - width) / 2,
+            _                                                                        => workArea.X + workArea.Width - width - margin
         };
+        int y = isTop
+            ? workArea.Y + margin
+            : workArea.Y + workArea.Height - height - margin;
 
-        _appWindow.MoveAndResize(new Windows.Graphics.RectInt32(
-            x,
-            workArea.Y + workArea.Height - height - margin,
-            width, height));
+        _appWindow.MoveAndResize(new Windows.Graphics.RectInt32(x, y, width, height));
 
         // Clip the window to a rounded rectangle — corners simply don't exist,
         // so there are no background-colour corner artifacts.

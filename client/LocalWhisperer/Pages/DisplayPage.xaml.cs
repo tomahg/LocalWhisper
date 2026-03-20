@@ -19,12 +19,16 @@ public sealed partial class DisplayPage : Page
         _settingsService = App.Services.GetRequiredService<SettingsService>();
 
         _loading = true;
-        switch (_settings.OverlayPosition)
+        var rb = _settings.OverlayPosition switch
         {
-            case OverlayPosition.Center: PositionCenter.IsChecked = true; break;
-            case OverlayPosition.Left:   PositionLeft.IsChecked   = true; break;
-            default:                     PositionRight.IsChecked  = true; break;
-        }
+            OverlayPosition.TopLeft     => PositionTopLeft,
+            OverlayPosition.TopCenter   => PositionTopCenter,
+            OverlayPosition.TopRight    => PositionTopRight,
+            OverlayPosition.BottomLeft  => PositionBottomLeft,
+            OverlayPosition.BottomCenter => PositionBottomCenter,
+            _                           => PositionBottomRight,
+        };
+        rb.IsChecked = true;
         _loading = false;
     }
 
@@ -33,10 +37,15 @@ public sealed partial class DisplayPage : Page
         if (_loading) return;
         _settings.OverlayPosition = sender switch
         {
-            RadioButton r when r == PositionCenter => OverlayPosition.Center,
-            RadioButton r when r == PositionLeft   => OverlayPosition.Left,
-            _                                      => OverlayPosition.Right
+            RadioButton r when r == PositionTopLeft     => OverlayPosition.TopLeft,
+            RadioButton r when r == PositionTopCenter   => OverlayPosition.TopCenter,
+            RadioButton r when r == PositionTopRight    => OverlayPosition.TopRight,
+            RadioButton r when r == PositionBottomLeft  => OverlayPosition.BottomLeft,
+            RadioButton r when r == PositionBottomCenter => OverlayPosition.BottomCenter,
+            _                                           => OverlayPosition.BottomRight,
         };
         _settingsService.Save(_settings);
+        if (Application.Current is App app)
+            app.Overlay?.RepositionIfVisible();
     }
 }
