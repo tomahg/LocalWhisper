@@ -5,7 +5,7 @@
     KeyDown="Page_KeyDown">
 
     <ScrollViewer>
-        <StackPanel Spacing="4" MaxWidth="460" HorizontalAlignment="Left" Margin="0,0,0,24">
+        <StackPanel Spacing="4" Margin="0,0,0,24">
             <TextBlock Text="Hurtigtast" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,12"/>
 
             <!-- Grouped card: Hotkey + Hold-to-talk -->
