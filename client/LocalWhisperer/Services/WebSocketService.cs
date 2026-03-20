@@ -20,6 +20,7 @@ public class WebSocketService : IAsyncDisposable
     public event Action<TranscriptionResult>? TranscriptionReceived;
     public event Action<Exception>? ConnectionError;
     public event Action? ConnectionRestored;
+    public event Action? Disconnected;
 
     public bool IsConnected => _ws?.State == WebSocketState.Open;
     public bool AutoReconnect { get; set; } = true;
@@ -29,6 +30,7 @@ public class WebSocketService : IAsyncDisposable
         _serverUrl = url;
         await DisconnectAsync();
         await ConnectCoreAsync(url);
+        ConnectionRestored?.Invoke();
     }
 
     private async Task ConnectCoreAsync(string url)
@@ -79,6 +81,8 @@ public class WebSocketService : IAsyncDisposable
     {
         if (_ws is null) return;
 
+        var wasConnected = _ws.State == WebSocketState.Open;
+
         _cts?.Cancel();
 
         if (_ws.State == WebSocketState.Open)
@@ -89,6 +93,9 @@ public class WebSocketService : IAsyncDisposable
 
         _ws.Dispose();
         _ws = null;
+
+        if (wasConnected)
+            Disconnected?.Invoke();
     }
 
     private async Task ReceiveLoopAsync()

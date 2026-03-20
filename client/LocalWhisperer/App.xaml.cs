@@ -129,7 +129,6 @@ public partial class App : Application
     private void InitializeTrayIcon()
     {
         _trayIcon = (TaskbarIcon)Resources["TrayIcon"];
-        _trayIcon.IconSource = new BitmapImage(UriIdle);
         _trayIcon.ContextFlyout = null; // Don't use WinUI MenuFlyout — it doesn't fire events
 
         _trayIcon.LeftClickCommand  = new RelayCommand(ShowWindow);
@@ -160,7 +159,11 @@ public partial class App : Application
         };
 
         ws.ConnectionError    += _ => UpdateTrayIcon(recording: false, connected: false);
+        ws.Disconnected       += () => UpdateTrayIcon(recording: false, connected: false);
         ws.ConnectionRestored += () => UpdateTrayIcon(recording: false, connected: true);
+
+        // Set correct initial icon — depends on AutoConnect result, so do it after events are wired
+        UpdateTrayIcon(recording: false, connected: ws.IsConnected);
         orchestrator.RecordingStateChanged += isRecording =>
         {
             UpdateTrayIcon(recording: isRecording, connected: true);
