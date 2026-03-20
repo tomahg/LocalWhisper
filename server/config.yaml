@@ -24,10 +24,6 @@ transcription:
   #     "int8"         — smallest VRAM footprint
   compute_type: "float16"
 
-streaming:
-  vad_enabled: true         # Voice Activity Detection (reduces hallucinations)
-  vad_threshold: 0.4        # Lower value → more audio passes through as "speech" (less filtering, fewer missed words, but more hallucinations on silence. (Range: 0.0–1.0)
-
 models:
   - id: "NbAiLab/nb-whisper-small"
     name: "NB Whisper Small (Norsk, rask)"

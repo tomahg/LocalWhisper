@@ -64,6 +64,10 @@ public class AppSettings
     // Display
     public OverlayPosition OverlayPosition     { get; set; } = OverlayPosition.Right;
 
+    // VAD (Voice Activity Detection) — synced to server on connect
+    public bool   VadEnabled   { get; set; } = true;
+    public double VadThreshold { get; set; } = 0.5;
+
     // Corrections
     public List<CorrectionEntry> Corrections   { get; set; } = [];
 }

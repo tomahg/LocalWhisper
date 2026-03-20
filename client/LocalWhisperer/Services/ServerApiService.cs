@@ -68,6 +68,31 @@ public class ServerApiService
             ?? new TranscriptionResult();
     }
 
+    /// <summary>POST /config/streaming — updates VAD settings on the server at runtime.</summary>
+    public async Task SetVadConfigAsync(string serverUrl, bool vadEnabled, double vadThreshold)
+    {
+        var baseUrl = WsToHttp(serverUrl);
+        var body = JsonSerializer.Serialize(new { vad_enabled = vadEnabled, vad_threshold = vadThreshold });
+        var response = await _http.PostAsync(
+            $"{baseUrl}/config/streaming",
+            new StringContent(body, Encoding.UTF8, "application/json"));
+        response.EnsureSuccessStatusCode();
+    }
+
+    /// <summary>POST /config/calibrate — sends noise audio, returns recommended VAD threshold.</summary>
+    public async Task<double> CalibrateVadAsync(string serverUrl, byte[] pcmData, CancellationToken ct = default)
+    {
+        var baseUrl = WsToHttp(serverUrl);
+        using var content = new ByteArrayContent(pcmData);
+        content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
+        var response = await _http.PostAsync($"{baseUrl}/config/calibrate", content, ct);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync(ct);
+        using var doc = JsonDocument.Parse(json);
+        return doc.RootElement.GetProperty("recommended_threshold").GetDouble();
+    }
+
     // ws://host:port/ws/transcribe → http://host:port
     private static string WsToHttp(string wsUrl)
     {

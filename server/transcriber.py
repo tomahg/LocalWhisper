@@ -128,6 +128,66 @@ class StreamingTranscriber:
         logger.debug("Final result [%d]: %r", self.segment_id, text)
         return {"type": "final", "text": text, "segment_id": self.segment_id}
 
+    def set_vad_config(self, vad_enabled: bool, vad_threshold: float) -> None:
+        """Update VAD settings at runtime (called by /config/streaming endpoint)."""
+        self.vad_enabled = vad_enabled
+        self.vad_threshold = max(0.0, min(1.0, vad_threshold))
+        logger.info("VAD config: enabled=%s threshold=%.2f", self.vad_enabled, self.vad_threshold)
+
+    def analyze_noise(self, pcm_bytes: bytes) -> dict:
+        """Analyze ambient noise audio using Silero VAD to recommend a threshold.
+
+        Sweeps VAD thresholds from 0.10 to 0.90 until the noise sample no longer
+        triggers speech detection. Returns the first suppressing threshold plus a
+        0.05 safety margin, so speech just above the noise floor still passes.
+        """
+        audio = np.frombuffer(pcm_bytes, dtype=np.int16).astype(np.float32) / 32768.0
+
+        if len(audio) < SAMPLE_RATE // 2:
+            logger.warning("Noise sample too short for calibration (< 0.5 s)")
+            return {"recommended_threshold": 0.5}
+
+        with self._inference_lock:
+            # Lazy-initialize the Silero VAD model if it hasn't been used yet.
+            if self.model._vad_model is None:
+                logger.debug("Force-initializing VAD model for calibration")
+                silence = np.zeros(SAMPLE_RATE, dtype=np.float32)
+                _ = list(self.model.transcribe(
+                    silence, vad_filter=True, vad_parameters={"threshold": 0.5},
+                )[0])
+
+            vad = self.model._vad_model
+            if vad is None:
+                logger.error("VAD model unavailable after initialization attempt")
+                return {"recommended_threshold": 0.5}
+
+            try:
+                from faster_whisper.vad import VadOptions
+                _use_vad_options = True
+            except ImportError:
+                _use_vad_options = False
+
+            for threshold in [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90]:
+                try:
+                    if _use_vad_options:
+                        timestamps = vad.get_speech_timestamps(audio, VadOptions(threshold=threshold))
+                    else:
+                        timestamps = vad.get_speech_timestamps(audio, threshold=threshold)  # type: ignore[call-arg]
+                except TypeError:
+                    # Fallback: some versions accept keyword args directly
+                    timestamps = vad.get_speech_timestamps(audio, threshold=threshold)  # type: ignore[call-arg]
+
+                if not timestamps:
+                    recommended = round(min(threshold + 0.05, 0.95), 2)
+                    logger.info(
+                        "Calibration: noise suppressed at %.2f → recommended %.2f",
+                        threshold, recommended,
+                    )
+                    return {"recommended_threshold": recommended, "noise_suppressed_at": threshold}
+
+        logger.warning("Calibration: noise too loud — recommending 0.95")
+        return {"recommended_threshold": 0.95}
+
     def transcribe_file(self, file_path: str) -> dict:
         """Transcribe an audio file directly (independent of the streaming buffer)."""
         vad_params = {"threshold": self.vad_threshold} if self.vad_enabled else {}

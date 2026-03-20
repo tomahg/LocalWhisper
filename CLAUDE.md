@@ -55,9 +55,10 @@ LocalWhisperer/
 
 ### Python / Server
 - Bruk `faster-whisper`, IKKE `openai-whisper` eller `transformers` pipeline.
-- WebSocket-endpoint mottar binære PCM-frames og returnerer JSON med `{"type": "partial"|"final", "text": "..."}`.
-- Sliding window-strategi: akkumuler audio, kjør inference hver ~2 sekunder, behold 0.5s overlapp.
-- REST-endpoints for `/health`, `/models`, `/models/switch`.
+- WebSocket-endpoint mottar binære PCM-frames og returnerer JSON med `{"type": "final", "text": "..."}`.
+- Bufferingsstrategi: akkumuler all PCM i én buffer, kjør én inferenspass når `audio_stop` mottas. Ingen sliding window.
+- REST-endpoints: `/health`, `/models`, `/models/switch`, `/config`, `/config/streaming`, `/config/calibrate`, `/transcribe/file`.
+- VAD-innstillinger (`vad_enabled`, `vad_threshold`) er **ikke** i `config.yaml` — de styres av klienten og synkroniseres via `POST /config/streaming` ved tilkobling. Serveren bruker code-level defaults (True / 0.5) inntil klienten setter dem.
 
 ### Kommunikasjon
 - Klient → Server: Binære WebSocket-frames (PCM audio) + JSON kontrollmeldinger

@@ -105,6 +105,76 @@
 
                 </StackPanel>
             </Border>
+        <!-- VAD card -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8">
+                <StackPanel>
+
+                    <!-- VAD enabled toggle -->
+                    <Grid Padding="16,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Grid.Column="0" Glyph="&#xE9F5;" FontSize="16"
+                                  VerticalAlignment="Center" Margin="0,0,14,0"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Talegjenkjenning (VAD)"/>
+                            <TextBlock Text="Filtrer vekk bakgrunnsstøy automatisk"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                        </StackPanel>
+                        <ToggleSwitch x:Name="VadEnabledToggle" Grid.Column="2"
+                                      OnContent="" OffContent="" MinWidth="0" Margin="16,0,0,0"
+                                      Toggled="VadEnabled_Changed"
+                                      VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- Divider + threshold panel (collapsed when VAD off) -->
+                    <Border x:Name="VadDivider" Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
+
+                    <StackPanel x:Name="VadSettingsPanel" Padding="16,12,16,16" Spacing="8">
+
+                        <!-- Threshold label row -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Terskelverdi"
+                                       VerticalAlignment="Center" FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            <TextBlock x:Name="VadThresholdLabel" Grid.Column="1"
+                                       VerticalAlignment="Center" FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        </Grid>
+
+                        <!-- Threshold slider -->
+                        <Slider x:Name="VadThresholdSlider"
+                                Minimum="0.10" Maximum="0.90" StepFrequency="0.05"
+                                ValueChanged="VadThreshold_Changed"/>
+
+                        <!-- Calibrate row -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="CalibrateStatusText" Grid.Column="0"
+                                       VerticalAlignment="Center" FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Visibility="Collapsed"/>
+                            <Button x:Name="CalibrateButton" Grid.Column="1"
+                                    Content="Kalibrér støy"
+                                    Click="CalibrateButton_Click"/>
+                        </Grid>
+
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
         </StackPanel>
     </ScrollViewer>
 </Page>

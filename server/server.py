@@ -6,7 +6,7 @@ import tempfile
 import time
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, File, UploadFile, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, File, Request, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 
 from config import load_config, AppConfig
@@ -89,6 +89,35 @@ async def switch_model(body: dict):
 @app.get("/config")
 async def get_config():
     return config.model_dump()
+
+
+@app.post("/config/streaming")
+async def set_streaming_config(body: dict):
+    vad_enabled = body.get("vad_enabled")
+    vad_threshold = body.get("vad_threshold")
+
+    if vad_enabled is None and vad_threshold is None:
+        return JSONResponse(status_code=400, content={"error": "vad_enabled or vad_threshold required"})
+
+    enabled = bool(vad_enabled) if vad_enabled is not None else transcriber.vad_enabled
+    threshold = float(vad_threshold) if vad_threshold is not None else transcriber.vad_threshold
+
+    if not 0.0 <= threshold <= 1.0:
+        return JSONResponse(status_code=400, content={"error": "vad_threshold must be between 0.0 and 1.0"})
+
+    transcriber.set_vad_config(enabled, threshold)
+    return {"status": "ok", "vad_enabled": transcriber.vad_enabled, "vad_threshold": transcriber.vad_threshold}
+
+
+@app.post("/config/calibrate")
+async def calibrate_vad(request: Request):
+    pcm_bytes = await request.body()
+    if len(pcm_bytes) < 8000:  # ~0.25 s at 16 kHz 16-bit mono
+        return JSONResponse(status_code=400, content={"error": "Audio too short (minimum ~0.5 s)"})
+
+    loop = asyncio.get_running_loop()
+    result = await loop.run_in_executor(None, transcriber.analyze_noise, pcm_bytes)
+    return result
 
 
 ALLOWED_EXTENSIONS = {".wav", ".mp3", ".m4a", ".ogg", ".flac", ".webm", ".wma", ".aac"}

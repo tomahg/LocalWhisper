@@ -121,7 +121,7 @@ Ved første oppstart starter appen i systemstatusfeltet (intet vindu vises). Iko
 | **Tilkobling** | Server-URL, koble til/fra |
 | **Hurtigtast** | Aktiv hurtigtast (F9), hold-to-talk-veksling |
 | **Modell** | Bytt transkripsjonmsodell under kjøring |
-| **Lyd** | Velg mikrofon, auto-kopier til utklippstavle, auto-send ved stillhet |
+| **Lyd** | Velg mikrofon, auto-kopier til utklippstavle, auto-send ved stillhet, VAD-følsomhet og støykalibrering |
 | **Visning** | Posisjon for overleggsvindu (høyre, midten, venstre) |
 | **Korreksjoner** | Ord- og fraseerstatninger som anvendes på transkripsjonen |
 | **Generelt** | Start/avslutning per segment, tekstinnlimingsmetode |
@@ -140,6 +140,8 @@ To moduser (konfigurerbart på Hurtigtast-siden):
 > Tips: Aktiver **Kopier automatisk til utklippstavle** på Lyd-siden for å hoppe over det manuelle kopieringstrinnet — resultatet kopieres automatisk når opptaket stopper.
 
 > Tips: Aktiver **Auto-send ved stillhet** på Lyd-siden for kontinuerlig diktering — transkriberte tekster akkumuleres i overleggsvinduet mens du snakker og pauser naturlig. Bruk **Avslutning per segment** for å styre hvordan pausene settes sammen: mellomrom (sammenhengende tekst), enkelt linjeskift eller dobbelt linjeskift (avsnittsskift).
+
+> Tips: Sitter du i støyende omgivelser og Whisper begynner å hallusinere tekst fra bakgrunnsstøy? Gå til **Lyd → Talegjenkjenning (VAD)** og trykk **Kalibrér støy**. Appen tar opp tre sekunder med bakgrunnslyd og beregner riktig terskelverdi automatisk.
 
 ---
 
@@ -171,7 +173,7 @@ Kreves kun for lukkede modeller. Unngår hastighetsbegrensning ved første nedla
 
 ### Konfigurasjon
 
-Rediger `config.yaml`:
+Rediger `config.yaml` for infrastrukturinnstillinger (modell, enhet, port):
 
 ```yaml
 transcription:
@@ -179,6 +181,8 @@ transcription:
   device: "cpu"        # "auto" | "cuda" | "cpu"
   compute_type: "int8" # "int8" for CPU, "float16" for GPU
 ```
+
+VAD-innstillinger (terskelverdi, av/på) settes fra klienten og synkroniseres automatisk ved tilkobling — de er ikke i `config.yaml`.
 
 Tilgjengelige modeller:
 
@@ -207,6 +211,9 @@ Den valgte modellen lastes ned fra HuggingFace ved første kjøring (~1–3 GB).
 | `/models` | GET | List tilgjengelige modeller |
 | `/models/switch` | POST | Bytt modell under kjøring |
 | `/config` | GET | Full konfigurasjon |
+| `/config/streaming` | POST | Oppdater VAD-innstillinger under kjøring |
+| `/config/calibrate` | POST | Analyser støyopptak, returner anbefalt VAD-terskel |
+| `/transcribe/file` | POST | Transkriber lydfil (wav, mp3, m4a, flac, …) |
 
 ```bash
 curl http://localhost:8765/health

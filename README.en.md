@@ -90,7 +90,7 @@ On first launch the app starts in the system tray (no window appears). The tray 
 | **Tilkobling** | Server URL, connect/disconnect |
 | **Hurtigtast** | Active hotkey (F9), hold-to-talk toggle |
 | **Modell** | Switch transcription model at runtime |
-| **Lyd** | Select microphone, auto-copy to clipboard, auto-send on silence (with configurable segment suffix) |
+| **Lyd** | Select microphone, auto-copy to clipboard, auto-send on silence, VAD sensitivity and noise calibration |
 | **Om** | About |
 
 Settings are persisted automatically between sessions.
@@ -106,6 +106,8 @@ Two modes (configurable in the Hurtigtast settings page):
 > Tip: Enable **auto-copy to clipboard** in the Lyd settings page to skip the manual copy step — the result is copied automatically when recording stops.
 
 > Tip: Enable **auto-send ved stillhet** in the Lyd settings page for continuous dictation — transcribed text accumulates in the overlay as you speak and pause naturally. Use the **Avslutning per segment** option to control how pauses are joined: space (continuous text), single newline, or double newline (paragraph break).
+
+> Tip: In noisy environments where Whisper starts hallucinating text from background noise, go to **Lyd → Talegjenkjenning (VAD)** and press **Kalibrér støy**. The app records three seconds of ambient noise and automatically calculates the right threshold.
 
 ---
 
@@ -137,7 +139,7 @@ Required only for gated models. Avoids rate-limiting on first download.
 
 ### Configuration
 
-Edit `config.yaml`:
+Edit `config.yaml` for infrastructure settings (model, device, port):
 
 ```yaml
 transcription:
@@ -145,6 +147,8 @@ transcription:
   device: "cpu"        # "auto" | "cuda" | "cpu"
   compute_type: "int8" # "int8" for CPU, "float16" for GPU
 ```
+
+VAD settings (threshold, enabled) are controlled by the client and synced automatically on connect — they are not in `config.yaml`.
 
 Available models:
 
@@ -178,6 +182,9 @@ INFO:     Application startup complete.
 | `/models` | GET | List available models |
 | `/models/switch` | POST | Switch model at runtime |
 | `/config` | GET | Full configuration |
+| `/config/streaming` | POST | Update VAD settings at runtime |
+| `/config/calibrate` | POST | Analyse noise recording, return recommended VAD threshold |
+| `/transcribe/file` | POST | Transcribe an audio file (wav, mp3, m4a, flac, …) |
 
 ```bash
 curl http://localhost:8765/health

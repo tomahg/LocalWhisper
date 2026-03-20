@@ -52,6 +52,7 @@ public class TranscriptionOrchestrator
         _audio.AudioLevelChanged  += OnAudioLevel;
         _audio.DeviceLost         += OnDeviceLost;
         _ws.TranscriptionReceived += OnTranscription;
+        _ws.ConnectionRestored    += async () => await SyncVadSettingsAsync();
     }
 
     public void StartRecording()
@@ -147,6 +148,53 @@ public class TranscriptionOrchestrator
         {
             TranscriptionUpdated?.Invoke(result, TranscriptionSource.Microphone);
         }
+    }
+
+    /// <summary>
+    /// Pushes the current VAD settings to the server. Called automatically on connect/reconnect
+    /// and can be called manually after settings change.
+    /// </summary>
+    public async Task SyncVadSettingsAsync()
+    {
+        if (!_ws.IsConnected) return;
+        try
+        {
+            await _api.SetVadConfigAsync(_settings.ServerUrl, _settings.VadEnabled, _settings.VadThreshold);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"VAD sync failed: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Records ambient noise for 3 seconds and asks the server to recommend a VAD threshold.
+    /// Must not be called while a recording session is active.
+    /// </summary>
+    public async Task<double> CalibrateVadAsync(CancellationToken ct = default)
+    {
+        if (IsRecording)
+            throw new InvalidOperationException("Kan ikke kalibrere under opptak.");
+
+        var buffer = new List<byte>();
+        void OnCalibrationAudio(byte[] pcm) { lock (buffer) buffer.AddRange(pcm); }
+
+        _audio.AudioDataAvailable += OnCalibrationAudio;
+        _audio.StartCapture(_settings.MicrophoneDeviceIndex, _settings.AudioSource);
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(3), ct);
+        }
+        finally
+        {
+            _audio.StopCapture();
+            _audio.AudioDataAvailable -= OnCalibrationAudio;
+        }
+
+        byte[] pcm;
+        lock (buffer) pcm = [.. buffer];
+
+        return await _api.CalibrateVadAsync(_settings.ServerUrl, pcm, ct);
     }
 
     public async Task TranscribeFileAsync(string filePath)
