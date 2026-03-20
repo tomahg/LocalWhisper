@@ -254,6 +254,9 @@ public partial class App : Application
                     return;
                 }
 
+                if (!char.IsWhiteSpace(text[^1]))
+                    text += sep;
+
                 if (settings.AutoCopyToClipboard)
                 {
                     _dispatcherQueue?.TryEnqueue(() => _overlay.CopyToClipboard(text));

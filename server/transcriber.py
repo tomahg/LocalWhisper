@@ -53,6 +53,7 @@ class StreamingTranscriber:
         self.audio_buffer = np.array([], dtype=np.float32)
         self.segment_id = 0
         self._inference_lock = threading.Lock()
+        self._switch_lock    = threading.Lock()
 
         logger.info(
             "Loading model '%s' on %s with compute_type=%s ...",
@@ -147,25 +148,34 @@ class StreamingTranscriber:
     def current_model_id(self) -> str:
         return self._current_model_id
 
+    @property
+    def device(self) -> str:
+        return self._device
+
+    @property
+    def compute_type(self) -> str:
+        return self._compute_type
+
     def switch_model(self, model_id: str) -> None:
-        if model_id == self._current_model_id:
-            return
-        logger.info("Switching model: %s → %s", self._current_model_id, model_id)
+        with self._switch_lock:
+            if model_id == self._current_model_id:
+                return
+            logger.info("Switching model: %s → %s", self._current_model_id, model_id)
 
-        # Load new model first without holding the lock — download can take minutes.
-        # Only swap if successful so we don't break the transcriber on failure.
-        new_model = WhisperModel(
-            model_id,
-            device=self._device,
-            compute_type=self._compute_type,
-        )
+            # Load new model while holding switch lock so concurrent calls queue up
+            # rather than downloading the same model twice.
+            new_model = WhisperModel(
+                model_id,
+                device=self._device,
+                compute_type=self._compute_type,
+            )
 
-        # Acquire inference lock so we never swap the model mid-transcription.
-        with self._inference_lock:
-            old_model = self.model
-            self.model = new_model
-            self._current_model_id = model_id
-            self.reset()
+            # Acquire inference lock so we never swap the model mid-transcription.
+            with self._inference_lock:
+                old_model = self.model
+                self.model = new_model
+                self._current_model_id = model_id
+                self.reset()
 
         del old_model
         try:
