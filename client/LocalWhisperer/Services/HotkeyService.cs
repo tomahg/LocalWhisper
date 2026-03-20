@@ -15,6 +15,7 @@ public class HotkeyService : IDisposable
 
     public event Action? HotkeyDown;
     public event Action? HotkeyUp;
+    public event Action? EscapePressed;
 
     private nint _hookHandle;
     private readonly LowLevelKeyboardProc _hookProc;
@@ -50,6 +51,8 @@ public class HotkeyService : IDisposable
         _hookHandle = 0;
     }
 
+    private const int VK_ESCAPE = 0x1B;
+
     // Suppress key-repeat: WH_KEYBOARD_LL fires for every repeat while held
     private bool _keyIsDown;
 
@@ -70,6 +73,10 @@ public class HotkeyService : IDisposable
                     _keyIsDown = false;
                     HotkeyUp?.Invoke();
                 }
+            }
+            else if (vk == VK_ESCAPE && wParam == WM_KEYDOWN)
+            {
+                EscapePressed?.Invoke();
             }
         }
         return CallNextHookEx(_hookHandle, nCode, wParam, lParam);

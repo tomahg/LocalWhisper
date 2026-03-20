@@ -352,6 +352,8 @@ public partial class App : Application
 
         _hotkey.Register(settings.HotkeyVirtualKey);
 
+        _hotkey.EscapePressed += () => _overlay?.Hide();
+
         _hotkey.HotkeyDown += () => _dispatcherQueue?.TryEnqueue(() =>
         {
             if (!ws.IsConnected) return;
