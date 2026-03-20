@@ -228,10 +228,9 @@ public class TranscriptionOrchestrator
         double sumSq = 0;
         foreach (var s in samples) sumSq += (double)s * s;
         double rawRms = Math.Sqrt(sumSq / samples.Length) / 32768.0;
-        double ambientLevel = rawRms * 36.0;
 
-        // Add 30% headroom so speech easily clears the gate, then round to 2 decimals
-        return Math.Clamp(Math.Round(ambientLevel * 1.3 + 0.02, 2), 0.00, 0.30);
+        // Add 30% headroom so speech easily clears the gate, then round to 3 decimals
+        return Math.Clamp(Math.Round(rawRms * 1.3 + 0.0005, 3), 0.000, 0.020);
     }
 
     public async Task TranscribeFileAsync(string filePath)

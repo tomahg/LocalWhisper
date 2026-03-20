@@ -16,6 +16,7 @@ public partial class App : Application
 {
     public static ServiceProvider Services { get; private set; } = null!;
     public OverlayWindow? Overlay => _overlay;
+    public void Exit() => ExitApp();
 
     private MainWindow?     _window;
     private OverlayWindow?  _overlay;

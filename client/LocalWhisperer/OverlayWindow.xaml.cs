@@ -197,10 +197,16 @@ public sealed partial class OverlayWindow : Window
         });
     }
 
+    /// <summary>
+    /// Amplification applied to raw RMS for the level bar display only.
+    /// Adjust this constant to change bar sensitivity without affecting silence detection.
+    /// </summary>
+    private const float LevelDisplayGain = 36f;
+
     public void UpdateAudioLevel(float level)
     {
         var threshold = (float)_settings.SilenceLevelThreshold;
-        var displayLevel = level < threshold ? 0f : level;
+        var displayLevel = level < threshold ? 0f : Math.Min(1f, level * LevelDisplayGain);
         DispatcherQueue.TryEnqueue(() =>
         {
             AudioLevelBarClip.Rect     = new Windows.Foundation.Rect(0, 0, AudioLevelBarContainer.ActualWidth * displayLevel, 6);

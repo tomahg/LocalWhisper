@@ -333,7 +333,7 @@ public class AudioCaptureService : IDisposable
             sum += (double)s * s;
         }
         var rms = (float)(Math.Sqrt(sum / samples) / 32768.0);
-        AudioLevelChanged?.Invoke(Math.Min(1f, rms * 36f));
+        AudioLevelChanged?.Invoke(rms);
     }
 
     private void OnRecordingStopped(object? sender, StoppedEventArgs e)

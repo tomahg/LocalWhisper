@@ -118,7 +118,7 @@
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                         </Grid>
                         <Slider x:Name="SilenceLevelSlider"
-                                Minimum="0.00" Maximum="0.30" StepFrequency="0.01"
+                                Minimum="0.000" Maximum="0.020" StepFrequency="0.001"
                                 ValueChanged="SilenceLevel_Changed"/>
 
                         <!-- Calibrate row -->

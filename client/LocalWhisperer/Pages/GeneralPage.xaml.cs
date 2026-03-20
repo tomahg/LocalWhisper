@@ -68,4 +68,10 @@ public sealed partial class GeneralPage : Page
             : InjectionMethod.Type;
         _settingsService.Save(_settings);
     }
+
+    private void ExitApp_Click(object sender, RoutedEventArgs e)
+    {
+        if (Application.Current is App app)
+            app.Exit();
+    }
 }

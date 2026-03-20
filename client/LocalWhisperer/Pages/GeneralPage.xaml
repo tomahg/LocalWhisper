@@ -162,6 +162,9 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
+            <Button Content="Avslutt LocalWhisperer"
+                    HorizontalAlignment="Right"
+                    Click="ExitApp_Click"/>
         </StackPanel>
     </ScrollViewer>
 </Page>

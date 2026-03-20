@@ -40,9 +40,9 @@ public sealed partial class AudioPage : Page
         SilenceThresholdRow.Visibility = silenceVis;
         SilenceLevelRow.Visibility     = silenceVis;
 
-        var clampedLevel = Math.Clamp(_settings.SilenceLevelThreshold, 0.00, 0.30);
+        var clampedLevel = Math.Clamp(_settings.SilenceLevelThreshold, 0.000, 0.020);
         SilenceLevelSlider.Value = clampedLevel;
-        SilenceLevelLabel.Text = clampedLevel.ToString("F2");
+        SilenceLevelLabel.Text = clampedLevel.ToString("F3");
 
         VadEnabledToggle.IsOn = _settings.VadEnabled;
         var clampedThreshold = Math.Clamp(_settings.VadThreshold, 0.10, 0.90);
@@ -98,8 +98,8 @@ public sealed partial class AudioPage : Page
     private void SilenceLevel_Changed(object sender, RangeBaseValueChangedEventArgs e)
     {
         if (_loading || _settings is null || SilenceLevelLabel is null || double.IsNaN(e.NewValue)) return;
-        var rounded = Math.Round(e.NewValue, 2);
-        SilenceLevelLabel.Text = rounded.ToString("F2");
+        var rounded = Math.Round(e.NewValue, 3);
+        SilenceLevelLabel.Text = rounded.ToString("F3");
         _settings.SilenceLevelThreshold = rounded;
         _settingsService.Save(_settings);
     }
@@ -127,11 +127,11 @@ public sealed partial class AudioPage : Page
             _settingsService.Save(_settings);
 
             _loading = true;
-            SilenceLevelSlider.Value = Math.Clamp(recommended, 0.00, 0.30);
-            SilenceLevelLabel.Text = recommended.ToString("F2");
+            SilenceLevelSlider.Value = Math.Clamp(recommended, 0.000, 0.020);
+            SilenceLevelLabel.Text = recommended.ToString("F3");
             _loading = false;
 
-            SilenceLevelStatusText.Text = $"Anbefalt: {recommended:F2}";
+            SilenceLevelStatusText.Text = $"Anbefalt: {recommended:F3}";
         }
         catch (OperationCanceledException)
         {
