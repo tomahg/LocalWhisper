@@ -128,7 +128,7 @@ public partial class App : Application
         RegisterHotkey();
 
         _window.AppWindow.Hide();
-        _window.AppWindow.Resize(new Windows.Graphics.SizeInt32(580, 720));
+        _window.AppWindow.Resize(new Windows.Graphics.SizeInt32(580, 800));
 
         var settings = Services.GetRequiredService<AppSettings>();
         if (settings.AutoConnect)

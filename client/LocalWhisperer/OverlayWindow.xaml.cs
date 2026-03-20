@@ -201,7 +201,7 @@ public sealed partial class OverlayWindow : Window
     /// Amplification applied to raw RMS for the level bar display only.
     /// Adjust this constant to change bar sensitivity without affecting silence detection.
     /// </summary>
-    private const float LevelDisplayGain = 36f;
+    private const float LevelDisplayGain = 24f;
 
     public void UpdateAudioLevel(float level)
     {

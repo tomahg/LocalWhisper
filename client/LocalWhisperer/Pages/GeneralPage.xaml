@@ -162,9 +162,14 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
-            <Button Content="Avslutt LocalWhisperer"
-                    HorizontalAlignment="Right"
-                    Click="ExitApp_Click"/>
+            <Button HorizontalAlignment="Center"
+                    Margin="0,12,0,0"
+                    Click="ExitApp_Click">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE7E8;" FontSize="14" Foreground="#C42B1C"/>
+                    <TextBlock Text="Avslutt"/>
+                </StackPanel>
+            </Button>
         </StackPanel>
     </ScrollViewer>
 </Page>
