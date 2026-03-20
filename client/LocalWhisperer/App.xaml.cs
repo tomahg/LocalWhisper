@@ -16,7 +16,6 @@ public partial class App : Application
 {
     public static ServiceProvider Services { get; private set; } = null!;
     public OverlayWindow? Overlay => _overlay;
-    public void Exit() => ExitApp();
 
     private MainWindow?     _window;
     private OverlayWindow?  _overlay;
@@ -352,7 +351,7 @@ public partial class App : Application
         var orchestrator = Services.GetRequiredService<TranscriptionOrchestrator>();
         var ws           = Services.GetRequiredService<WebSocketService>();
 
-        _hotkey.Register(settings.HotkeyVirtualKey);
+        _hotkey.Register(settings.HotkeyVirtualKey, settings.HotkeyModifiers);
 
         _hotkey.EscapePressed += () => _overlay?.Hide();
 
@@ -429,7 +428,7 @@ public partial class App : Application
         _window?.AppWindow.Hide();
     }
 
-    private void ExitApp()
+    public void ExitApp()
     {
         _isExiting = true;
         try

@@ -72,6 +72,6 @@ public sealed partial class GeneralPage : Page
     private void ExitApp_Click(object sender, RoutedEventArgs e)
     {
         if (Application.Current is App app)
-            app.Exit();
+            app.ExitApp();
     }
 }

@@ -48,6 +48,8 @@ public class AppSettings
     // Hotkey
     /// <summary>Win32 virtual-key code for the global hotkey. Default: F9 (0x78).</summary>
     public int    HotkeyVirtualKey      { get; set; } = 0x78;
+    /// <summary>Modifier bitmask: 1=Ctrl, 2=Shift, 4=Alt. Default: 0 (no modifiers).</summary>
+    public int    HotkeyModifiers       { get; set; } = 0;
     /// <summary>Human-readable name shown in the settings UI.</summary>
     public string HotkeyDisplayName     { get; set; } = "F9";
 

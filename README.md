@@ -119,12 +119,12 @@ Ved første oppstart starter appen i systemstatusfeltet (intet vindu vises). Iko
 | Side | Beskrivelse |
 |---|---|
 | **Tilkobling** | Server-URL, koble til/fra |
-| **Hurtigtast** | Aktiv hurtigtast (F9), hold-to-talk-veksling |
+| **Hurtigtast** | Aktiv hurtigtast, enkeltaster og modifikatorkombinasioner (Ctrl, Shift, Alt, Win), hold-to-talk-veksling |
 | **Modell** | Bytt transkripsjonmsodell under kjøring |
-| **Lyd** | Velg mikrofon, auto-kopier til utklippstavle, auto-send ved stillhet, VAD-følsomhet og støykalibrering |
-| **Visning** | Posisjon for overleggsvindu (høyre, midten, venstre) |
+| **Lyd** | Velg mikrofon, auto-kopier til utklippstavle, auto-send ved stillhet med lydnivåkalibrering, VAD-følsomhet og støykalibrering |
+| **Visning** | Posisjon for overleggsvindu (6 posisjoner: øverst/nederst × venstre/midten/høyre) — flyttes i sanntid |
 | **Korreksjoner** | Ord- og fraseerstatninger som anvendes på transkripsjonen |
-| **Generelt** | Start/avslutning per segment, tekstinnlimingsmetode |
+| **Generelt** | Start/avslutning per segment, tekstinnlimingsmetode, avslutt appen |
 | **Om** | Om appen |
 
 Innstillinger lagres automatisk mellom økter.

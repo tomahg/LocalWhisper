@@ -2,7 +2,8 @@
     x:Class="LocalWhisperer.Pages.HotkeyPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    KeyDown="Page_KeyDown">
+    KeyDown="Page_KeyDown"
+    KeyUp="Page_KeyUp">
 
     <ScrollViewer>
         <StackPanel Spacing="4" Margin="0,0,0,24">
@@ -30,12 +31,7 @@
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
                         </StackPanel>
                         <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="12,0,0,0">
-                            <Border Background="{ThemeResource AccentFillColorDefaultBrush}"
-                                    CornerRadius="5" Padding="12,5">
-                                <TextBlock x:Name="HotkeyLabel"
-                                           FontFamily="Consolas" FontSize="16"
-                                           Foreground="White"/>
-                            </Border>
+                            <StackPanel x:Name="HotkeyBadges" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center"/>
                             <Button x:Name="ChangeButton" Content="Endre..." Click="ChangeButton_Click"/>
                         </StackPanel>
                     </Grid>
@@ -45,8 +41,8 @@
 
             <InfoBar x:Name="CapturingBar"
                      IsOpen="False" Severity="Informational" IsClosable="False"
-                     Title="Venter på tast..."
-                     Message="Trykk ønsket tast. Esc avbryter."
+                     Title="Venter på tast(er)..."
+                     Message="Hold eventuelle modifikatorer (Ctrl, Shift, Alt) og trykk ønsket tast. ESC avbryter."
                      Margin="0,8,0,0"/>
         </StackPanel>
     </ScrollViewer>

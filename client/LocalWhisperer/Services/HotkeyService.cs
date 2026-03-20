@@ -9,9 +9,21 @@ namespace LocalWhisperer.Services;
 /// </summary>
 public class HotkeyService : IDisposable
 {
-    private const int WH_KEYBOARD_LL = 13;
-    private const int WM_KEYDOWN = 0x0100;
-    private const int WM_KEYUP = 0x0101;
+    private const int WH_KEYBOARD_LL  = 13;
+    private const int WM_KEYDOWN      = 0x0100;
+    private const int WM_KEYUP        = 0x0101;
+    private const int WM_SYSKEYDOWN   = 0x0104;
+    private const int WM_SYSKEYUP     = 0x0105;
+
+    // Left/right specific VK codes (what WH_KEYBOARD_LL actually reports)
+    private const int VK_LSHIFT   = 0xA0;
+    private const int VK_RSHIFT   = 0xA1;
+    private const int VK_LCONTROL = 0xA2;
+    private const int VK_RCONTROL = 0xA3;
+    private const int VK_LMENU    = 0xA4;
+    private const int VK_RMENU    = 0xA5;
+    private const int VK_LWIN     = 0x5B;
+    private const int VK_RWIN     = 0x5C;
 
     public event Action? HotkeyDown;
     public event Action? HotkeyUp;
@@ -20,6 +32,15 @@ public class HotkeyService : IDisposable
     private nint _hookHandle;
     private readonly LowLevelKeyboardProc _hookProc;
     private int _watchedVk;
+    private int _watchedModifiers; // bitmask: 1=Ctrl, 2=Shift, 4=Alt, 8=Win
+    private volatile bool _suspended;
+
+    // Real-time modifier tracking inside the hook
+    // Bitmask: 1=Ctrl, 2=Shift, 4=Alt, 8=Win
+    private volatile bool _ctrlDown;
+    private volatile bool _shiftDown;
+    private volatile bool _altDown;
+    private volatile bool _winDown;
 
     public HotkeyService()
     {
@@ -27,9 +48,10 @@ public class HotkeyService : IDisposable
         _hookProc = HookCallback;
     }
 
-    public void Register(int virtualKey)
+    public void Register(int virtualKey, int modifiers = 0)
     {
-        _watchedVk = virtualKey;
+        _watchedVk        = virtualKey;
+        _watchedModifiers = modifiers;
 
         if (_hookHandle != 0) return;
 
@@ -38,10 +60,11 @@ public class HotkeyService : IDisposable
             GetModuleHandle(module.ModuleName), 0);
     }
 
-    public void Update(int newVirtualKey)
+    public void Update(int newVirtualKey, int modifiers = 0)
     {
-        _watchedVk = newVirtualKey;
-        _keyIsDown = false;
+        _watchedVk        = newVirtualKey;
+        _watchedModifiers = modifiers;
+        _keyIsDown        = false;
     }
 
     public void Unregister()
@@ -58,29 +81,62 @@ public class HotkeyService : IDisposable
 
     private nint HookCallback(int nCode, nint wParam, nint lParam)
     {
-        if (nCode >= 0)
+        if (nCode >= 0 && !_suspended)
         {
-            var vk = Marshal.ReadInt32(lParam);
-            if (vk == _watchedVk)
+            var vk     = Marshal.ReadInt32(lParam);
+            bool isDown = wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN;
+            bool isUp   = wParam == WM_KEYUP   || wParam == WM_SYSKEYUP;
+
+            // Track modifier state (WH_KEYBOARD_LL reports specific left/right VK codes)
+            if      (vk is VK_LCONTROL or VK_RCONTROL) _ctrlDown  = isDown;
+            else if (vk is VK_LSHIFT   or VK_RSHIFT)   _shiftDown = isDown;
+            else if (vk is VK_LMENU    or VK_RMENU)    _altDown   = isDown;
+            else if (vk is VK_LWIN     or VK_RWIN)     _winDown   = isDown;
+
+            if (_watchedVk == 0)
             {
-                if (wParam == WM_KEYDOWN && !_keyIsDown)
+                // Modifier-only hotkey — fire when modifier state transitions to exact match
+                bool matches = ModifiersExactlyMatch();
+                if (isDown && matches && !_keyIsDown)
                 {
                     _keyIsDown = true;
                     HotkeyDown?.Invoke();
                 }
-                else if (wParam == WM_KEYUP)
+                else if (isUp && _keyIsDown && !matches)
                 {
                     _keyIsDown = false;
                     HotkeyUp?.Invoke();
                 }
             }
-            else if (vk == VK_ESCAPE && wParam == WM_KEYDOWN)
+            else if (vk == _watchedVk)
             {
-                EscapePressed?.Invoke();
+                if (isDown && !_keyIsDown && ModifiersExactlyMatch())
+                {
+                    _keyIsDown = true;
+                    HotkeyDown?.Invoke();
+                }
+                else if (isUp)
+                {
+                    _keyIsDown = false;
+                    HotkeyUp?.Invoke();
+                }
             }
+
+            if (vk == VK_ESCAPE && isDown)
+                EscapePressed?.Invoke();
         }
         return CallNextHookEx(_hookHandle, nCode, wParam, lParam);
     }
+
+    /// <summary>Temporarily disables hotkey firing (e.g. while the user is capturing a new hotkey).</summary>
+    public void Suspend() => _suspended = true;
+    public void Resume()  => _suspended = false;
+
+    private bool ModifiersExactlyMatch() =>
+        ((_watchedModifiers & 1) != 0) == _ctrlDown  &&
+        ((_watchedModifiers & 2) != 0) == _shiftDown &&
+        ((_watchedModifiers & 4) != 0) == _altDown   &&
+        ((_watchedModifiers & 8) != 0) == _winDown;
 
     public void Dispose() => Unregister();
 
