@@ -22,8 +22,7 @@ public sealed partial class HotkeyPage : Page
         _settingsService = App.Services.GetRequiredService<SettingsService>();
         _hotkey          = App.Services.GetRequiredService<HotkeyService>();
 
-        HotkeyLabel.Text      = _settings.HotkeyDisplayName;
-        HoldToTalkToggle.IsOn = _settings.HoldToTalk;
+        HotkeyLabel.Text = _settings.HotkeyDisplayName;
 
         IsTabStop = true; // needed to receive KeyDown
     }
@@ -75,13 +74,7 @@ public sealed partial class HotkeyPage : Page
         ChangeButton.IsEnabled = true;
     }
 
-    private void HoldToTalkToggle_Toggled(object sender, RoutedEventArgs e)
-    {
-        _settings.HoldToTalk = HoldToTalkToggle.IsOn;
-        _settingsService.Save(_settings);
-    }
-
-    private static string VirtualKeyToName(VirtualKey key) => key switch
+private static string VirtualKeyToName(VirtualKey key) => key switch
     {
         >= VirtualKey.F1 and <= VirtualKey.F24 =>
             $"F{(int)key - (int)VirtualKey.F1 + 1}",

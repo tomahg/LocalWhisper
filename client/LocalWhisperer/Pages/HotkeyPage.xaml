@@ -40,29 +40,6 @@
                         </StackPanel>
                     </Grid>
 
-                    <!-- Divider -->
-                    <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
-
-                    <!-- Hold-to-talk row -->
-                    <Grid Padding="16,14">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="Auto"/>
-                        </Grid.ColumnDefinitions>
-                        <FontIcon Grid.Column="0" Glyph="&#xE720;" FontSize="16"
-                                  VerticalAlignment="Center" Margin="0,0,14,0"
-                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="Hold nede for opptak"/>
-                            <TextBlock Text="Slipp tasten for å stoppe opptak"
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
-                        </StackPanel>
-                        <ToggleSwitch x:Name="HoldToTalkToggle" Grid.Column="2"
-                                      OnContent="" OffContent="" MinWidth="0" Margin="16,0,0,0"
-                                      Toggled="HoldToTalkToggle_Toggled"
-                                      VerticalAlignment="Center"/>
-                    </Grid>
                 </StackPanel>
             </Border>
 

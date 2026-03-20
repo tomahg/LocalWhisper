@@ -23,6 +23,8 @@ public partial class App : Application
     private DispatcherQueue? _dispatcherQueue;
     private bool             _isExiting;
     private string           _accumulatedText = "";
+    private DateTime         _hotkeyPressedAt;
+    private const int        HoldThresholdMs = 300;
 
     /// <summary>
     /// Injects text into the active window, converting '\n' characters to real Return key presses.
@@ -354,23 +356,22 @@ public partial class App : Application
         {
             if (!ws.IsConnected) return;
 
-            if (settings.HoldToTalk)
+            if (!orchestrator.IsRecording)
             {
-                if (!orchestrator.IsRecording) orchestrator.StartRecording();
+                _hotkeyPressedAt = DateTime.UtcNow;
+                orchestrator.StartRecording();
             }
             else
             {
-                if (!orchestrator.IsRecording)
-                    orchestrator.StartRecording();
-                else
-                    _ = orchestrator.StopRecordingAsync();
+                _ = orchestrator.StopRecordingAsync();
             }
         });
 
         _hotkey.HotkeyUp += () =>
         {
-            if (!settings.HoldToTalk) return;
-            _dispatcherQueue?.TryEnqueue(() => _ = orchestrator.StopRecordingAsync());
+            if (!orchestrator.IsRecording) return;
+            if ((DateTime.UtcNow - _hotkeyPressedAt).TotalMilliseconds >= HoldThresholdMs)
+                _dispatcherQueue?.TryEnqueue(() => _ = orchestrator.StopRecordingAsync());
         };
     }
 
