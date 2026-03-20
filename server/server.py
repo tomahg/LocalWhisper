@@ -81,7 +81,7 @@ async def switch_model(body: dict):
             content={"error": f"Unknown model '{model_id}'. Known: {sorted(known_ids)}"},
         )
 
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
     await loop.run_in_executor(None, transcriber.switch_model, model_id)
     return {"status": "ok", "model": transcriber.current_model_id}
 
@@ -114,7 +114,7 @@ async def transcribe_file(file: UploadFile = File(...)):
             tmp.write(data)
             tmp_path = tmp.name
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         t0 = time.perf_counter()
         result = await loop.run_in_executor(None, transcriber.transcribe_file, tmp_path)
         elapsed_ms = round((time.perf_counter() - t0) * 1000)
@@ -141,7 +141,7 @@ async def websocket_transcribe(websocket: WebSocket):
     logger.info("Client connected: %s", client)
 
     transcriber.reset()
-    loop = asyncio.get_event_loop()
+    loop = asyncio.get_running_loop()
 
     # Queue decouples the receive loop from inference.
     # Audio chunks (bytes) and control strings ("audio_stop", "close") are enqueued

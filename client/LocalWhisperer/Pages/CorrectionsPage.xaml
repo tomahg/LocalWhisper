@@ -23,7 +23,7 @@
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="Orderstattninger" Style="{StaticResource BodyStrongTextBlockStyle}"/>
-                            <TextBlock Text="Ord og fraser som erstattes automatisk i transkripsjonen"
+                            <TextBlock Text="Ord og fraser som erstattes automatisk. Bruk \n for å sette inn linjeskift."
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
                         </StackPanel>
                     </Grid>

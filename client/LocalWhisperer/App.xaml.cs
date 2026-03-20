@@ -60,6 +60,13 @@ public partial class App : Application
             InjectText(text);
     }
 
+    private static string GetSeparator(SilenceSuffixMode mode) => mode switch
+    {
+        SilenceSuffixMode.Newline       => "\n",
+        SilenceSuffixMode.DoubleNewline => "\n\n",
+        _                               => " "
+    };
+
     private static Uri AssetUri(string fileName) =>
         new(Path.Combine(AppContext.BaseDirectory, "Assets", fileName));
 
@@ -183,12 +190,7 @@ public partial class App : Application
                     // Inject this segment immediately; overlay stays in "Lytter..." state
                     if (!string.IsNullOrEmpty(text))
                     {
-                        var suffix = settings.SilenceSuffix switch
-                        {
-                            Models.SilenceSuffixMode.Newline       => "\n",
-                            Models.SilenceSuffixMode.DoubleNewline => "\n\n",
-                            _                                      => " "
-                        };
+                        var suffix   = GetSeparator(settings.SilenceSuffix);
                         var toInject = char.IsWhiteSpace(text[^1]) ? text : text + suffix;
                         Inject(toInject, settings);
                     }
@@ -199,12 +201,7 @@ public partial class App : Application
                 {
                     if (!string.IsNullOrEmpty(text))
                     {
-                        var suffix = settings.SilenceSuffix switch
-                        {
-                            Models.SilenceSuffixMode.Newline       => "\n",
-                            Models.SilenceSuffixMode.DoubleNewline => "\n\n",
-                            _                                      => " "
-                        };
+                        var suffix   = GetSeparator(settings.SilenceSuffix);
                         var toInject = char.IsWhiteSpace(text[^1]) ? text : text + suffix;
                         Inject(toInject, settings);
                     }
@@ -219,12 +216,7 @@ public partial class App : Application
             }
 
             // --- Overlay mode ---
-            var sep = settings.SilenceSuffix switch
-            {
-                Models.SilenceSuffixMode.Newline       => "\n",
-                Models.SilenceSuffixMode.DoubleNewline => "\n\n",
-                _                                      => " "
-            };
+            var sep = GetSeparator(settings.SilenceSuffix);
 
             if (source == AutoSilence)
             {
