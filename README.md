@@ -16,6 +16,37 @@ Standardmodell: **NbAiLab/nb-whisper-medium** — optimalisert for norsk.
 
 Klienten strømmer rå 16kHz PCM-lyd over WebSocket under opptak. Når opptaket stoppes (eller ved en stillhetspause), kjører serveren en inferenspass på den bufrede lyden og returnerer transkripsjonen.
 
+```mermaid
+sequenceDiagram
+    actor Bruker
+    participant Klient as Klient (WinUI 3)
+    participant Server as Server (Python)
+    participant Whisper as faster-whisper
+
+    Bruker->>Klient: Trykker F9
+    Klient->>Klient: Starter mikrofonopptak
+    Klient->>Bruker: Viser overleggsvindu (Lytter...)
+
+    loop Mens opptak pågår
+        Klient->>Server: PCM-lyd (binære WebSocket-frames)
+    end
+
+    Bruker->>Klient: Trykker F9 igjen (eller stillhet detekteres)
+    Klient->>Server: {"type": "audio_stop"}
+    Klient->>Bruker: Viser overleggsvindu (Behandler...)
+
+    Server->>Whisper: Inferens på bufret lyd
+    Whisper-->>Server: Transkriberte segmenter
+
+    Server-->>Klient: {"type": "final", "text": "..."}
+
+    alt Skriv tekst direkte inn
+        Klient->>Bruker: Injiserer tekst i aktivt felt (SendInput / Ctrl+V)
+    else Overleggsmodus
+        Klient->>Bruker: Viser resultat i overleggsvindu med Kopier-knapp
+    end
+```
+
 ---
 
 ## Prosjektstruktur
