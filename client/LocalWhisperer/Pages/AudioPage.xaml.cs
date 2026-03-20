@@ -33,12 +33,12 @@ public sealed partial class AudioPage : Page
         AutoSilenceToggle.IsOn = _settings.AutoSendOnSilence;
         SilenceThresholdBox.Value = _settings.SilenceThresholdSeconds;
         SilenceThresholdRow.Visibility = _settings.AutoSendOnSilence
-            ? Microsoft.UI.Xaml.Visibility.Visible
-            : Microsoft.UI.Xaml.Visibility.Collapsed;
+            ? Visibility.Visible
+            : Visibility.Collapsed;
         InjectToggle.IsOn = _settings.InjectTextDirectly;
         AutoCopyRow.Visibility = _settings.InjectTextDirectly
-            ? Microsoft.UI.Xaml.Visibility.Collapsed
-            : Microsoft.UI.Xaml.Visibility.Visible;
+            ? Visibility.Collapsed
+            : Visibility.Visible;
         _loading = false;
     }
 
@@ -65,20 +65,20 @@ public sealed partial class AudioPage : Page
         _settingsService.Save(_settings);
     }
 
-    private void AutoCopy_Changed(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private void AutoCopy_Changed(object sender, RoutedEventArgs e)
     {
         if (_loading) return;
         _settings.AutoCopyToClipboard = AutoCopyToggle.IsOn;
         _settingsService.Save(_settings);
     }
 
-    private void AutoSilence_Changed(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private void AutoSilence_Changed(object sender, RoutedEventArgs e)
     {
         if (_loading) return;
         _settings.AutoSendOnSilence = AutoSilenceToggle.IsOn;
         SilenceThresholdRow.Visibility = AutoSilenceToggle.IsOn
-            ? Microsoft.UI.Xaml.Visibility.Visible
-            : Microsoft.UI.Xaml.Visibility.Collapsed;
+            ? Visibility.Visible
+            : Visibility.Collapsed;
         _settingsService.Save(_settings);
     }
 
@@ -91,7 +91,7 @@ public sealed partial class AudioPage : Page
         _settingsService.Save(_settings);
     }
 
-    private void Inject_Changed(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
+    private void Inject_Changed(object sender, RoutedEventArgs e)
     {
         if (_loading) return;
         _settings.InjectTextDirectly = InjectToggle.IsOn;

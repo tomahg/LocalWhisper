@@ -73,13 +73,15 @@ class StreamingTranscriber:
             login(token=token, add_to_git_credential=False)
             logger.info("Logged in to HuggingFace with token from secrets.yaml")
 
-        print(f"Downloading / loading model '{self._current_model_id}' — this may take a few minutes on first run...", flush=True)
+        logger.info(
+            "Downloading / loading model '%s' — this may take a few minutes on first run...",
+            self._current_model_id,
+        )
         self.model = WhisperModel(
             self._current_model_id,
             device=self._device,
             compute_type=self._compute_type,
         )
-        print("Model ready.", flush=True)
         logger.info("Model loaded.")
 
     # ------------------------------------------------------------------

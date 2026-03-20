@@ -29,23 +29,32 @@ public enum InjectionMethod
 
 public class AppSettings
 {
-    public string ServerUrl           { get; set; } = "ws://localhost:8765/ws/transcribe";
-    public int    MicrophoneDeviceIndex { get; set; } = 0;
-    public AudioSourceMode AudioSource { get; set; } = AudioSourceMode.Microphone;
-    public bool   HoldToTalk          { get; set; } = false;
-    public bool   AutoConnect         { get; set; } = true;
-    public bool   AutoCopyToClipboard { get; set; } = false;
-    public bool   AutoSendOnSilence      { get; set; } = false;
-    public double SilenceThresholdSeconds { get; set; } = 2.0;
-    public SilenceSuffixMode SilenceSuffix  { get; set; } = SilenceSuffixMode.Space;
-    public OverlayPosition   OverlayPosition  { get; set; } = OverlayPosition.Right;
-    public InjectionMethod   InjectionMethod  { get; set; } = InjectionMethod.Type;
-    public List<CorrectionEntry> Corrections  { get; set; } = [];
+    // Connection
+    public string ServerUrl             { get; set; } = "ws://localhost:8765/ws/transcribe";
+    public bool   AutoConnect           { get; set; } = true;
 
-    public bool   InjectTextDirectly { get; set; } = false;
-
+    // Hotkey
     /// <summary>Win32 virtual-key code for the global hotkey. Default: F9 (0x78).</summary>
-    public int    HotkeyVirtualKey    { get; set; } = 0x78;
+    public int    HotkeyVirtualKey      { get; set; } = 0x78;
     /// <summary>Human-readable name shown in the settings UI.</summary>
-    public string HotkeyDisplayName   { get; set; } = "F9";
+    public string HotkeyDisplayName     { get; set; } = "F9";
+    public bool   HoldToTalk            { get; set; } = false;
+
+    // Audio capture
+    public AudioSourceMode AudioSource        { get; set; } = AudioSourceMode.Microphone;
+    public int             MicrophoneDeviceIndex { get; set; } = 0;
+    public bool            AutoSendOnSilence   { get; set; } = false;
+    public double          SilenceThresholdSeconds { get; set; } = 2.0;
+
+    // Text output
+    public bool            InjectTextDirectly  { get; set; } = false;
+    public InjectionMethod InjectionMethod     { get; set; } = InjectionMethod.Type;
+    public bool            AutoCopyToClipboard { get; set; } = false;
+    public SilenceSuffixMode SilenceSuffix     { get; set; } = SilenceSuffixMode.Space;
+
+    // Display
+    public OverlayPosition OverlayPosition     { get; set; } = OverlayPosition.Right;
+
+    // Corrections
+    public List<CorrectionEntry> Corrections   { get; set; } = [];
 }
