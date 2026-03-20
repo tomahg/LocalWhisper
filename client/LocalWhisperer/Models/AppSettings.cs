@@ -9,9 +9,18 @@ public enum AudioSourceMode
 
 public enum SilenceSuffixMode
 {
-    Space,
-    Newline,
-    DoubleNewline
+    None          = 0,
+    Space         = 1,
+    Newline       = 2,
+    DoubleNewline = 3
+}
+
+public enum SegmentPrefixMode
+{
+    None  = 0,
+    Space = 1,  // " "
+    Dash  = 2,  // "- "
+    Star  = 3   // "* "
 }
 
 public enum OverlayPosition
@@ -50,6 +59,7 @@ public class AppSettings
     public bool            InjectTextDirectly  { get; set; } = false;
     public InjectionMethod InjectionMethod     { get; set; } = InjectionMethod.Type;
     public bool            AutoCopyToClipboard { get; set; } = false;
+    public SegmentPrefixMode SegmentPrefix     { get; set; } = SegmentPrefixMode.None;
     public SilenceSuffixMode SilenceSuffix     { get; set; } = SilenceSuffixMode.Space;
 
     // Display

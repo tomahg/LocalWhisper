@@ -62,9 +62,18 @@ public partial class App : Application
 
     private static string GetSeparator(SilenceSuffixMode mode) => mode switch
     {
+        SilenceSuffixMode.Space         => " ",
         SilenceSuffixMode.Newline       => "\n",
         SilenceSuffixMode.DoubleNewline => "\n\n",
-        _                               => " "
+        _                               => ""
+    };
+
+    private static string GetPrefix(SegmentPrefixMode mode) => mode switch
+    {
+        SegmentPrefixMode.Space => " ",
+        SegmentPrefixMode.Dash  => "- ",
+        SegmentPrefixMode.Star  => "* ",
+        _                       => ""
     };
 
     private static Uri AssetUri(string fileName) =>
@@ -194,8 +203,9 @@ public partial class App : Application
                     // Inject this segment immediately; overlay stays in "Lytter..." state
                     if (!string.IsNullOrEmpty(text))
                     {
+                        var prefix   = GetPrefix(settings.SegmentPrefix);
                         var suffix   = GetSeparator(settings.SilenceSuffix);
-                        var toInject = char.IsWhiteSpace(text[^1]) ? text : text + suffix;
+                        var toInject = prefix + (char.IsWhiteSpace(text[^1]) ? text : text + suffix);
                         Inject(toInject, settings);
                     }
                     return;
@@ -205,8 +215,9 @@ public partial class App : Application
                 {
                     if (!string.IsNullOrEmpty(text))
                     {
+                        var prefix   = GetPrefix(settings.SegmentPrefix);
                         var suffix   = GetSeparator(settings.SilenceSuffix);
-                        var toInject = char.IsWhiteSpace(text[^1]) ? text : text + suffix;
+                        var toInject = prefix + (char.IsWhiteSpace(text[^1]) ? text : text + suffix);
                         Inject(toInject, settings);
                     }
                     _overlay.Hide();
@@ -228,7 +239,7 @@ public partial class App : Application
                 if (string.IsNullOrWhiteSpace(text)) return;
                 if (_accumulatedText.Length > 0)
                     _accumulatedText += sep;
-                _accumulatedText += text;
+                _accumulatedText += GetPrefix(settings.SegmentPrefix) + text;
                 if (settings.AutoCopyToClipboard)
                 {
                     _dispatcherQueue?.TryEnqueue(() => _overlay.CopyToClipboard(_accumulatedText));
@@ -246,10 +257,14 @@ public partial class App : Application
                     if (!string.IsNullOrWhiteSpace(text))
                     {
                         _accumulatedText += sep;
-                        _accumulatedText += text;
+                        _accumulatedText += GetPrefix(settings.SegmentPrefix) + text;
                     }
                     text = _accumulatedText;
                     _accumulatedText = "";
+                }
+                else if (!string.IsNullOrWhiteSpace(text))
+                {
+                    text = GetPrefix(settings.SegmentPrefix) + text;
                 }
 
                 if (string.IsNullOrWhiteSpace(text))

@@ -12,7 +12,35 @@
                     BorderThickness="1" CornerRadius="8">
 
                 <StackPanel>
-                    <!-- Header row -->
+                    <!-- Start per segment row -->
+                    <Grid Padding="16,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Grid.Column="0" Glyph="&#xE9D2;" FontSize="16"
+                                  VerticalAlignment="Center" Margin="0,0,14,0"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Start per segment" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                            <TextBlock Text="Hva som legges foran"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                        </StackPanel>
+                        <ComboBox x:Name="SegmentPrefixComboBox" Grid.Column="2"
+                                  SelectionChanged="SegmentPrefix_Changed"
+                                  MinWidth="160">
+                            <ComboBoxItem Content="(Ingen)"/>
+                            <ComboBoxItem Content="Mellomrom"/>
+                            <ComboBoxItem Content="Bindestrek"/>
+                            <ComboBoxItem Content="Stjerne"/>
+                        </ComboBox>
+                    </Grid>
+
+                    <!-- Divider -->
+                    <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
+
+                    <!-- Avslutning per segment row -->
                     <Grid Padding="16,14">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -30,6 +58,7 @@
                         <ComboBox x:Name="SilenceSuffixComboBox" Grid.Column="2"
                                   SelectionChanged="SilenceSuffix_Changed"
                                   MinWidth="160">
+                            <ComboBoxItem Content="(Ingen)"/>
                             <ComboBoxItem Content="Mellomrom"/>
                             <ComboBoxItem Content="Linjeskift"/>
                             <ComboBoxItem Content="Dobbelt linjeskift"/>

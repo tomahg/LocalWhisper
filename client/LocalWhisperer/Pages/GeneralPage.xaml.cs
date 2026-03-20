@@ -19,12 +19,20 @@ public sealed partial class GeneralPage : Page
         _settingsService = App.Services.GetRequiredService<SettingsService>();
 
         _loading = true;
+        SegmentPrefixComboBox.SelectedIndex = (int)_settings.SegmentPrefix;
         SilenceSuffixComboBox.SelectedIndex = (int)_settings.SilenceSuffix;
         if (_settings.InjectionMethod == InjectionMethod.Paste)
             MethodPaste.IsChecked = true;
         else
             MethodType.IsChecked = true;
         _loading = false;
+    }
+
+    private void SegmentPrefix_Changed(object sender, SelectionChangedEventArgs e)
+    {
+        if (_loading) return;
+        _settings.SegmentPrefix = (SegmentPrefixMode)SegmentPrefixComboBox.SelectedIndex;
+        _settingsService.Save(_settings);
     }
 
     private void SilenceSuffix_Changed(object sender, SelectionChangedEventArgs e)
