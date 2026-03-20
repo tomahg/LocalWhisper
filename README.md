@@ -133,6 +133,8 @@ Innstillinger lagres automatisk mellom økter.
 
 Standard: **F9**
 
+Støtter enkeltaster (F1–F24, bokstaver, piltaster, osv.), modifikatorkombinasioner (Ctrl, Shift, Alt, Win — én eller flere), og rene modifikatorer alene (f.eks. kun Shift).
+
 To moduser (konfigurerbart på Hurtigtast-siden):
 - **Veksle** (standard) — trykk én gang for å starte, trykk igjen for å stoppe
 - **Hold-to-talk** — hold tasten inne mens du snakker, slipp for å stoppe
@@ -140,6 +142,8 @@ To moduser (konfigurerbart på Hurtigtast-siden):
 > Tips: Aktiver **Kopier automatisk til utklippstavle** på Lyd-siden for å hoppe over det manuelle kopieringstrinnet — resultatet kopieres automatisk når opptaket stopper.
 
 > Tips: Aktiver **Auto-send ved stillhet** på Lyd-siden for kontinuerlig diktering — transkriberte tekster akkumuleres i overleggsvinduet mens du snakker og pauser naturlig. Bruk **Avslutning per segment** for å styre hvordan pausene settes sammen: mellomrom (sammenhengende tekst), enkelt linjeskift eller dobbelt linjeskift (avsnittsskift).
+
+> Tips: Opptaksnivåindikatoren viser ikke lyd under stilleterskel — bruk **Lyd → Auto-send ved stillhet → Kalibrér lydnivå** for å stille inn terskelen automatisk basert på tre sekunder med omgivelseslyd.
 
 > Tips: Sitter du i støyende omgivelser og Whisper begynner å hallusinere tekst fra bakgrunnsstøy? Gå til **Lyd → Talegjenkjenning (VAD)** og trykk **Kalibrér støy**. Appen tar opp tre sekunder med bakgrunnslyd og beregner riktig terskelverdi automatisk.
 
@@ -248,3 +252,4 @@ Forventet utdata:
 - Transkripsjon kjøres etter at opptaket stopper (eller per stillhetspause med auto-send) — lengre opptak mellom pauser betyr lengre ventetid for hvert resultat.
 - faster-whisper støtter ikke Metal/MPS — macOS bruker CPU med int8.
 - Den globale tastatturhoken (`WH_KEYBOARD_LL`) kan bli blokkert i noen bedriftsmiljøer.
+- `Fn`-tasten genereres på maskinvarenivå og når aldri operativsystemet — den kan ikke brukes som hurtigtast.

@@ -52,6 +52,8 @@ LocalWhisperer/
 - Tekst-injeksjon: Bruk `SendInput` med `KEYEVENTF_UNICODE` for norske tegn (æøå). Clipboard+Ctrl+V som fallback for lange tekster.
 - Audio sendes som rå binære WebSocket-frames. Ingen base64-encoding for audio.
 - Partial-tekst oppdateres ved å sende backspace for forrige partial, deretter ny tekst.
+- Hotkey støtter modifikatorkombinasioner (1=Ctrl, 2=Shift, 4=Alt, 8=Win) og modifier-only (`_watchedVk == 0`). `HotkeyService.Suspend()`/`Resume()` deaktiverer hooken under tast-capture for å hindre at gjeldende hurtigtast avbryter capture-modus.
+- Lydnivå emitteres som rå RMS (`sqrt(sum(s²)/n) / 32768.0`) fra `AudioCaptureService` — ingen forsterkning. Visuell forsterkning (`LevelDisplayGain = 8f`) brukes kun i `OverlayWindow` og påvirker ikke stilledeteksjon.
 
 ### Python / Server
 - Bruk `faster-whisper`, IKKE `openai-whisper` eller `transformers` pipeline.
@@ -91,6 +93,7 @@ Følg fasene i PLAN.md:
 
 ## Kjente begrensninger å være klar over
 - faster-whisper støtter ikke Metal/MPS direkte — på Mac brukes CPU med int8 (som likevel er rask).
-- Whisper er ikke en ekte streaming-modell — vi simulerer streaming med sliding window.
+- Whisper er ikke en ekte streaming-modell — PCM akkumuleres i én buffer og inferens kjøres én gang ved `audio_stop` (eller per stillhetspause med auto-send).
 - `SendInput` fungerer ikke i apper som kjører med høyere privilege-nivå enn klienten (f.eks. admin-apper). Dokumenter dette.
 - WinUI 3 system tray er ikke like modent som WPF — forvent noen quirks med `H.NotifyIcon.WinUI`.
+- `Fn`-tasten genereres på maskinvarenivå og når aldri OS — den kan ikke fanges opp av `WH_KEYBOARD_LL`.

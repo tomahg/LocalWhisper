@@ -88,9 +88,12 @@ On first launch the app starts in the system tray (no window appears). The tray 
 | Page | Description |
 |---|---|
 | **Tilkobling** | Server URL, connect/disconnect |
-| **Hurtigtast** | Active hotkey (F9), hold-to-talk toggle |
+| **Hurtigtast** | Active hotkey, single keys and modifier combinations (Ctrl, Shift, Alt, Win), hold-to-talk toggle |
 | **Modell** | Switch transcription model at runtime |
-| **Lyd** | Select microphone, auto-copy to clipboard, auto-send on silence, VAD sensitivity and noise calibration |
+| **Lyd** | Select microphone, auto-copy to clipboard, auto-send on silence with silence level calibration, VAD sensitivity and noise calibration |
+| **Visning** | Overlay window position (6 positions: top/bottom × left/center/right) — repositions live |
+| **Korreksjoner** | Word and phrase replacements applied to transcriptions |
+| **Generelt** | Segment prefix/suffix, text injection method, quit the app |
 | **Om** | About |
 
 Settings are persisted automatically between sessions.
@@ -99,6 +102,8 @@ Settings are persisted automatically between sessions.
 
 Default: **F9**
 
+Supports single keys (F1–F24, letters, arrow keys, etc.), modifier combinations (Ctrl, Shift, Alt, Win — one or more), and modifier-only hotkeys (e.g. Shift alone or Ctrl+Win).
+
 Two modes (configurable in the Hurtigtast settings page):
 - **Toggle** (default) — press once to start, press again to stop
 - **Hold-to-talk** — hold key while speaking, release to stop
@@ -106,6 +111,8 @@ Two modes (configurable in the Hurtigtast settings page):
 > Tip: Enable **auto-copy to clipboard** in the Lyd settings page to skip the manual copy step — the result is copied automatically when recording stops.
 
 > Tip: Enable **auto-send ved stillhet** in the Lyd settings page for continuous dictation — transcribed text accumulates in the overlay as you speak and pause naturally. Use the **Avslutning per segment** option to control how pauses are joined: space (continuous text), single newline, or double newline (paragraph break).
+
+> Tip: The recording level indicator does not show audio below the silence threshold — use **Lyd → Auto-send on silence → Kalibrér lydnivå** to set the threshold automatically from three seconds of ambient audio.
 
 > Tip: In noisy environments where Whisper starts hallucinating text from background noise, go to **Lyd → Talegjenkjenning (VAD)** and press **Kalibrér støy**. The app records three seconds of ambient noise and automatically calculates the right threshold.
 
@@ -219,3 +226,4 @@ Expected output:
 - Transcription runs after recording stops (or per silence pause with auto-send) — longer recordings between pauses mean a longer wait for each result.
 - faster-whisper does not support Metal/MPS — macOS uses CPU with int8.
 - The global keyboard hook (`WH_KEYBOARD_LL`) may be blocked in some enterprise environments.
+- The `Fn` key is generated at hardware level and never reaches the OS — it cannot be used as a hotkey.
