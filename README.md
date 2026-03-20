@@ -77,9 +77,9 @@ On first launch the app starts in the system tray (no window appears). The tray 
 
 | Icon | State |
 |---|---|
-| Blue | Idle / connected |
-| Red | Recording |
-| Gray | Disconnected |
+| 🟢 Green circle | Connected / idle |
+| 🔴 Red circle | Recording |
+| ⬛ Dark gray square | Disconnected |
 
 **Right-click** the tray icon for the context menu. **Left-click** opens the settings window.
 

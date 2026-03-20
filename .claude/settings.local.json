@@ -41,7 +41,8 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:api.github.com)",
       "WebSearch",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(git diff:*)"
     ]
   }
 }

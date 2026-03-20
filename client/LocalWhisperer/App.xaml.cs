@@ -70,8 +70,9 @@ public partial class App : Application
     private static Uri AssetUri(string fileName) =>
         new(Path.Combine(AppContext.BaseDirectory, "Assets", fileName));
 
-    private static readonly Uri UriIdle      = AssetUri("tray-idle.ico");
-    private static readonly Uri UriListening = AssetUri("tray-listening.ico");
+    private static readonly Uri UriIdle         = AssetUri("tray-idle.ico");
+    private static readonly Uri UriListening    = AssetUri("tray-listening.ico");
+    private static readonly Uri UriDisconnected = AssetUri("tray-disconnected.ico");
 
     public App()
     {
@@ -311,7 +312,7 @@ public partial class App : Application
         {
             if (_trayIcon is null) return;
 
-            _trayIcon.IconSource  = new BitmapImage(recording ? UriListening : UriIdle);
+            _trayIcon.IconSource  = new BitmapImage(recording ? UriListening : connected ? UriIdle : UriDisconnected);
             _trayIcon.ToolTipText = connected
                 ? (recording ? "LocalWhisperer – Tar opp..." : "Local Whisperer – Tilkoblet")
                 : "Local Whisperer – Frakoblet";
