@@ -19,33 +19,29 @@ public sealed partial class DisplayPage : Page
         _settingsService = App.Services.GetRequiredService<SettingsService>();
 
         _loading = true;
-        var rb = _settings.OverlayPosition switch
-        {
-            OverlayPosition.TopLeft     => PositionTopLeft,
-            OverlayPosition.TopCenter   => PositionTopCenter,
-            OverlayPosition.TopRight    => PositionTopRight,
-            OverlayPosition.BottomLeft  => PositionBottomLeft,
-            OverlayPosition.BottomCenter => PositionBottomCenter,
-            _                           => PositionBottomRight,
-        };
-        rb.IsChecked = true;
+        var pos = _settings.OverlayPosition;
+        VPosTop.IsChecked    = pos is OverlayPosition.TopLeft    or OverlayPosition.TopCenter    or OverlayPosition.TopRight;
+        VPosBottom.IsChecked = pos is OverlayPosition.BottomLeft or OverlayPosition.BottomCenter or OverlayPosition.BottomRight;
+        HPosLeft.IsChecked   = pos is OverlayPosition.TopLeft    or OverlayPosition.BottomLeft;
+        HPosCenter.IsChecked = pos is OverlayPosition.TopCenter  or OverlayPosition.BottomCenter;
+        HPosRight.IsChecked  = pos is OverlayPosition.TopRight   or OverlayPosition.BottomRight;
         _loading = false;
     }
 
     private void Position_Checked(object sender, RoutedEventArgs e)
     {
         if (_loading) return;
-        _settings.OverlayPosition = sender switch
-        {
-            RadioButton r when r == PositionTopLeft     => OverlayPosition.TopLeft,
-            RadioButton r when r == PositionTopCenter   => OverlayPosition.TopCenter,
-            RadioButton r when r == PositionTopRight    => OverlayPosition.TopRight,
-            RadioButton r when r == PositionBottomLeft  => OverlayPosition.BottomLeft,
-            RadioButton r when r == PositionBottomCenter => OverlayPosition.BottomCenter,
-            _                                           => OverlayPosition.BottomRight,
-        };
+        _settings.OverlayPosition = CombinedPosition();
         _settingsService.Save(_settings);
         if (Application.Current is App app)
             app.Overlay?.RepositionIfVisible();
+    }
+
+    private OverlayPosition CombinedPosition()
+    {
+        bool top = VPosTop.IsChecked == true;
+        if (HPosLeft.IsChecked   == true) return top ? OverlayPosition.TopLeft    : OverlayPosition.BottomLeft;
+        if (HPosCenter.IsChecked == true) return top ? OverlayPosition.TopCenter  : OverlayPosition.BottomCenter;
+        return                                   top ? OverlayPosition.TopRight   : OverlayPosition.BottomRight;
     }
 }

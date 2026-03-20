@@ -23,7 +23,7 @@
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="Plassering av overlay" Style="{StaticResource BodyStrongTextBlockStyle}"/>
-                            <TextBlock Text="Hjørne der transkripsjonsvindtet vises"
+                            <TextBlock Text="Der transkripsjonsvindtet vises"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
                         </StackPanel>
                     </Grid>
@@ -31,18 +31,28 @@
                     <!-- Divider -->
                     <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
 
-                    <!-- Radio buttons -->
-                    <StackPanel Padding="16,12,16,16" Spacing="8">
-                        <TextBlock Text="Øverst" FontSize="12"
+                    <!-- Vertical position -->
+                    <StackPanel Padding="16,12,16,12">
+                        <TextBlock Text="Loddrett" FontSize="12" Margin="0,0,0,8"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                        <RadioButton x:Name="PositionTopLeft"    Content="Venstre" GroupName="OverlayPosition" Checked="Position_Checked"/>
-                        <RadioButton x:Name="PositionTopCenter"  Content="Midten"  GroupName="OverlayPosition" Checked="Position_Checked"/>
-                        <RadioButton x:Name="PositionTopRight"   Content="Høyre"   GroupName="OverlayPosition" Checked="Position_Checked"/>
-                        <TextBlock Text="Nederst" FontSize="12" Margin="0,4,0,0"
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <RadioButton x:Name="VPosTop"    Content="Øverst"  GroupName="OverlayVPos" Checked="Position_Checked"/>
+                            <RadioButton x:Name="VPosBottom" Content="Nederst" GroupName="OverlayVPos" Checked="Position_Checked"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Divider -->
+                    <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
+
+                    <!-- Horizontal position -->
+                    <StackPanel Padding="16,12,16,16">
+                        <TextBlock Text="Vannrett" FontSize="12" Margin="0,0,0,8"
                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                        <RadioButton x:Name="PositionBottomLeft"   Content="Venstre" GroupName="OverlayPosition" Checked="Position_Checked"/>
-                        <RadioButton x:Name="PositionBottomCenter" Content="Midten"  GroupName="OverlayPosition" Checked="Position_Checked"/>
-                        <RadioButton x:Name="PositionBottomRight"  Content="Høyre"   GroupName="OverlayPosition" Checked="Position_Checked"/>
+                        <StackPanel Orientation="Horizontal" Spacing="16">
+                            <RadioButton x:Name="HPosLeft"   Content="Venstre" GroupName="OverlayHPos" Checked="Position_Checked"/>
+                            <RadioButton x:Name="HPosCenter" Content="Midten"  GroupName="OverlayHPos" Checked="Position_Checked"/>
+                            <RadioButton x:Name="HPosRight"  Content="Høyre"   GroupName="OverlayHPos" Checked="Position_Checked"/>
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
             </Border>
