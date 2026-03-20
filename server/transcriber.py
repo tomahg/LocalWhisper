@@ -135,11 +135,15 @@ class StreamingTranscriber:
         logger.info("VAD config: enabled=%s threshold=%.2f", self.vad_enabled, self.vad_threshold)
 
     def analyze_noise(self, pcm_bytes: bytes) -> dict:
-        """Analyze ambient noise audio using Silero VAD to recommend a threshold.
+        """Analyze ambient noise to recommend a VAD threshold.
 
-        Sweeps VAD thresholds from 0.10 to 0.90 until the noise sample no longer
-        triggers speech detection. Returns the first suppressing threshold plus a
-        0.05 safety margin, so speech just above the noise floor still passes.
+        Sweeps Silero VAD thresholds from 0.90 down to 0.10, stopping at the first
+        threshold where the noise is classified as speech. The recommended threshold
+        is one step (0.10) above that boundary so real speech still passes comfortably.
+
+        Uses only the public transcribe() API — no access to faster-whisper internals.
+        When VAD finds no speech the generator is immediately empty and Whisper never
+        runs, so only the single boundary threshold triggers an actual inference pass.
         """
         audio = np.frombuffer(pcm_bytes, dtype=np.int16).astype(np.float32) / 32768.0
 
@@ -147,46 +151,29 @@ class StreamingTranscriber:
             logger.warning("Noise sample too short for calibration (< 0.5 s)")
             return {"recommended_threshold": 0.5}
 
+        boundary: float | None = None
         with self._inference_lock:
-            # Lazy-initialize the Silero VAD model if it hasn't been used yet.
-            if self.model._vad_model is None:
-                logger.debug("Force-initializing VAD model for calibration")
-                silence = np.zeros(SAMPLE_RATE, dtype=np.float32)
-                _ = list(self.model.transcribe(
-                    silence, vad_filter=True, vad_parameters={"threshold": 0.5},
-                )[0])
+            for threshold in [0.90, 0.80, 0.70, 0.60, 0.50, 0.40, 0.30, 0.20, 0.10]:
+                segments_gen, _ = self.model.transcribe(
+                    audio,
+                    language=self.language,
+                    beam_size=1,
+                    vad_filter=True,
+                    vad_parameters={"threshold": threshold},
+                )
+                # Empty generator → VAD found no speech → Whisper never ran (fast path)
+                if any(True for _ in segments_gen):
+                    boundary = threshold
+                    break
 
-            vad = self.model._vad_model
-            if vad is None:
-                logger.error("VAD model unavailable after initialization attempt")
-                return {"recommended_threshold": 0.5}
+        if boundary is None:
+            # Noise so quiet it's suppressed even at the most permissive threshold
+            logger.info("Calibration: noise suppressed at all thresholds → recommended 0.15")
+            return {"recommended_threshold": 0.15}
 
-            try:
-                from faster_whisper.vad import VadOptions
-                _use_vad_options = True
-            except ImportError:
-                _use_vad_options = False
-
-            for threshold in [0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90]:
-                try:
-                    if _use_vad_options:
-                        timestamps = vad.get_speech_timestamps(audio, VadOptions(threshold=threshold))
-                    else:
-                        timestamps = vad.get_speech_timestamps(audio, threshold=threshold)  # type: ignore[call-arg]
-                except TypeError:
-                    # Fallback: some versions accept keyword args directly
-                    timestamps = vad.get_speech_timestamps(audio, threshold=threshold)  # type: ignore[call-arg]
-
-                if not timestamps:
-                    recommended = round(min(threshold + 0.05, 0.95), 2)
-                    logger.info(
-                        "Calibration: noise suppressed at %.2f → recommended %.2f",
-                        threshold, recommended,
-                    )
-                    return {"recommended_threshold": recommended, "noise_suppressed_at": threshold}
-
-        logger.warning("Calibration: noise too loud — recommending 0.95")
-        return {"recommended_threshold": 0.95}
+        recommended = round(min(boundary + 0.10, 0.95), 2)
+        logger.info("Calibration: noise detected at %.2f → recommended %.2f", boundary, recommended)
+        return {"recommended_threshold": recommended, "noise_detected_at": boundary}
 
     def transcribe_file(self, file_path: str) -> dict:
         """Transcribe an audio file directly (independent of the streaming buffer)."""

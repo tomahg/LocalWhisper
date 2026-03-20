@@ -108,7 +108,9 @@ public sealed partial class AudioPage : Page
 
     private void VadThreshold_Changed(object sender, RangeBaseValueChangedEventArgs e)
     {
-        if (_loading || double.IsNaN(e.NewValue)) return;
+        // Guard against firing during InitializeComponent() — Slider coerces Value to Minimum
+        // (0→0.10) before _settings and VadThresholdLabel are assigned.
+        if (_loading || _settings is null || VadThresholdLabel is null || double.IsNaN(e.NewValue)) return;
         var rounded = Math.Round(e.NewValue, 2);
         VadThresholdLabel.Text = rounded.ToString("F2");
         _settings.VadThreshold = rounded;
