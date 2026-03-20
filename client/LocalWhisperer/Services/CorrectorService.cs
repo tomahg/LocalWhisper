@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using LocalWhisperer.Models;
 
@@ -20,6 +21,8 @@ public static class CorrectorService
         EnsureCompiled(corrections);
         foreach (var e in _compiled)
             text = e.Pattern.Replace(text, e.Replacement);
+        if (text.Contains('\n'))
+            text = string.Join('\n', text.Split('\n').Select(l => l.TrimStart()));
         return text;
     }
 
