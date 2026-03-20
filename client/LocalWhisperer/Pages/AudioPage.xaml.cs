@@ -29,16 +29,11 @@ public sealed partial class AudioPage : Page
         MicComboBox.SelectedIndex = _settings.MicrophoneDeviceIndex < MicComboBox.Items.Count
             ? _settings.MicrophoneDeviceIndex
             : 0;
-        AutoCopyToggle.IsOn = _settings.AutoCopyToClipboard;
         AutoSilenceToggle.IsOn = _settings.AutoSendOnSilence;
         SilenceThresholdBox.Value = _settings.SilenceThresholdSeconds;
         SilenceThresholdRow.Visibility = _settings.AutoSendOnSilence
             ? Visibility.Visible
             : Visibility.Collapsed;
-        InjectToggle.IsOn = _settings.InjectTextDirectly;
-        AutoCopyRow.Visibility = _settings.InjectTextDirectly
-            ? Visibility.Collapsed
-            : Visibility.Visible;
         _loading = false;
     }
 
@@ -65,13 +60,6 @@ public sealed partial class AudioPage : Page
         _settingsService.Save(_settings);
     }
 
-    private void AutoCopy_Changed(object sender, RoutedEventArgs e)
-    {
-        if (_loading) return;
-        _settings.AutoCopyToClipboard = AutoCopyToggle.IsOn;
-        _settingsService.Save(_settings);
-    }
-
     private void AutoSilence_Changed(object sender, RoutedEventArgs e)
     {
         if (_loading) return;
@@ -91,13 +79,4 @@ public sealed partial class AudioPage : Page
         _settingsService.Save(_settings);
     }
 
-    private void Inject_Changed(object sender, RoutedEventArgs e)
-    {
-        if (_loading) return;
-        _settings.InjectTextDirectly = InjectToggle.IsOn;
-        AutoCopyRow.Visibility = InjectToggle.IsOn
-            ? Microsoft.UI.Xaml.Visibility.Collapsed
-            : Microsoft.UI.Xaml.Visibility.Visible;
-        _settingsService.Save(_settings);
-    }
 }

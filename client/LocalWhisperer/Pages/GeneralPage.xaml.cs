@@ -19,6 +19,9 @@ public sealed partial class GeneralPage : Page
         _settingsService = App.Services.GetRequiredService<SettingsService>();
 
         _loading = true;
+        InjectToggle.IsOn = _settings.InjectTextDirectly;
+        AutoCopyToggle.IsOn = _settings.AutoCopyToClipboard;
+        AutoCopyRow.Visibility = _settings.InjectTextDirectly ? Visibility.Collapsed : Visibility.Visible;
         SegmentPrefixComboBox.SelectedIndex = (int)_settings.SegmentPrefix;
         SilenceSuffixComboBox.SelectedIndex = (int)_settings.SilenceSuffix;
         if (_settings.InjectionMethod == InjectionMethod.Paste)
@@ -26,6 +29,21 @@ public sealed partial class GeneralPage : Page
         else
             MethodType.IsChecked = true;
         _loading = false;
+    }
+
+    private void Inject_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loading) return;
+        _settings.InjectTextDirectly = InjectToggle.IsOn;
+        AutoCopyRow.Visibility = InjectToggle.IsOn ? Visibility.Collapsed : Visibility.Visible;
+        _settingsService.Save(_settings);
+    }
+
+    private void AutoCopy_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loading) return;
+        _settings.AutoCopyToClipboard = AutoCopyToggle.IsOn;
+        _settingsService.Save(_settings);
     }
 
     private void SegmentPrefix_Changed(object sender, SelectionChangedEventArgs e)
