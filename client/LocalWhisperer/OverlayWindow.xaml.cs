@@ -39,6 +39,7 @@ public sealed partial class OverlayWindow : Window
 
     private readonly AppWindow _appWindow;
     private readonly nint _hwnd;
+    private readonly Models.AppSettings _settings;
     private string _lastResult = string.Empty;
     private DispatcherTimer? _processingTimer;
     private DateTime _processingStart;
@@ -52,6 +53,7 @@ public sealed partial class OverlayWindow : Window
 
         _hwnd      = WindowNative.GetWindowHandle(this);
         _appWindow = AppWindow.GetFromWindowId(Win32Interop.GetWindowIdFromWindow(_hwnd));
+        _settings  = App.Services.GetRequiredService<Models.AppSettings>();
 
         ConfigureWindow();
     }
@@ -197,10 +199,12 @@ public sealed partial class OverlayWindow : Window
 
     public void UpdateAudioLevel(float level)
     {
+        var threshold = (float)_settings.SilenceLevelThreshold;
+        var displayLevel = level < threshold ? 0f : level;
         DispatcherQueue.TryEnqueue(() =>
         {
-            AudioLevelBarClip.Rect     = new Windows.Foundation.Rect(0, 0, AudioLevelBarContainer.ActualWidth * level, 6);
-            AudioLevelBarTextClip.Rect = new Windows.Foundation.Rect(0, 0, AudioLevelBarTextContainer.ActualWidth * level, 6);
+            AudioLevelBarClip.Rect     = new Windows.Foundation.Rect(0, 0, AudioLevelBarContainer.ActualWidth * displayLevel, 6);
+            AudioLevelBarTextClip.Rect = new Windows.Foundation.Rect(0, 0, AudioLevelBarTextContainer.ActualWidth * displayLevel, 6);
         });
     }
 

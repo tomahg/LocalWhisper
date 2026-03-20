@@ -64,6 +64,9 @@ public class AppSettings
     // Display
     public OverlayPosition OverlayPosition     { get; set; } = OverlayPosition.Right;
 
+    // Silence level threshold for auto-send (compared against 36× amplified RMS level)
+    public double SilenceLevelThreshold { get; set; } = 0.08;
+
     // VAD (Voice Activity Detection) — synced to server on connect
     public bool   VadEnabled   { get; set; } = true;
     public double VadThreshold { get; set; } = 0.5;

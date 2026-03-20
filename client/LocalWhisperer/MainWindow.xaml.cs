@@ -13,7 +13,7 @@ public sealed partial class MainWindow : Window
         var appWindow = Microsoft.UI.Windowing.AppWindow.GetFromWindowId(
             Microsoft.UI.Win32Interop.GetWindowIdFromWindow(
                 WinRT.Interop.WindowNative.GetWindowHandle(this)));
-        appWindow.Resize(new Windows.Graphics.SizeInt32(560, 640));
+        appWindow.Resize(new Windows.Graphics.SizeInt32(580, 690));
         appWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", "tray-idle.ico"));
 
         // Select first item (Tilkobling)

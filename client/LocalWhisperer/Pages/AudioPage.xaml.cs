@@ -14,6 +14,7 @@ public sealed partial class AudioPage : Page
     private readonly TranscriptionOrchestrator _orchestrator;
     private bool _loading;
     private CancellationTokenSource? _calibrationCts;
+    private CancellationTokenSource? _silenceLevelCts;
 
     public AudioPage()
     {
@@ -35,9 +36,13 @@ public sealed partial class AudioPage : Page
             : 0;
         AutoSilenceToggle.IsOn = _settings.AutoSendOnSilence;
         SilenceThresholdBox.Value = _settings.SilenceThresholdSeconds;
-        SilenceThresholdRow.Visibility = _settings.AutoSendOnSilence
-            ? Visibility.Visible
-            : Visibility.Collapsed;
+        var silenceVis = _settings.AutoSendOnSilence ? Visibility.Visible : Visibility.Collapsed;
+        SilenceThresholdRow.Visibility = silenceVis;
+        SilenceLevelRow.Visibility     = silenceVis;
+
+        var clampedLevel = Math.Clamp(_settings.SilenceLevelThreshold, 0.00, 0.30);
+        SilenceLevelSlider.Value = clampedLevel;
+        SilenceLevelLabel.Text = clampedLevel.ToString("F2");
 
         VadEnabledToggle.IsOn = _settings.VadEnabled;
         var clampedThreshold = Math.Clamp(_settings.VadThreshold, 0.10, 0.90);
@@ -75,9 +80,9 @@ public sealed partial class AudioPage : Page
     {
         if (_loading) return;
         _settings.AutoSendOnSilence = AutoSilenceToggle.IsOn;
-        SilenceThresholdRow.Visibility = AutoSilenceToggle.IsOn
-            ? Visibility.Visible
-            : Visibility.Collapsed;
+        var vis = AutoSilenceToggle.IsOn ? Visibility.Visible : Visibility.Collapsed;
+        SilenceThresholdRow.Visibility = vis;
+        SilenceLevelRow.Visibility     = vis;
         _settingsService.Save(_settings);
     }
 
@@ -88,6 +93,60 @@ public sealed partial class AudioPage : Page
         sender.Value = rounded;
         _settings.SilenceThresholdSeconds = rounded;
         _settingsService.Save(_settings);
+    }
+
+    private void SilenceLevel_Changed(object sender, RangeBaseValueChangedEventArgs e)
+    {
+        if (_loading || _settings is null || SilenceLevelLabel is null || double.IsNaN(e.NewValue)) return;
+        var rounded = Math.Round(e.NewValue, 2);
+        SilenceLevelLabel.Text = rounded.ToString("F2");
+        _settings.SilenceLevelThreshold = rounded;
+        _settingsService.Save(_settings);
+    }
+
+    private async void SilenceLevelCalibrateButton_Click(object sender, RoutedEventArgs e)
+    {
+        _silenceLevelCts = new CancellationTokenSource();
+        SilenceLevelCalibrateButton.IsEnabled = false;
+        SilenceLevelStatusText.Visibility = Visibility.Visible;
+
+        try
+        {
+            var calibrationTask = _orchestrator.CalibrateSilenceLevelAsync(_silenceLevelCts.Token);
+
+            for (int i = 3; i >= 1; i--)
+            {
+                SilenceLevelStatusText.Text = $"Ikke snakk... {i}";
+                await Task.Delay(1000, _silenceLevelCts.Token);
+            }
+
+            SilenceLevelStatusText.Text = "Analyserer...";
+            var recommended = await calibrationTask;
+
+            _settings.SilenceLevelThreshold = recommended;
+            _settingsService.Save(_settings);
+
+            _loading = true;
+            SilenceLevelSlider.Value = Math.Clamp(recommended, 0.00, 0.30);
+            SilenceLevelLabel.Text = recommended.ToString("F2");
+            _loading = false;
+
+            SilenceLevelStatusText.Text = $"Anbefalt: {recommended:F2}";
+        }
+        catch (OperationCanceledException)
+        {
+            SilenceLevelStatusText.Visibility = Visibility.Collapsed;
+        }
+        catch (Exception ex)
+        {
+            SilenceLevelStatusText.Text = $"Feil: {ex.Message}";
+        }
+        finally
+        {
+            SilenceLevelCalibrateButton.IsEnabled = true;
+            _silenceLevelCts?.Dispose();
+            _silenceLevelCts = null;
+        }
     }
 
     private void VadEnabled_Changed(object sender, RoutedEventArgs e)
@@ -131,7 +190,7 @@ public sealed partial class AudioPage : Page
 
             for (int i = 3; i >= 1; i--)
             {
-                CalibrateStatusText.Text = $"Hold deg stille... {i}";
+                CalibrateStatusText.Text = $"Ikke snakk... {i}";
                 await Task.Delay(1000, _calibrationCts.Token);
             }
 

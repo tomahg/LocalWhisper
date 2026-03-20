@@ -102,6 +102,41 @@
                                    MinWidth="120"/>
                     </Grid>
 
+                    <!-- Silence level row (visible when toggle is on) -->
+                    <StackPanel x:Name="SilenceLevelRow" Padding="16,0,16,14" Spacing="4" Visibility="Collapsed">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Lydnivåterskel"
+                                       VerticalAlignment="Center" FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Margin="30,0,0,0"/>
+                            <TextBlock x:Name="SilenceLevelLabel" Grid.Column="1"
+                                       VerticalAlignment="Center" FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        </Grid>
+                        <Slider x:Name="SilenceLevelSlider"
+                                Minimum="0.00" Maximum="0.30" StepFrequency="0.01"
+                                ValueChanged="SilenceLevel_Changed"/>
+
+                        <!-- Calibrate row -->
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="SilenceLevelStatusText" Grid.Column="0"
+                                       VerticalAlignment="Center" FontSize="12"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                       Visibility="Collapsed"/>
+                            <Button x:Name="SilenceLevelCalibrateButton" Grid.Column="1"
+                                    Content="Kalibrér stillhet"
+                                    Click="SilenceLevelCalibrateButton_Click"/>
+                        </Grid>
+                    </StackPanel>
+
 
                 </StackPanel>
             </Border>

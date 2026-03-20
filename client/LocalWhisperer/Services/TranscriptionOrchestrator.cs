@@ -16,7 +16,6 @@ public class TranscriptionOrchestrator
 
     private System.Timers.Timer? _silenceTimer;
     private int _pendingSilenceStops;
-    private const float SilenceLevelThreshold = 0.02f;
 
     public bool IsRecording { get; private set; }
     public bool IsTranscribingFile { get; private set; }
@@ -90,7 +89,7 @@ public class TranscriptionOrchestrator
 
         if (!IsRecording || !_settings.AutoSendOnSilence) return;
 
-        if (level < SilenceLevelThreshold)
+        if (level < (float)_settings.SilenceLevelThreshold)
         {
             // Below threshold — start one-shot timer if not running
             if (_silenceTimer is null)
@@ -195,6 +194,44 @@ public class TranscriptionOrchestrator
         lock (buffer) pcm = [.. buffer];
 
         return await _api.CalibrateVadAsync(_settings.ServerUrl, pcm, ct);
+    }
+
+    /// <summary>
+    /// Records ambient noise for 3 seconds and returns the recommended silence level threshold.
+    /// Computed client-side from RMS, using the same 36× amplification as the audio level bar.
+    /// </summary>
+    public async Task<double> CalibrateSilenceLevelAsync(CancellationToken ct = default)
+    {
+        if (IsRecording)
+            throw new InvalidOperationException("Kan ikke kalibrere under opptak.");
+
+        var buffer = new List<byte>();
+        void OnAudio(byte[] pcm) { lock (buffer) buffer.AddRange(pcm); }
+
+        _audio.AudioDataAvailable += OnAudio;
+        _audio.StartCapture(_settings.MicrophoneDeviceIndex, _settings.AudioSource);
+        try { await Task.Delay(TimeSpan.FromSeconds(3), ct); }
+        finally
+        {
+            _audio.StopCapture();
+            _audio.AudioDataAvailable -= OnAudio;
+        }
+
+        byte[] pcm;
+        lock (buffer) pcm = [.. buffer];
+
+        if (pcm.Length < 2) return 0.08;
+
+        // Compute RMS — same formula as AudioCaptureService.FireLevelEvent
+        var samples = new short[pcm.Length / 2];
+        Buffer.BlockCopy(pcm, 0, samples, 0, pcm.Length);
+        double sumSq = 0;
+        foreach (var s in samples) sumSq += (double)s * s;
+        double rawRms = Math.Sqrt(sumSq / samples.Length) / 32768.0;
+        double ambientLevel = rawRms * 36.0;
+
+        // Add 30% headroom so speech easily clears the gate, then round to 2 decimals
+        return Math.Clamp(Math.Round(ambientLevel * 1.3 + 0.02, 2), 0.00, 0.30);
     }
 
     public async Task TranscribeFileAsync(string filePath)
