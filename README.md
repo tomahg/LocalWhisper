@@ -1,32 +1,32 @@
 # LocalWhisperer
 
-Windows speech-to-text for any input field in any application. A system tray app (WinUI 3 / .NET 10) streams microphone audio over WebSocket to a transcription server running [faster-whisper](https://github.com/SYSTRAN/faster-whisper). The server can run locally or on another machine on the LAN.
+Tale-til-tekst for Windows — fungerer i alle inputfelt i alle applikasjoner. En systemstatusfelts-app (WinUI 3 / .NET 10) som strømmer mikrofonlyd over WebSocket til en transkripsjonsserver som kjører [faster-whisper](https://github.com/SYSTRAN/faster-whisper). Serveren kan kjøre lokalt eller på en annen maskin i lokalnettet.
 
-Default model: **NbAiLab/nb-whisper-medium** — optimised for Norwegian.
-
----
-
-## How it works
-
-1. Press **F9** (hold for hold-to-talk, or tap to toggle) — an overlay appears in the bottom-right corner
-2. Speak — a live audio level indicator shows the microphone is active
-3. Release / press again to stop — the server transcribes and the result appears with a **Kopier** button
-
-**Optional: auto-send on silence** — enable in Lyd settings for continuous dictation. The server transcribes each pause automatically and text accumulates in the overlay while the microphone stays open. Press the hotkey to finish.
-
-The client streams raw 16kHz PCM audio over WebSocket while recording. When stopped (or when a silence pause is detected), the server runs an inference pass on the buffered audio and returns the transcription.
+Standardmodell: **NbAiLab/nb-whisper-medium** — optimalisert for norsk.
 
 ---
 
-## Project structure
+## Slik fungerer det
+
+1. Trykk **F9** (hold inne for hold-to-talk, eller trykk for å veksle) — et overleggsvindu vises nederst på skjermen
+2. Snakk — en live lydnivåindikator viser at mikrofonen er aktiv
+3. Slipp / trykk igjen for å stoppe — serveren transkriberer og resultatet vises med en **Kopier**-knapp
+
+**Valgfritt: auto-send ved stillhet** — aktiver i Lyd-innstillingene for kontinuerlig diktering. Serveren transkriberer automatisk ved hver pause, og teksten akkumuleres i overleggsvinduet mens mikrofonen forblir åpen. Trykk hurtigtasten for å avslutte.
+
+Klienten strømmer rå 16kHz PCM-lyd over WebSocket under opptak. Når opptaket stoppes (eller ved en stillhetspause), kjører serveren en inferenspass på den bufrede lyden og returnerer transkripsjonen.
+
+---
+
+## Prosjektstruktur
 
 ```
 LocalWhisperer/
-├── client/                          # C# / WinUI 3 / .NET 10 Windows client
+├── client/                          # C# / WinUI 3 / .NET 10 Windows-klient
 │   └── LocalWhisperer/
-│       ├── App.xaml(.cs)            # Startup, system tray, global hotkey
-│       ├── MainWindow.xaml(.cs)     # Settings window (NavigationView)
-│       ├── Pages/                   # Settings pages (Connection, Hotkey, Model, Audio, About)
+│       ├── App.xaml(.cs)            # Oppstart, systemstatusfeltet, global hurtigtast
+│       ├── MainWindow.xaml(.cs)     # Innstillingsvindu (NavigationView)
+│       ├── Pages/                   # Innstillingssider (Tilkobling, Hurtigtast, Modell, Lyd, Om)
 │       ├── Services/
 │       │   ├── AudioCaptureService.cs
 │       │   ├── WebSocketService.cs
@@ -34,13 +34,13 @@ LocalWhisperer/
 │       │   ├── TranscriptionOrchestrator.cs
 │       │   ├── SettingsService.cs
 │       │   └── ServerApiService.cs
-│       └── Helpers/NativeMethods.cs # P/Invoke (SendInput, keyboard hook)
-└── server/                          # Python transcription server
+│       └── Helpers/NativeMethods.cs # P/Invoke (SendInput, tastatturhook)
+└── server/                          # Python-transkripsjonsserver
     ├── server.py
     ├── transcriber.py
     ├── config.py
-    ├── config.yaml                  # Main configuration (committed)
-    ├── secrets.yaml                 # HuggingFace token — NOT committed (see below)
+    ├── config.yaml                  # Hovedkonfigurasjon (versjonskontrollert)
+    ├── secrets.yaml                 # HuggingFace-token — IKKE versjonskontrollert (se nedenfor)
     ├── secrets.yaml.example
     ├── requirements.txt
     └── test_client.py
@@ -48,74 +48,77 @@ LocalWhisperer/
 
 ---
 
-## Client
+## Klient
 
-### Requirements
+### Krav
 
-- Windows 10 1809 (build 17763) or later
-- .NET 10 SDK (for building from source)
+- Windows 10 1809 (build 17763) eller nyere
+- .NET 10 SDK (for å bygge fra kildekode)
 
-### Build
+### Bygg
 
 ```powershell
 cd client
 dotnet build LocalWhisperer/LocalWhisperer.csproj -r win-x64
 ```
 
-### Publish (self-contained folder)
+### Publiser (selvdistribuert mappe)
 
 ```powershell
 cd client
 dotnet publish LocalWhisperer/LocalWhisperer.csproj -r win-x64 -c Release --self-contained -o publish
 ```
 
-Copy the `publish\` folder to the target machine and run `LocalWhisperer.exe`. No installation required.
+Kopier `publish\`-mappen til målmaskinen og kjør `LocalWhisperer.exe`. Ingen installasjon nødvendig.
 
-### Usage
+### Bruk
 
-On first launch the app starts in the system tray (no window appears). The tray icon indicates state:
+Ved første oppstart starter appen i systemstatusfeltet (intet vindu vises). Ikonet indikerer tilstand:
 
-| Icon | State |
+| Ikon | Tilstand |
 |---|---|
-| 🟢 Green circle | Connected / idle |
-| 🔴 Red circle | Recording |
-| ⬛ Dark gray square | Disconnected |
+| 🟢 Grønn sirkel | Tilkoblet / inaktiv |
+| 🔴 Rød sirkel | Tar opp |
+| ⬛ Mørk grå firkant | Frakoblet |
 
-**Right-click** the tray icon for the context menu. **Left-click** opens the settings window.
+**Høyreklikk** på ikonet for kontekstmenyen. **Venstreklikk** åpner innstillingsvinduet.
 
-#### Settings
+#### Innstillinger
 
-| Page | Description |
+| Side | Beskrivelse |
 |---|---|
-| **Tilkobling** | Server URL, connect/disconnect |
-| **Hurtigtast** | Active hotkey (F9), hold-to-talk toggle |
-| **Modell** | Switch transcription model at runtime |
-| **Lyd** | Select microphone, auto-copy to clipboard, auto-send on silence (with configurable segment suffix) |
-| **Om** | About |
+| **Tilkobling** | Server-URL, koble til/fra |
+| **Hurtigtast** | Aktiv hurtigtast (F9), hold-to-talk-veksling |
+| **Modell** | Bytt transkripsjonmsodell under kjøring |
+| **Lyd** | Velg mikrofon, auto-kopier til utklippstavle, auto-send ved stillhet |
+| **Visning** | Posisjon for overleggsvindu (høyre, midten, venstre) |
+| **Korreksjoner** | Ord- og fraseerstatninger som anvendes på transkripsjonen |
+| **Generelt** | Start/avslutning per segment, tekstinnlimingsmetode |
+| **Om** | Om appen |
 
-Settings are persisted automatically between sessions.
+Innstillinger lagres automatisk mellom økter.
 
-#### Hotkey
+#### Hurtigtast
 
-Default: **F9**
+Standard: **F9**
 
-Two modes (configurable in the Hurtigtast settings page):
-- **Toggle** (default) — press once to start, press again to stop
-- **Hold-to-talk** — hold key while speaking, release to stop
+To moduser (konfigurerbart på Hurtigtast-siden):
+- **Veksle** (standard) — trykk én gang for å starte, trykk igjen for å stoppe
+- **Hold-to-talk** — hold tasten inne mens du snakker, slipp for å stoppe
 
-> Tip: Enable **auto-copy to clipboard** in the Lyd settings page to skip the manual copy step — the result is copied automatically when recording stops.
+> Tips: Aktiver **Kopier automatisk til utklippstavle** på Lyd-siden for å hoppe over det manuelle kopieringstrinnet — resultatet kopieres automatisk når opptaket stopper.
 
-> Tip: Enable **auto-send ved stillhet** in the Lyd settings page for continuous dictation — transcribed text accumulates in the overlay as you speak and pause naturally. Use the **Avslutning per segment** option to control how pauses are joined: space (continuous text), single newline, or double newline (paragraph break).
+> Tips: Aktiver **Auto-send ved stillhet** på Lyd-siden for kontinuerlig diktering — transkriberte tekster akkumuleres i overleggsvinduet mens du snakker og pauser naturlig. Bruk **Avslutning per segment** for å styre hvordan pausene settes sammen: mellomrom (sammenhengende tekst), enkelt linjeskift eller dobbelt linjeskift (avsnittsskift).
 
 ---
 
 ## Server
 
-### Requirements
+### Krav
 
 - Python 3.10+
 
-### Install
+### Installer
 
 ```bash
 cd server
@@ -125,19 +128,19 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-### HuggingFace token (optional)
+### HuggingFace-token (valgfritt)
 
-Required only for gated models. Avoids rate-limiting on first download.
+Kreves kun for lukkede modeller. Unngår hastighetsbegrensning ved første nedlasting.
 
-1. Get a read-only token at <https://huggingface.co/settings/tokens>
+1. Hent et skrivebeskyttet token på <https://huggingface.co/settings/tokens>
 2. `cp secrets.yaml.example secrets.yaml`
-3. Replace `hf_YOUR_TOKEN_HERE` with your token
+3. Erstatt `hf_YOUR_TOKEN_HERE` med ditt token
 
-`secrets.yaml` is in `.gitignore` and will never be committed.
+`secrets.yaml` er i `.gitignore` og vil aldri bli versjonskontrollert.
 
-### Configuration
+### Konfigurasjon
 
-Edit `config.yaml`:
+Rediger `config.yaml`:
 
 ```yaml
 transcription:
@@ -146,14 +149,14 @@ transcription:
   compute_type: "int8" # "int8" for CPU, "float16" for GPU
 ```
 
-Available models:
+Tilgjengelige modeller:
 
-| Model | Notes |
+| Modell | Merknader |
 |---|---|
-| `NbAiLab/nb-whisper-small` | Fast, less accurate |
-| `NbAiLab/nb-whisper-medium` | Recommended |
-| `NbAiLab/nb-whisper-large` | Best quality, slow on CPU |
-| `openai/whisper-large-v3` | Multilingual |
+| `NbAiLab/nb-whisper-small` | Rask, mindre nøyaktig |
+| `NbAiLab/nb-whisper-medium` | Anbefalt |
+| `NbAiLab/nb-whisper-large` | Beste kvalitet, treg på CPU |
+| `openai/whisper-large-v3` | Flerspråklig |
 
 ### Start
 
@@ -163,21 +166,16 @@ cd server
 uvicorn server:app --host 0.0.0.0 --port 8765
 ```
 
-The selected model is downloaded from HuggingFace on first run (~1–3 GB). Subsequent starts use the local cache.
+Den valgte modellen lastes ned fra HuggingFace ved første kjøring (~1–3 GB). Påfølgende starter bruker lokal hurtigbuffer.
 
-```
-Model ready.
-INFO:     Application startup complete.
-```
+### REST-endepunkter
 
-### REST endpoints
-
-| Endpoint | Method | Description |
+| Endepunkt | Metode | Beskrivelse |
 |---|---|---|
-| `/health` | GET | Status, current model, device |
-| `/models` | GET | List available models |
-| `/models/switch` | POST | Switch model at runtime |
-| `/config` | GET | Full configuration |
+| `/health` | GET | Status, gjeldende modell, enhet |
+| `/models` | GET | List tilgjengelige modeller |
+| `/models/switch` | POST | Bytt modell under kjøring |
+| `/config` | GET | Full konfigurasjon |
 
 ```bash
 curl http://localhost:8765/health
@@ -185,30 +183,30 @@ curl http://localhost:8765/health
 
 ---
 
-## Test client
+## Testklient
 
-Verify the server without the Windows client:
+Verifiser serveren uten Windows-klienten:
 
 ```bash
-# Connectivity test (3 seconds of silence)
+# Tilkoblingstest (3 sekunder stillhet)
 python test_client.py
 
-# Stream a WAV file
-python test_client.py path/to/audio.wav
+# Strøm en WAV-fil
+python test_client.py sti/til/lyd.wav
 
-# Remote server
-python test_client.py --url ws://192.168.1.x:8765/ws/transcribe path/to/audio.wav
+# Ekstern server
+python test_client.py --url ws://192.168.1.x:8765/ws/transcribe sti/til/lyd.wav
 ```
 
-Expected output:
+Forventet utdata:
 ```
 [final  ] 'Hei, dette er en test av talestyring.'  (1243ms)
 ```
 
 ---
 
-## Known limitations
+## Kjente begrensninger
 
-- Transcription runs after recording stops (or per silence pause with auto-send) — longer recordings between pauses mean a longer wait for each result.
-- faster-whisper does not support Metal/MPS — macOS uses CPU with int8.
-- The global keyboard hook (`WH_KEYBOARD_LL`) may be blocked in some enterprise environments.
+- Transkripsjon kjøres etter at opptaket stopper (eller per stillhetspause med auto-send) — lengre opptak mellom pauser betyr lengre ventetid for hvert resultat.
+- faster-whisper støtter ikke Metal/MPS — macOS bruker CPU med int8.
+- Den globale tastatturhoken (`WH_KEYBOARD_LL`) kan bli blokkert i noen bedriftsmiljøer.
