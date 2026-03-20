@@ -37,7 +37,7 @@ public sealed partial class GeneralPage : Page
     private void Method_Checked(object sender, RoutedEventArgs e)
     {
         if (_loading) return;
-        _settings.InjectionMethod = sender == MethodPaste
+        _settings.InjectionMethod = (RadioButton)sender == MethodPaste
             ? InjectionMethod.Paste
             : InjectionMethod.Type;
         _settingsService.Save(_settings);
