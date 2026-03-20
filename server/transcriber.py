@@ -21,6 +21,14 @@ logger = logging.getLogger(__name__)
 
 SAMPLE_RATE = 16000
 
+_TOKENS_TO_STRIP = ["<|nocaptions|>"]
+
+
+def _strip_tokens(text: str) -> str:
+    for token in _TOKENS_TO_STRIP:
+        text = text.replace(token, "")
+    return text.strip()
+
 
 def _resolve_device(device: str) -> str:
     """Resolve 'auto' to 'cuda' or 'cpu' based on availability."""
@@ -111,7 +119,7 @@ class StreamingTranscriber:
                 repetition_penalty=1.3,
             )
             # IMPORTANT: consume generator before touching audio_buffer
-            text = " ".join(s.text for s in segments).strip()
+            text = _strip_tokens(" ".join(s.text for s in segments))
         self.segment_id += 1
         self.audio_buffer = np.array([], dtype=np.float32)
 
@@ -132,7 +140,7 @@ class StreamingTranscriber:
                 no_speech_threshold=0.6,
                 repetition_penalty=1.3,
             )
-            text = " ".join(s.text for s in segments).strip()
+            text = _strip_tokens(" ".join(s.text for s in segments))
             duration_ms = round(info.duration * 1000)
         self.segment_id += 1
 
