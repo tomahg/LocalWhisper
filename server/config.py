@@ -40,8 +40,6 @@ class TranscriptionConfig(BaseModel):
 
 
 class StreamingConfig(BaseModel):
-    chunk_duration_sec: float = 2.0
-    overlap_sec: float = 0.5
     vad_enabled: bool = True
     vad_threshold: float = 0.5
 
