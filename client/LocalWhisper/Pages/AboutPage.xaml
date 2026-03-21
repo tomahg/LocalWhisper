@@ -1,0 +1,47 @@
+<Page
+    x:Class="LocalWhisper.Pages.AboutPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer>
+        <StackPanel Spacing="4" Margin="0,0,0,24">
+            <TextBlock Text="Om" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,12"/>
+
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8">
+
+                <StackPanel>
+                    <!-- App header -->
+                    <StackPanel Padding="16" Spacing="4">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <FontIcon Glyph="&#xE720;" FontSize="28"
+                                      Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                                      VerticalAlignment="Center"/>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Local Whisper" Style="{StaticResource SubtitleTextBlockStyle}"/>
+                                <TextBlock Text="Norsk tale-til-tekst for Windows"
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Divider -->
+                    <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
+
+                    <!-- Technology -->
+                    <StackPanel Padding="16" Spacing="6">
+                        <TextBlock Text="Teknologi" Style="{StaticResource BodyStrongTextBlockStyle}"
+                                   Margin="0,0,0,2"/>
+                        <TextBlock Text="faster-whisper / NbAiLab nb-whisper"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13"/>
+                        <TextBlock Text="WinUI 3 / .NET 10"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13"/>
+                        <TextBlock Text="NAudio"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="13"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

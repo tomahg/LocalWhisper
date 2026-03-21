@@ -1,4 +1,4 @@
-# LocalWhisperer
+# LocalWhisper
 
 Windows speech-to-text for any input field in any application. A system tray app (WinUI 3 / .NET 10) streams microphone audio over WebSocket to a transcription server running [faster-whisper](https://github.com/SYSTRAN/faster-whisper). The server can run locally or on another machine on the LAN.
 
@@ -21,9 +21,9 @@ The client streams raw 16kHz PCM audio over WebSocket while recording. When stop
 ## Project structure
 
 ```
-LocalWhisperer/
+LocalWhisper/
 ├── client/                          # C# / WinUI 3 / .NET 10 Windows client
-│   └── LocalWhisperer/
+│   └── LocalWhisper/
 │       ├── App.xaml(.cs)            # Startup, system tray, global hotkey
 │       ├── MainWindow.xaml(.cs)     # Settings window (NavigationView)
 │       ├── Pages/                   # Settings pages (Connection, Hotkey, Model, Audio, About)
@@ -59,17 +59,17 @@ LocalWhisperer/
 
 ```powershell
 cd client
-dotnet build LocalWhisperer/LocalWhisperer.csproj -r win-x64
+dotnet build LocalWhisper/LocalWhisper.csproj -r win-x64
 ```
 
 ### Publish (self-contained folder)
 
 ```powershell
 cd client
-dotnet publish LocalWhisperer/LocalWhisperer.csproj -r win-x64 -c Release --self-contained -o publish
+dotnet publish LocalWhisper/LocalWhisper.csproj -r win-x64 -c Release --self-contained -o publish
 ```
 
-Copy the `publish\` folder to the target machine and run `LocalWhisperer.exe`. No installation required.
+Copy the `publish\` folder to the target machine and run `LocalWhisper.exe`. No installation required.
 
 ### Usage
 

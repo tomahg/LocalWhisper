@@ -1,7 +1,7 @@
 # Secrets / local overrides — never commit these
 server/secrets.yaml
 server/corrections.yaml
-client/LocalWhisperer/appsettings.local.json
+client/LocalWhisper/appsettings.local.json
 
 # Python
 __pycache__/

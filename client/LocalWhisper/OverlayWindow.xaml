@@ -1,0 +1,155 @@
+<Window
+    x:Class="LocalWhisper.OverlayWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid Background="Transparent">
+
+        <!-- Listening state -->
+        <Border x:Name="ListeningPanel"
+                Background="#CC1E1E2E" CornerRadius="8" Padding="14,10"
+                AllowDrop="True" DragOver="ListeningPanel_DragOver"
+                DragLeave="ListeningPanel_DragLeave" Drop="ListeningPanel_Drop">
+            <Grid VerticalAlignment="Center">
+                <!-- Normal listening content -->
+                <Grid x:Name="ListeningContent">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Ellipse Grid.Column="0" Width="8" Height="8" Fill="#FF4444"
+                             VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Grid.Column="1" Text="Lytter..." Foreground="White"
+                               FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <Grid x:Name="AudioLevelBarContainer" Grid.Column="2" Height="6" VerticalAlignment="Center">
+                        <Rectangle Fill="#22FFFFFF" RadiusX="3" RadiusY="3"/>
+                        <Rectangle RadiusX="3" RadiusY="3">
+                            <Rectangle.Clip>
+                                <RectangleGeometry x:Name="AudioLevelBarClip" Rect="0,0,0,6"/>
+                            </Rectangle.Clip>
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#55EE44" Offset="0.0"/>
+                                    <GradientStop Color="#FFBB00" Offset="0.6"/>
+                                    <GradientStop Color="#FF3333" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Grid>
+                </Grid>
+                <!-- Drop hint (shown during drag-over) -->
+                <StackPanel x:Name="DropHint" Orientation="Horizontal" Spacing="8"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Visibility="Collapsed">
+                    <TextBlock Text="&#xE896;" FontFamily="Segoe MDL2 Assets"
+                               Foreground="#88CCFF" FontSize="16" VerticalAlignment="Center"/>
+                    <TextBlock Text="Slipp for å transkribere" Foreground="#88CCFF"
+                               FontSize="14" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Listening with accumulated text state -->
+        <Border x:Name="ListeningTextPanel"
+                Background="#CC1E1E2E" CornerRadius="8" Padding="14,10"
+                Visibility="Collapsed">
+            <Grid MaxWidth="500">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <!-- Top row: listening indicator -->
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Ellipse Grid.Column="0" Width="8" Height="8" Fill="#FF4444"
+                             VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <TextBlock Grid.Column="1" Text="Lytter..." Foreground="White"
+                               FontSize="14" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                    <Grid x:Name="AudioLevelBarTextContainer" Grid.Column="2" Height="6" VerticalAlignment="Center">
+                        <Rectangle Fill="#22FFFFFF" RadiusX="3" RadiusY="3"/>
+                        <Rectangle RadiusX="3" RadiusY="3">
+                            <Rectangle.Clip>
+                                <RectangleGeometry x:Name="AudioLevelBarTextClip" Rect="0,0,0,6"/>
+                            </Rectangle.Clip>
+                            <Rectangle.Fill>
+                                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                    <GradientStop Color="#55EE44" Offset="0.0"/>
+                                    <GradientStop Color="#FFBB00" Offset="0.6"/>
+                                    <GradientStop Color="#FF3333" Offset="1.0"/>
+                                </LinearGradientBrush>
+                            </Rectangle.Fill>
+                        </Rectangle>
+                    </Grid>
+                </Grid>
+                <!-- Accumulated text -->
+                <ScrollViewer Grid.Row="1" MaxHeight="300" VerticalScrollBarVisibility="Auto"
+                              Margin="0,8,0,0">
+                    <TextBlock x:Name="AccumulatedText"
+                               Foreground="White" FontSize="14" TextWrapping="Wrap"/>
+                </ScrollViewer>
+                <!-- Copy button row -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8"
+                            HorizontalAlignment="Right" Margin="0,8,0,0">
+                    <Button x:Name="AccumulatedCopyButton" Content="Kopier"
+                            Click="AccumulatedCopyButton_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Processing state -->
+        <Border x:Name="ProcessingPanel"
+                Background="#CC1E1E2E" CornerRadius="8" Padding="14,10"
+                Visibility="Collapsed">
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <ProgressRing IsActive="True" Width="16" Height="16" Foreground="White"/>
+                <TextBlock Text="Behandler..." Foreground="White" FontSize="14" VerticalAlignment="Center"/>
+                <TextBlock x:Name="ProcessingTimer" Foreground="#88FFFFFF" FontSize="14" VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Result state -->
+        <Border x:Name="ResultPanel"
+                Background="#CC1E1E2E" CornerRadius="8" Padding="14,10"
+                AllowDrop="True" DragOver="ResultPanel_DragOver"
+                DragLeave="ResultPanel_DragLeave" Drop="ResultPanel_Drop"
+                Visibility="Collapsed">
+            <Grid>
+                <!-- Normal result content -->
+                <Grid x:Name="ResultContent" MaxWidth="500">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <ScrollViewer Grid.Row="0" MaxHeight="340" VerticalScrollBarVisibility="Auto">
+                        <TextBlock x:Name="ResultText"
+                                   Foreground="White" FontSize="14" TextWrapping="Wrap"/>
+                    </ScrollViewer>
+                    <Grid Grid.Row="1" Margin="0,8,0,0">
+                        <TextBlock x:Name="StatsText" Foreground="#88FFFFFF" FontSize="12"
+                                   VerticalAlignment="Center" HorizontalAlignment="Left"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                            <Button x:Name="CopyButton" Content="Kopier" Click="CopyButton_Click"/>
+                            <Button x:Name="CloseButton" Content="✕" Click="CloseButton_Click"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+                <!-- Drop hint (shown during drag-over) -->
+                <StackPanel x:Name="ResultDropHint" Orientation="Horizontal" Spacing="8"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Visibility="Collapsed">
+                    <TextBlock Text="&#xE896;" FontFamily="Segoe MDL2 Assets"
+                               Foreground="#88CCFF" FontSize="16" VerticalAlignment="Center"/>
+                    <TextBlock Text="Slipp for å transkribere" Foreground="#88CCFF"
+                               FontSize="14" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+    </Grid>
+</Window>

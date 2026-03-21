@@ -1,4 +1,4 @@
-# LocalWhisperer
+# LocalWhisper
 
 Tale-til-tekst for Windows — fungerer i alle inputfelt i alle applikasjoner. En systemstatusfelts-app (WinUI 3 / .NET 10) som strømmer mikrofonlyd over WebSocket til en transkripsjonsserver som kjører [faster-whisper](https://github.com/SYSTRAN/faster-whisper). Serveren kan kjøre lokalt eller på en annen maskin i lokalnettet.
 
@@ -52,9 +52,9 @@ sequenceDiagram
 ## Prosjektstruktur
 
 ```
-LocalWhisperer/
+LocalWhisper/
 ├── client/                          # C# / WinUI 3 / .NET 10 Windows-klient
-│   └── LocalWhisperer/
+│   └── LocalWhisper/
 │       ├── App.xaml(.cs)            # Oppstart, systemstatusfeltet, global hurtigtast
 │       ├── MainWindow.xaml(.cs)     # Innstillingsvindu (NavigationView)
 │       ├── Pages/                   # Innstillingssider (Tilkobling, Hurtigtast, Modell, Lyd, Om)
@@ -90,17 +90,17 @@ LocalWhisperer/
 
 ```powershell
 cd client
-dotnet build LocalWhisperer/LocalWhisperer.csproj -r win-x64
+dotnet build LocalWhisper/LocalWhisper.csproj -r win-x64
 ```
 
 ### Publiser (selvdistribuert mappe)
 
 ```powershell
 cd client
-dotnet publish LocalWhisperer/LocalWhisperer.csproj -r win-x64 -c Release --self-contained -o publish
+dotnet publish LocalWhisper/LocalWhisper.csproj -r win-x64 -c Release --self-contained -o publish
 ```
 
-Kopier `publish\`-mappen til målmaskinen og kjør `LocalWhisperer.exe`. Ingen installasjon nødvendig.
+Kopier `publish\`-mappen til målmaskinen og kjør `LocalWhisper.exe`. Ingen installasjon nødvendig.
 
 ### Bruk
 

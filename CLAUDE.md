@@ -1,4 +1,4 @@
-﻿# LocalWhisperer — Norsk Tale-til-Tekst for Windows
+﻿# LocalWhisper — Norsk Tale-til-Tekst for Windows
 
 ## Hva er dette?
 
@@ -7,13 +7,13 @@ En Windows system tray-app (WinUI 3 / .NET 10) som gir tale-til-tekst i alle inp
 ## Prosjektstruktur
 
 ```
-LocalWhisperer/
+LocalWhisper/
 ├── CLAUDE.md                   # ← Du leser denne
 ├── PLAN.md                     # Detaljert arkitektur og implementeringsplan
 ├── client/                     # C# / WinUI 3 / .NET 10 Windows-klient
-│   ├── LocalWhisperer.sln
-│   └── LocalWhisperer/
-│       ├── LocalWhisperer.csproj
+│   ├── LocalWhisper.sln
+│   └── LocalWhisper/
+│       ├── LocalWhisper.csproj
 │       ├── App.xaml(.cs)
 │       ├── MainWindow.xaml(.cs)
 │       ├── Services/           # Kjernefunksjonalitet

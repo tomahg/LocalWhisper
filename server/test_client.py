@@ -104,7 +104,7 @@ async def stream(url: str, pcm: bytes) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="LocalWhisperer test client")
+    parser = argparse.ArgumentParser(description="LocalWhisper test client")
     parser.add_argument("wav_file", nargs="?", help="WAV file to stream (optional)")
     parser.add_argument(
         "--url",

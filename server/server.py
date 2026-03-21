@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
     logger.info("Server shutting down.")
 
 
-app = FastAPI(title="LocalWhisperer Transcription Server", lifespan=lifespan)
+app = FastAPI(title="LocalWhisper Transcription Server", lifespan=lifespan)
 
 # ---------------------------------------------------------------------------
 # REST endpoints
