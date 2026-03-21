@@ -57,7 +57,7 @@ public class AppSettings
     public AudioSourceMode AudioSource        { get; set; } = AudioSourceMode.Microphone;
     public int             MicrophoneDeviceIndex { get; set; } = 0;
     public bool            AutoSendOnSilence   { get; set; } = false;
-    public double          SilenceThresholdSeconds { get; set; } = 2.0;
+    public double          SilenceThresholdSeconds { get; set; } = 0.5;
 
     // Text output
     public bool            InjectTextDirectly  { get; set; } = false;
@@ -67,7 +67,7 @@ public class AppSettings
     public SilenceSuffixMode SilenceSuffix     { get; set; } = SilenceSuffixMode.Space;
 
     // Display
-    public OverlayPosition OverlayPosition     { get; set; } = OverlayPosition.BottomRight;
+    public OverlayPosition OverlayPosition     { get; set; } = OverlayPosition.BottomCenter;
 
     // Silence level threshold for auto-send
     public double SilenceLevelThreshold { get; set; } = 0.002;
