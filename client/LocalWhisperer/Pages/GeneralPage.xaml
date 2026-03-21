@@ -24,7 +24,7 @@
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="Start per segment" Style="{StaticResource BodyStrongTextBlockStyle}"/>
-                            <TextBlock Text="Hva som legges foran"
+                            <TextBlock Text="Hva som legges til foran"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
                         </StackPanel>
                         <ComboBox x:Name="SegmentPrefixComboBox" Grid.Column="2"
@@ -52,7 +52,7 @@
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
                             <TextBlock Text="Avslutning per segment" Style="{StaticResource BodyStrongTextBlockStyle}"/>
-                            <TextBlock Text="Hva som legges til"
+                            <TextBlock Text="Hva som legges til etter"
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
                         </StackPanel>
                         <ComboBox x:Name="SilenceSuffixComboBox" Grid.Column="2"
