@@ -1,11 +1,11 @@
 <Page
-    x:Class="LocalWhisper.Pages.CorrectionsPage"
+    x:Class="LocalWhisper.Pages.DirectTypeCorrectionsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <ScrollViewer>
         <StackPanel Spacing="4" Margin="0,0,0,24">
-            <TextBlock Text="Korreksjoner" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,12"/>
+            <TextBlock Text="Direkteord" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,12"/>
 
             <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
@@ -18,13 +18,13 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <FontIcon Grid.Column="0" Glyph="&#xE8D3;" FontSize="16"
+                        <FontIcon Grid.Column="0" Glyph="&#xE773;" FontSize="16"
                                   VerticalAlignment="Center" Margin="0,0,14,0"
                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                            <TextBlock Text="Orderstattninger" Style="{StaticResource BodyStrongTextBlockStyle}"/>
-                            <TextBlock Text="Ord og fraser som erstattes automatisk. Bruk \n for linjeskift og \t for tabulator."
-                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                            <TextBlock Text="Ordererstatninger med direkte tastetrykk" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                            <TextBlock Text="Aktiveres kun når transkripsjonen samsvarer nøyaktig. Sender alltid tastetrykk direkte, uavhengig av innstilling for tekstinnliming. Bruk \n for linjeskift og \t for tabulator."
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Grid>
 

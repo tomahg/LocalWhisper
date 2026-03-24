@@ -32,8 +32,9 @@ public sealed partial class MainWindow : Window
             "model"      => typeof(ModelPage),
             "audio"      => typeof(AudioPage),
             "display"    => typeof(DisplayPage),
-            "corrections"=> typeof(CorrectionsPage),
-            "general"    => typeof(GeneralPage),
+            "corrections"          => typeof(CorrectionsPage),
+            "direct-corrections"   => typeof(DirectTypeCorrectionsPage),
+            "general"              => typeof(GeneralPage),
             "about"      => typeof(AboutPage),
             _            => typeof(ConnectionPage),
         };

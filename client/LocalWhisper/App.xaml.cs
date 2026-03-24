@@ -28,16 +28,22 @@ public partial class App : Application
     private const int        HoldThresholdMs = 300;
 
     /// <summary>
-    /// Injects text into the active window, converting '\n' characters to real Return key presses.
+    /// Injects text into the active window, converting '\n' to Return and '\t' to Tab key presses.
     /// </summary>
     private static void InjectText(string text)
     {
-        var parts = text.Split('\n');
-        for (int i = 0; i < parts.Length; i++)
+        var lines = text.Split('\n');
+        for (int i = 0; i < lines.Length; i++)
         {
-            if (parts[i].Length > 0)
-                NativeMethods.SendUnicodeString(parts[i]);
-            if (i < parts.Length - 1)
+            var tabs = lines[i].Split('\t');
+            for (int j = 0; j < tabs.Length; j++)
+            {
+                if (tabs[j].Length > 0)
+                    NativeMethods.SendUnicodeString(tabs[j]);
+                if (j < tabs.Length - 1)
+                    NativeMethods.SendTab();
+            }
+            if (i < lines.Length - 1)
                 NativeMethods.SendReturn();
         }
     }
@@ -200,6 +206,26 @@ public partial class App : Application
 
             if (settings.InjectTextDirectly)
             {
+                // --- DirectTypeCorrections: exact whole-text match → always use SendInput ---
+                if (settings.DirectTypeCorrections.Count > 0)
+                {
+                    var match = settings.DirectTypeCorrections
+                        .FirstOrDefault(e => string.Equals(
+                            text.Trim(), e.Wrong.Trim(),
+                            StringComparison.CurrentCultureIgnoreCase));
+                    if (match is not null)
+                    {
+                        var replacement = match.Correct
+                            .Replace(@"\n", "\n")
+                            .Replace(@"\t", "\t");
+                        if (!string.IsNullOrEmpty(replacement))
+                            InjectText(replacement);
+                        if (source != AutoSilence)
+                            _overlay.Hide();
+                        return;
+                    }
+                }
+
                 // --- Inject mode ---
                 if (source == AutoSilence)
                 {

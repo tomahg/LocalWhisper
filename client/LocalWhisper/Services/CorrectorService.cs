@@ -38,7 +38,7 @@ public static class CorrectorService
                 new Regex(
                     $@"(?<![a-zA-ZæøåÆØÅ]){Regex.Escape(c.Wrong)}(?![a-zA-ZæøåÆØÅ])",
                     RegexOptions.IgnoreCase | RegexOptions.Compiled),
-                c.Correct.Replace(@"\n", "\n")))
+                c.Correct.Replace(@"\n", "\n").Replace(@"\t", "\t")))
             .ToArray();
     }
 }

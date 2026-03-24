@@ -25,6 +25,11 @@
                     <FontIcon Glyph="&#xE8D3;"/>
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
+            <NavigationViewItem Content="Direkteord"  Tag="direct-corrections">
+                <NavigationViewItem.Icon>
+                    <FontIcon Glyph="&#xE773;"/>
+                </NavigationViewItem.Icon>
+            </NavigationViewItem>
             <NavigationViewItem Content="Generelt"    Tag="general">
                 <NavigationViewItem.Icon>
                     <FontIcon Glyph="&#xE713;"/>

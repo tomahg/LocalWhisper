@@ -77,5 +77,9 @@ public class AppSettings
     public double VadThreshold { get; set; } = 0.5;
 
     // Corrections
-    public List<CorrectionEntry> Corrections   { get; set; } = [];
+    public List<CorrectionEntry> Corrections            { get; set; } = [];
+
+    // Replacements that always inject via SendInput (Type), regardless of InjectionMethod setting.
+    // Activates only when the entire transcribed text matches the Wrong field exactly.
+    public List<CorrectionEntry> DirectTypeCorrections  { get; set; } = [];
 }

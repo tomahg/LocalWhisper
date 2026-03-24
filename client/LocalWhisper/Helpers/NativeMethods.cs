@@ -13,6 +13,7 @@ internal static partial class NativeMethods
     private const uint KEYEVENTF_UNICODE = 0x0004;
     private const uint KEYEVENTF_KEYUP = 0x0002;
     private const ushort VK_BACK    = 0x08;
+    private const ushort VK_TAB     = 0x09;
     private const ushort VK_RETURN  = 0x0D;
     private const ushort VK_CONTROL = 0x11;
     private const ushort VK_V       = 0x56;
@@ -62,6 +63,16 @@ internal static partial class NativeMethods
         [
             VkKeyInput(VK_RETURN, keyUp: false),
             VkKeyInput(VK_RETURN, keyUp: true),
+        ];
+        SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<INPUT>());
+    }
+
+    public static void SendTab()
+    {
+        INPUT[] inputs =
+        [
+            VkKeyInput(VK_TAB, keyUp: false),
+            VkKeyInput(VK_TAB, keyUp: true),
         ];
         SendInput((uint)inputs.Length, inputs, Marshal.SizeOf<INPUT>());
     }
