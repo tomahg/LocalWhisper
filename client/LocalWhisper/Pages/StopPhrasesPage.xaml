@@ -1,0 +1,59 @@
+<Page
+    x:Class="LocalWhisper.Pages.StopPhrasesPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <ScrollViewer>
+        <StackPanel Spacing="4" Margin="0,0,0,24">
+            <TextBlock Text="Stoppfraser" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,12"/>
+
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1" CornerRadius="8">
+
+                <StackPanel>
+                    <!-- Header -->
+                    <Grid Padding="16,14">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Grid.Column="0" Glyph="&#xE8D0;" FontSize="16"
+                                  VerticalAlignment="Center" Margin="0,0,14,0"
+                                  Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="Stoppfraser" Style="{StaticResource BodyStrongTextBlockStyle}"/>
+                            <TextBlock Text="Fraser som fjernes fra transkripsjonen (uten hensyn til store/små bokstaver)"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" FontSize="12"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <!-- Divider -->
+                    <Border Height="1" Background="{ThemeResource CardStrokeColorDefaultBrush}"/>
+
+                    <!-- Add input row -->
+                    <Grid Padding="16,12" ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Grid.Column="0" x:Name="PhraseBox"
+                                 PlaceholderText="Legg til stoppfrase..."
+                                 KeyDown="PhraseBox_KeyDown"/>
+                        <Button Grid.Column="1" Content="Legg til"
+                                Click="Add_Click"/>
+                    </Grid>
+
+                    <!-- Divider (only shown when list is non-empty) -->
+                    <Border x:Name="ListDivider" Height="1"
+                            Background="{ThemeResource CardStrokeColorDefaultBrush}"
+                            Visibility="Collapsed"/>
+
+                    <!-- Dynamically built list -->
+                    <StackPanel x:Name="PhraseList"/>
+
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

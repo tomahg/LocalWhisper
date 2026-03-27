@@ -42,7 +42,8 @@
       "WebFetch(domain:api.github.com)",
       "WebSearch",
       "Bash(curl:*)",
-      "Bash(git diff:*)"
+      "Bash(git diff:*)",
+      "Bash(find /c/Dev/NorskTale/client/LocalWhisper -type f -name *Settings* -o -name *Config*)"
     ]
   }
 }

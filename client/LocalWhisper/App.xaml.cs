@@ -21,6 +21,7 @@ public partial class App : Application
     private OverlayWindow?  _overlay;
     private TaskbarIcon?    _trayIcon;
     private HotkeyService?  _hotkey;
+    private LlmService?     _llm;
     private DispatcherQueue? _dispatcherQueue;
     private bool             _isExiting;
     private string           _accumulatedText = "";
@@ -69,6 +70,9 @@ public partial class App : Application
             InjectText(text);
     }
 
+    private static string NormalizeSpaces(string s) =>
+        System.Text.RegularExpressions.Regex.Replace(s, @" {2,}", " ");
+
     private static string GetSeparator(SilenceSuffixMode mode) => mode switch
     {
         SilenceSuffixMode.Space         => " ",
@@ -113,6 +117,7 @@ public partial class App : Application
         services.AddSingleton<HotkeyService>();
         services.AddSingleton<TranscriptionOrchestrator>();
         services.AddSingleton<ServerApiService>();
+        services.AddSingleton<LlmService>();
         services.AddSingleton<MainViewModel>();
     }
 
@@ -156,6 +161,7 @@ public partial class App : Application
         // Subscribe to state changes for icon + tooltip updates
         var ws           = Services.GetRequiredService<WebSocketService>();
         var orchestrator = Services.GetRequiredService<TranscriptionOrchestrator>();
+        _llm             = Services.GetRequiredService<LlmService>();
 
         _overlay = new OverlayWindow();
         _overlay.Activate();   // must activate once so AppWindow is ready; Hide() immediately follows
@@ -195,7 +201,7 @@ public partial class App : Application
                 _overlay.ShowProcessing();
         };
         orchestrator.AudioLevelChanged += level => _overlay.UpdateAudioLevel(level);
-        orchestrator.TranscriptionUpdated += (result, source) =>
+        orchestrator.TranscriptionUpdated += async (result, source) =>
         {
             if (!result.IsFinal) return;
             var text = result.Text;
@@ -203,6 +209,22 @@ public partial class App : Application
 
             if (settings.Corrections.Count > 0)
                 text = CorrectorService.Apply(text, settings.Corrections);
+
+            text = text.Trim(); // Whisper prepends a space token — strip it early
+
+            if (settings.StopPhrases.Count > 0)
+            {
+                var filtered = CorrectorService.ApplyStopPhrases(text, settings.StopPhrases);
+                if (filtered is null)
+                {
+                    // AutoSilence: user is still recording — skip silently, keep overlay as-is
+                    // Microphone/File: recording is done — hide overlay
+                    if (source != AutoSilence)
+                        _overlay.Hide();
+                    return;
+                }
+                text = filtered;
+            }
 
             if (settings.InjectTextDirectly)
             {
@@ -225,6 +247,15 @@ public partial class App : Application
                         return;
                     }
                 }
+
+                // --- LLM post-processing ---
+                if (settings.LlmEnabled && _llm is not null)
+                {
+                    if (source != AutoSilence)
+                        _overlay?.ShowProcessing();
+                    text = await _llm.PostProcessAsync(text, settings);
+                }
+                text = NormalizeSpaces(text);
 
                 // --- Inject mode ---
                 if (source == AutoSilence)
@@ -258,6 +289,15 @@ public partial class App : Application
                 _overlay.Hide();
                 return;
             }
+
+            // --- LLM post-processing (overlay mode) ---
+            if (settings.LlmEnabled && _llm is not null)
+            {
+                if (source != AutoSilence)
+                    _overlay?.ShowProcessing();
+                text = await _llm.PostProcessAsync(text, settings);
+            }
+            text = NormalizeSpaces(text);
 
             // --- Overlay mode ---
             var sep = GetSeparator(settings.SilenceSuffix);

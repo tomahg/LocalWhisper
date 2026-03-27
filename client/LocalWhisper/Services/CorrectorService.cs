@@ -26,6 +26,26 @@ public static class CorrectorService
         return text;
     }
 
+    /// <summary>
+    /// Removes each stop phrase from <paramref name="text"/> (case-insensitive substring match)
+    /// and trims the result. Returns null if the text is empty or whitespace after removal.
+    /// </summary>
+    public static string? ApplyStopPhrases(string text, IList<string> stopPhrases)
+    {
+        foreach (var phrase in stopPhrases)
+        {
+            if (string.IsNullOrEmpty(phrase)) continue;
+            int idx = text.IndexOf(phrase, StringComparison.CurrentCultureIgnoreCase);
+            while (idx >= 0)
+            {
+                text = text.Remove(idx, phrase.Length);
+                idx  = text.IndexOf(phrase, Math.Max(0, idx), StringComparison.CurrentCultureIgnoreCase);
+            }
+        }
+        var trimmed = text.Trim();
+        return string.IsNullOrWhiteSpace(trimmed) ? null : trimmed;
+    }
+
     private static void EnsureCompiled(IList<CorrectionEntry> corrections)
     {
         if (ReferenceEquals(corrections, _lastSource) && _compiled.Length == corrections.Count)
