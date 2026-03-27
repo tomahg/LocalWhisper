@@ -64,7 +64,9 @@ LocalWhisper/
 │       │   ├── HotkeyService.cs
 │       │   ├── TranscriptionOrchestrator.cs
 │       │   ├── SettingsService.cs
-│       │   └── ServerApiService.cs
+│       │   ├── ServerApiService.cs
+│       │   ├── CorrectorService.cs
+│       │   └── LlmService.cs
 │       └── Helpers/NativeMethods.cs # P/Invoke (SendInput, tastatturhook)
 └── server/                          # Python-transkripsjonsserver
     ├── server.py
@@ -124,6 +126,9 @@ Ved første oppstart starter appen i systemstatusfeltet (intet vindu vises). Iko
 | **Lyd** | Velg mikrofon, auto-kopier til utklippstavle, auto-send ved stillhet med lydnivåkalibrering, VAD-følsomhet og støykalibrering |
 | **Visning** | Posisjon for overleggsvindu (6 posisjoner: øverst/nederst × venstre/midten/høyre) — flyttes i sanntid |
 | **Korreksjoner** | Ord- og fraseerstatninger som anvendes på transkripsjonen |
+| **Direkteskriv** | Korreksjoner som alltid injiseres via SendInput (Type), uavhengig av innlimingsmetode — aktiveres kun når hele transkripsjon matcher feltet nøyaktig |
+| **Stoppfraser** | Fraser som fjernes fra transkripsjonsresultatet (ufølsom for store/små bokstaver). Hvis hele resultatet er en stoppfrase, forkastes det stille |
+| **LLM** | Valgfri LLM-etterbehandling av transkripsjonen (Ollama, LM Studio, OpenAI, Claude, Azure OpenAI) |
 | **Generelt** | Start/avslutning per segment, tekstinnlimingsmetode, avslutt appen |
 | **Om** | Om appen |
 

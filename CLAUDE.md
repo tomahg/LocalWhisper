@@ -61,6 +61,12 @@ LocalWhisper/
 - Bufferingsstrategi: akkumuler all PCM i én buffer, kjør én inferenspass når `audio_stop` mottas. Ingen sliding window.
 - REST-endpoints: `/health`, `/models`, `/models/switch`, `/config`, `/config/streaming`, `/config/calibrate`, `/transcribe/file`.
 - VAD-innstillinger (`vad_enabled`, `vad_threshold`) er **ikke** i `config.yaml` — de styres av klienten og synkroniseres via `POST /config/streaming` ved tilkobling. Serveren bruker code-level defaults (True / 0.5) inntil klienten setter dem.
+- Transkripsjonspipeline (etter mottak av `final`-tekst fra server):
+  1. `CorrectorService.Apply()` — ord/frasekorreksjoner (regex, word-boundary, støtter `\n` og `\t` i replacement)
+  2. `CorrectorService.ApplyStopPhrases()` — fjerner stoppfraser (case-insensitive substring). Returnerer `null` hvis hele teksten er en stoppfrase → resultatet forkastes stille
+  3. `LlmService.PostProcessAsync()` — valgfri LLM-etterbehandling (kun hvis `LlmEnabled = true`). Graceful fallback til original tekst ved feil eller timeout
+  4. `DirectTypeCorrections` — sjekkes etter pipeline: hvis hele teksten matcher `Wrong`-feltet nøyaktig, injiseres `Correct` alltid via SendInput (Type), uansett `InjectionMethod`-innstilling
+- `LlmService` støtter Ollama, LM Studio, OpenAI, Claude (Anthropic), og Azure OpenAI. Claude bruker `https://api.anthropic.com/v1/messages` med `x-api-key`-header; de øvrige bruker OpenAI-kompatibelt `/v1/chat/completions`-endepunkt. `LlmUseSystemRole = false` slår av system-rollen (prompten prepend-es til user-meldingen) for modeller som ikke støtter den.
 
 ### Kommunikasjon
 - Klient → Server: Binære WebSocket-frames (PCM audio) + JSON kontrollmeldinger
